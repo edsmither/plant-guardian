@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B1120">
+<title>Plant Guardian</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0B1120;color:#F1F5F9;min-height:100vh}
+#root{max-width:480px;margin:0 auto;min-height:100vh}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const WAPI = "https://api.open-meteo.com/v1/forecast";
+const DN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const PL = [
+  {n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},
+  {n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},
+  {n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette."},
+  {n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold."},
+  {n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50°F."},
+  {n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet."},
+  {n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind."},
+  {n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity."},
+  {n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60°F."},
+  {n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind."},
+  {n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible."},
+  {n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant."},
+  {n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold."},
+  {n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold."},
+  {n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,t:"Hardy."},
+  {n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat."},
+  {n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts."},
+  {n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant."},
+  {n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat."},
+  {n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,t:"Blooms when stressed."},
+  {n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,t:"Root rot risk in rain."},
+  {n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet."},
+  {n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold."},
+  {n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat."},
+  {n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable."},
+  {n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind."},
+  {n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive."},
+  {n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant."},
+  {n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance."},
+  {n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts."},
+  {n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going."},
+  {n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,t:"Stores water in trunk."},
+  {n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,t:"Very forgiving."},
+  {n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,t:"Full sun, good drainage."},
+  {n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun."},
+  {n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold."},
+  {n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,t:"Extremely tolerant."},
+  {n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat."},
+  {n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,t:"Needs great drainage."},
+  {n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,t:"Hate sitting water."},
+  {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance."},
+];
+
+function toPlant(p) { return { common_name:p.n, scientific_name:p.s, min_temp_f:p.mn, max_temp_f:p.mx, max_wind_mph:p.w, rain_sensitive:!!p.r, notes:p.t }; }
+const wIcon = c => c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
+
+function buildTimeline(groups, wx) {
+  if (!wx || !groups.length) return [];
+  const d = wx.daily, days = [];
+  for (let i = 0; i < d.time.length; i++) {
+    const dt = new Date(d.time[i]+"T12:00:00");
+    const high = d.temperature_2m_max[i], low = d.temperature_2m_min[i], wind = d.wind_speed_10m_max[i], rain = d.precipitation_sum[i];
+    const issues = [];
+    for (const g of groups) { for (const p of g.plants) {
+      if (high > p.max_temp_f) issues.push({plant:p.common_name,type:"heat",icon:"🌡️",detail:`${Math.round(high)}°>${p.max_temp_f}°`});
+      if (low < p.min_temp_f) issues.push({plant:p.common_name,type:"cold",icon:"❄️",detail:`${Math.round(low)}°<${p.min_temp_f}°`});
+      if (wind > p.max_wind_mph) issues.push({plant:p.common_name,type:"wind",icon:"💨",detail:`${Math.round(wind)}>${p.max_wind_mph}mph`});
+      if (p.rain_sensitive && rain > 0.1) issues.push({plant:p.common_name,type:"rain",icon:"🌧️",detail:`${rain.toFixed(1)}" rain`});
+    }}
+    days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tomorrow":DN[dt.getDay()],dateLabel:`${MN[dt.getMonth()]} ${dt.getDate()}`,high,low,wind,rain,weatherCode:d.weathercode[i],issues,rainCollect:rain>0.1});
+  }
+  return days;
+}
+
+const dk = {bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
+const cs = {background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
+
+function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return {}}}
+function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
+
+function App() {
+  const stored = ld();
+  const [scr,setScr]=useState("home");
+  const [loc,setLoc]=useState(stored.loc||null);
+  const [wx,setWx]=useState(null);
+  const [groups,setGroups]=useState(stored.groups||[]);
+  const [timeline,setTimeline]=useState([]);
+  const [err,setErr]=useState(null);
+  const [zip,setZip]=useState(stored.zip||"");
+  const [savedZip,setSavedZip]=useState(stored.zip||null);
+  const [sq,setSq]=useState("");
+  const [selP,setSelP]=useState([]);
+  const [gName,setGName]=useState("");
+  const [saving,setSaving]=useState(false);
+  const [editingGroup,setEditingGroup]=useState(null);
+  const [wxLoading,setWxLoading]=useState(false);
+
+  useEffect(()=>{sv({groups,zip:savedZip,loc})},[groups,savedZip,loc]);
+
+  useEffect(()=>{
+    if(loc)return;
+    if(!navigator.geolocation)return;
+    navigator.geolocation.getCurrentPosition(
+      pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},
+      ()=>{},{enableHighAccuracy:false,timeout:8000}
+    );
+  },[]);
+
+  useEffect(()=>{
+    if(!loc)return;
+    setWxLoading(true);
+    fetch(`${WAPI}?latitude=${loc.lat}&longitude=${loc.lon}&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=7`)
+      .then(r=>r.json()).then(d=>{setWx(d);setWxLoading(false)}).catch(()=>{setErr("Couldn't fetch weather.");setWxLoading(false)});
+  },[loc]);
+
+  useEffect(()=>{setTimeline(buildTimeline(groups,wx))},[groups,wx]);
+
+  const lookupZip = async(z)=>{
+    if(!z||z.length<5)return; setErr(null);
+    try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(z)}&count=1&language=en&format=json`);
+      const d=await r.json();
+      if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z);}
+      else setErr("Couldn't find that zip.");
+    }catch(e){setErr("Connection issue.")}
+  };
+
+  const toggleP=p=>setSelP(prev=>prev.find(x=>x.common_name===p.n)?prev.filter(x=>x.common_name!==p.n):[...prev,toPlant(p)]);
+  const saveGroup=()=>{
+    if(!selP.length||saving)return; setSaving(true);
+    if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants:selP}:g))}
+    else{setGroups(prev=>[...prev,{id:String(Date.now()),name:gName||`Patio Group ${groups.length+1}`,plants:selP,addedAt:new Date().toISOString()}])}
+    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setTimeout(()=>setSaving(false),500);
+  };
+
+  const pc=groups.reduce((s,g)=>s+g.plants.length,0);
+  const issueCount=timeline.reduce((s,d)=>s+d.issues.filter(i=>i.type!=="rain").length,0);
+  const filtered=sq.length>0?PL.filter(p=>p.n.toLowerCase().includes(sq.trim().toLowerCase())||p.s.toLowerCase().includes(sq.trim().toLowerCase())):[];
+
+  return (
+    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white}}>
+      <div style={{padding:"18px 18px 14px",borderBottom:`1px solid ${dk.border}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>PLANT GUARDIAN</div>
+          <div style={{fontSize:22,fontWeight:700,color:dk.white,letterSpacing:-0.5}}>
+            {wx?`${Math.round(wx.daily.temperature_2m_max[0])}°F`:"—"}
+            <span style={{fontSize:14,fontWeight:400,color:dk.muted,marginLeft:8}}>
+              {pc>0?`${pc} plants`:""}{issueCount>0?` · ${issueCount} alerts`:pc>0?" · all clear":""}
+            </span>
+          </div>
+        </div>
+        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:14,color:dk.muted}}>⚙️</button>}
+      </div>
+
+      <div style={{padding:"14px 18px 100px"}}>
+        {err&&<div style={{...cs,background:"#7F1D1D",borderColor:dk.red}}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
+
+        {scr==="home"&&<>
+          {!loc&&!wxLoading&&(
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>SET YOUR LOCATION</div>
+              <div style={{fontSize:13,color:dk.muted,marginBottom:10}}>Enter your zip code for weather forecasts.</div>
+              <div style={{display:"flex",gap:8}}>
+                <input type="text" inputMode="numeric" value={zip} onChange={e=>setZip(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>{if(e.key==="Enter")lookupZip(zip)}} placeholder="e.g. 78641" style={{flex:1,padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/>
+                <button onClick={()=>lookupZip(zip)} disabled={zip.length<5} style={{padding:"10px 20px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Go</button>
+              </div>
+            </div>
+          )}
+          {wxLoading&&<div style={{...cs,textAlign:"center",color:dk.muted,padding:20}}>Loading forecast...</div>}
+
+          {groups.length===0&&loc?(
+            <div style={{textAlign:"center",padding:"56px 24px"}}>
+              <div style={{fontSize:48,marginBottom:14}}>🌿</div>
+              <div style={{fontSize:18,fontWeight:700,color:dk.gold,marginBottom:8}}>No plants yet</div>
+              <div style={{fontSize:13,color:dk.muted,lineHeight:1.6}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
+            </div>
+          ):groups.length>0&&<>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10}}>7-DAY OUTLOOK</div>
+            {timeline.map((day,di)=>{
+              const actionIssues=day.issues.filter(i=>i.type!=="rain");
+              const hasIssues=actionIssues.length>0;
+              const isToday=di===0;
+              const borderColors={cold:"#4A90D9",heat:"#A08060",wind:"#9B6DD7"};
+              const primaryType=hasIssues?["cold","heat","wind"].find(t=>actionIssues.some(i=>i.type===t)):null;
+              const alertBorder=primaryType?borderColors[primaryType]:dk.border;
+              return (
+                <div key={day.date} style={{background:hasIssues?dk.cardAlt:dk.card,borderRadius:12,padding:hasIssues?"14px":"10px 14px",marginBottom:8,borderLeft:`4px solid ${hasIssues?alertBorder:isToday?dk.teal:dk.border}`,border:`1px solid ${hasIssues?"#2A1520":dk.border}`,borderLeftWidth:4,borderLeftColor:hasIssues?alertBorder:isToday?dk.teal:dk.border,opacity:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <span style={{fontSize:24}}>{wIcon(day.weatherCode)}</span>
+                      <div>
+                        <div style={{fontWeight:700,fontSize:14,color:isToday?dk.teal:dk.white}}>{day.dayName}</div>
+                        <div style={{fontSize:11,color:dk.muted}}>{day.dateLabel}</div>
+                      </div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°<span style={{fontWeight:400,color:dk.muted}}>/{Math.round(day.low)}°</span></div>
+                      <div style={{fontSize:10,color:dk.muted}}>{day.wind>0?`💨${Math.round(day.wind)}`:""}{day.rain>0?` 🌧️${day.rain.toFixed(1)}"`:""}</div>
+                    </div>
+                  </div>
+                  {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>🪣 Collect rainwater — {day.rain.toFixed(1)}" expected</div>}
+                  {hasIssues&&(()=>{
+                    const priority=["cold","heat","wind"];
+                    const actions={heat:{action:"too hot",bg:"#2A2018",color:"#C4A882"},cold:{action:"too cold overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"too windy",bg:"#2A1E45",color:"#BFA0E8"}};
+                    const icons={heat:"🌡️",cold:"❄️",wind:"💨"};
+                    const byPlant={};
+                    for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type);}
+                    const byAction={};
+                    for(const[plant,types]of Object.entries(byPlant)){const topType=priority.find(t=>types.has(t))||[...types][0];if(!byAction[topType])byAction[topType]=[];byAction[topType].push(plant);}
+                    return(<div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
+                      {priority.filter(t=>byAction[t]).map(type=>{const a=actions[type];return(
+                        <div key={type} style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>
+                          {icons[type]} {byAction[type].join(", ")} — {a.action}
+                        </div>);})}
+                    </div>);
+                  })()}
+                  {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
+                </div>
+              );
+            })}
+            <div style={{marginTop:14}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>YOUR PLANTS</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                {groups.map(g=>g.plants.map((p,i)=><span key={g.id+i} style={{fontSize:11,padding:"3px 9px",borderRadius:6,background:dk.cardAlt,color:dk.teal,fontWeight:600,border:`1px solid ${dk.tealDim}40`}}>{p.common_name}</span>))}
+              </div>
+              <div style={{marginTop:8,display:"flex",gap:12,flexWrap:"wrap"}}>
+                {groups.map(g=>(
+                  <span key={g.id} style={{display:"inline-flex",gap:8}}>
+                    <button onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setSq("");setScr("add")}} style={{fontSize:11,color:dk.teal,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>edit {g.name}</button>
+                    <button onClick={()=>setGroups(prev=>prev.filter(x=>x.id!==g.id))} style={{fontSize:11,color:dk.muted,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>remove</button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </>}
+          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null)}} style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+        </>}
+
+        {scr==="add"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>{editingGroup?"EDIT GROUP":"ADD PLANTS"}</div>
+          </div>
+          {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12}}>
+            {selP.map((p,i)=><span key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{fontSize:11,padding:"4px 10px",borderRadius:6,background:dk.tealDim,color:dk.white,fontWeight:600,margin:3,cursor:"pointer"}}>{p.common_name} ✕</span>)}
+          </div>}
+          <div style={cs}>
+            <input type="text" value={sq} onChange={e=>setSq(e.target.value)} placeholder="Search plants..." style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:filtered.length>0||sq.length>0?12:0}}/>
+            {sq.length>0&&filtered.length===0&&<div style={{fontSize:13,color:dk.muted,padding:"8px 0",textAlign:"center"}}>No matches. Send me a photo in chat.</div>}
+            <div style={{maxHeight:340,overflowY:"auto"}}>
+              {filtered.map((p,i)=>{const sel=selP.some(x=>x.common_name===p.n);return(
+                <div key={i} onClick={()=>toggleP(p)} style={{padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none",cursor:"pointer",opacity:sel?0.45:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div><div style={{fontWeight:600,fontSize:14,color:dk.white}}>{p.n}</div><div style={{fontSize:11,color:dk.muted,fontStyle:"italic"}}>{p.s}</div></div>
+                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"✓":""}</div>
+                  </div>
+                  <div style={{marginTop:6}}>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>🌡️ {p.mn}–{p.mx}°F</span>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>💨 ≤{p.w} mph</span>
+                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>🌧️ sensitive</span>:null}
+                  </div>
+                  <div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div>
+                </div>);})}
+            </div>
+          </div>
+          {selP.length>0&&<>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:6}}>GROUP NAME</div>
+              <input type="text" value={gName} onChange={e=>setGName(e.target.value)} placeholder={`Patio Group ${groups.length+1}`} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+            <button onClick={saveGroup} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
+              {editingGroup?`Update ${selP.length} Plant${selP.length!==1?"s":""}`:`Save & Watch ${selP.length} Plant${selP.length!==1?"s":""}`}
+            </button>
+          </>}
+          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>
+            📸 <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.
+          </div>
+        </>}
+
+        {scr==="set"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <button onClick={()=>{setScr("home");setErr(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>SETTINGS</div>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div>
+            <div style={{fontSize:13,color:dk.muted,marginBottom:10}}>{savedZip?`Zip: ${savedZip}`:loc?`${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`:"Not set"}</div>
+            <div style={{display:"flex",gap:8}}>
+              <input type="text" inputMode="numeric" value={zip} onChange={e=>setZip(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>{if(e.key==="Enter")lookupZip(zip)}} placeholder="Change zip..." style={{flex:1,padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/>
+              <button onClick={()=>lookupZip(zip)} disabled={zip.length<5} style={{padding:"10px 16px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Update</button>
+            </div>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>DATA</div>
+            <button onClick={()=>{if(confirm("Delete all plants?"))setGroups([])}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:dk.red,border:`1.5px solid ${dk.red}`,fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button>
+          </div>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
