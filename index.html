@@ -218,7 +218,7 @@ function App() {
                   {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>🪣 Collect rainwater — {day.rain.toFixed(1)}" expected</div>}
                   {hasIssues&&(()=>{
                     const priority=["cold","heat","wind"];
-                    const actions={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below comfort zone overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"exceeds typical wind tolerance",bg:"#2A1E45",color:"#F87171"}};
+                    const actions={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};
                     const icons={heat:"🌡️",cold:"❄️",wind:"💨"};
                     const byPlant={};
                     for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type);}
