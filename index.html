@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0B1120">
+<link rel="manifest" href="manifest.json">
 <title>Plant Guardian</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -69,35 +70,64 @@ const PL = [
   {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance."},
 ];
 
-function toPlant(p) { return { common_name:p.n, scientific_name:p.s, min_temp_f:p.mn, max_temp_f:p.mx, max_wind_mph:p.w, rain_sensitive:!!p.r, notes:p.t }; }
-const wIcon = c => c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
+function toPlant(p){return{common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t}}
+const wIcon=c=>c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
 
-function buildTimeline(groups, wx) {
-  if (!wx || !groups.length) return [];
-  const d = wx.daily, days = [];
-  for (let i = 0; i < d.time.length; i++) {
-    const dt = new Date(d.time[i]+"T12:00:00");
-    const high = d.temperature_2m_max[i], low = d.temperature_2m_min[i], wind = d.wind_speed_10m_max[i], rain = d.precipitation_sum[i];
-    const issues = [];
-    for (const g of groups) { for (const p of g.plants) {
-      if (high > p.max_temp_f) issues.push({plant:p.common_name,type:"heat",icon:"🌡️",detail:`${Math.round(high)}°>${p.max_temp_f}°`});
-      if (low < p.min_temp_f) issues.push({plant:p.common_name,type:"cold",icon:"❄️",detail:`${Math.round(low)}°<${p.min_temp_f}°`});
-      if (wind > p.max_wind_mph) issues.push({plant:p.common_name,type:"wind",icon:"💨",detail:`${Math.round(wind)}>${p.max_wind_mph}mph`});
-      if (p.rain_sensitive && rain > 0.1) issues.push({plant:p.common_name,type:"rain",icon:"🌧️",detail:`${rain.toFixed(1)}" rain`});
-    }}
+function buildTimeline(groups,wx){
+  if(!wx||!groups.length)return[];
+  const d=wx.daily,days=[];
+  for(let i=0;i<d.time.length;i++){
+    const dt=new Date(d.time[i]+"T12:00:00");
+    const high=d.temperature_2m_max[i],low=d.temperature_2m_min[i],wind=d.wind_speed_10m_max[i],rain=d.precipitation_sum[i];
+    const issues=[];
+    for(const g of groups){
+      const ha=g.heatAdj||0,ca=g.coldAdj||0,wa=g.windAdj||0;
+      for(const p of g.plants){
+        const emx=p.max_temp_f+ha,emn=p.min_temp_f-ca,ew=p.max_wind_mph+wa;
+        if(high>emx)issues.push({plant:p.common_name,type:"heat",icon:"🌡️",detail:`${Math.round(high)}°>${emx}°`});
+        if(low<emn)issues.push({plant:p.common_name,type:"cold",icon:"❄️",detail:`${Math.round(low)}°<${emn}°`});
+        if(wind>ew)issues.push({plant:p.common_name,type:"wind",icon:"💨",detail:`${Math.round(wind)}>${ew}mph`});
+        if(p.rain_sensitive&&rain>0.1)issues.push({plant:p.common_name,type:"rain",icon:"🌧️",detail:`${rain.toFixed(1)}" rain`});
+      }
+    }
     days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tomorrow":DN[dt.getDay()],dateLabel:`${MN[dt.getMonth()]} ${dt.getDate()}`,high,low,wind,rain,weatherCode:d.weathercode[i],issues,rainCollect:rain>0.1});
   }
   return days;
 }
 
-const dk = {bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
-const cs = {background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
+const dk={bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
+const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 
-function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return {}}}
+function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
 
-function App() {
-  const stored = ld();
+// Notification helper
+function sendAlertNotification(timeline){
+  if(!("serviceWorker" in navigator)||Notification.permission!=="granted")return;
+  if(!timeline||!timeline.length)return;
+  const today=timeline[0];
+  const actionIssues=today.issues.filter(i=>i.type!=="rain");
+  if(!actionIssues.length)return;
+  // Check if we already notified today
+  const lastNotif=localStorage.getItem("pg-last-notif");
+  const todayStr=new Date().toISOString().split("T")[0];
+  if(lastNotif===todayStr)return;
+  localStorage.setItem("pg-last-notif",todayStr);
+  // Build alert summaries
+  const priority=["cold","heat","wind"];
+  const labels={heat:"above typical range",cold:"below typical range overnight",wind:"above typical wind range"};
+  const byPlant={};
+  for(const iss of actionIssues){if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type);}
+  const byAction={};
+  for(const[plant,types]of Object.entries(byPlant)){const top=priority.find(t=>types.has(t))||[...types][0];if(!byAction[top])byAction[top]=[];byAction[top].push(plant);}
+  const alerts=priority.filter(t=>byAction[t]).map(t=>`${byAction[t].join(", ")} — ${labels[t]}`);
+  navigator.serviceWorker.ready.then(reg=>{
+    reg.active.postMessage({type:"CHECK_ALERTS",alerts,url:window.location.href});
+  });
+}
+
+function App(){
+  const stored=ld();
   const [scr,setScr]=useState("home");
   const [loc,setLoc]=useState(stored.loc||null);
   const [wx,setWx]=useState(null);
@@ -111,10 +141,15 @@ function App() {
   const [gName,setGName]=useState("");
   const [saving,setSaving]=useState(false);
   const [editingGroup,setEditingGroup]=useState(null);
+  const [heatAdj,setHeatAdj]=useState(0);
+  const [coldAdj,setColdAdj]=useState(0);
+  const [windAdj,setWindAdj]=useState(0);
   const [wxLoading,setWxLoading]=useState(false);
+  const [notifEnabled,setNotifEnabled]=useState(Notification.permission==="granted");
 
   useEffect(()=>{sv({groups,zip:savedZip,loc})},[groups,savedZip,loc]);
 
+  // Geolocation on mount
   useEffect(()=>{
     if(loc)return;
     if(!navigator.geolocation)return;
@@ -124,38 +159,51 @@ function App() {
     );
   },[]);
 
+  // Fetch real weather
   useEffect(()=>{
-    if(!loc)return;
-    setWxLoading(true);
+    if(!loc)return;setWxLoading(true);
     fetch(`${WAPI}?latitude=${loc.lat}&longitude=${loc.lon}&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=7`)
       .then(r=>r.json()).then(d=>{setWx(d);setWxLoading(false)}).catch(()=>{setErr("Couldn't fetch weather.");setWxLoading(false)});
   },[loc]);
 
-  useEffect(()=>{setTimeline(buildTimeline(groups,wx))},[groups,wx]);
+  useEffect(()=>{
+    const tl=buildTimeline(groups,wx);
+    setTimeline(tl);
+    // Send notification if enabled and there are alerts
+    if(tl.length>0&&notifEnabled)sendAlertNotification(tl);
+  },[groups,wx]);
 
-  const lookupZip = async(z)=>{
-    if(!z||z.length<5)return; setErr(null);
+  const lookupZip=async(z)=>{
+    if(!z||z.length<5)return;setErr(null);
     try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(z)}&count=1&language=en&format=json`);
       const d=await r.json();
-      if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z);}
-      else setErr("Couldn't find that zip.");
+      if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z)}
+      else setErr("Couldn't find that zip.")
     }catch(e){setErr("Connection issue.")}
+  };
+
+  const enableNotifications=async()=>{
+    const perm=await Notification.requestPermission();
+    setNotifEnabled(perm==="granted");
+    if(perm==="granted"&&timeline.length>0)sendAlertNotification(timeline);
   };
 
   const toggleP=p=>setSelP(prev=>prev.find(x=>x.common_name===p.n)?prev.filter(x=>x.common_name!==p.n):[...prev,toPlant(p)]);
   const saveGroup=()=>{
-    if(!selP.length||saving)return; setSaving(true);
-    if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants:selP}:g))}
-    else{setGroups(prev=>[...prev,{id:String(Date.now()),name:gName||`Patio Group ${groups.length+1}`,plants:selP,addedAt:new Date().toISOString()}])}
-    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setTimeout(()=>setSaving(false),500);
+    if(!selP.length||saving)return;setSaving(true);
+    if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants:selP,heatAdj,coldAdj,windAdj}:g))}
+    else{setGroups(prev=>[...prev,{id:String(Date.now()),name:gName||`Patio Group ${groups.length+1}`,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}])}
+    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);
+    setTimeout(()=>setSaving(false),500);
   };
 
   const pc=groups.reduce((s,g)=>s+g.plants.length,0);
   const issueCount=timeline.reduce((s,d)=>s+d.issues.filter(i=>i.type!=="rain").length,0);
   const filtered=sq.length>0?PL.filter(p=>p.n.toLowerCase().includes(sq.trim().toLowerCase())||p.s.toLowerCase().includes(sq.trim().toLowerCase())):[];
 
-  return (
+  return(
     <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white}}>
+      {/* Header */}
       <div style={{padding:"18px 18px 14px",borderBottom:`1px solid ${dk.border}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>PLANT GUARDIAN</div>
@@ -172,6 +220,7 @@ function App() {
       <div style={{padding:"14px 18px 100px"}}>
         {err&&<div style={{...cs,background:"#7F1D1D",borderColor:dk.red}}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
 
+        {/* HOME */}
         {scr==="home"&&<>
           {!loc&&!wxLoading&&(
             <div style={cs}>
@@ -200,7 +249,7 @@ function App() {
               const borderColors={cold:"#4A90D9",heat:"#A08060",wind:"#9B6DD7"};
               const primaryType=hasIssues?["cold","heat","wind"].find(t=>actionIssues.some(i=>i.type===t)):null;
               const alertBorder=primaryType?borderColors[primaryType]:dk.border;
-              return (
+              return(
                 <div key={day.date} style={{background:hasIssues?dk.cardAlt:dk.card,borderRadius:12,padding:hasIssues?"14px":"10px 14px",marginBottom:8,borderLeft:`4px solid ${hasIssues?alertBorder:isToday?dk.teal:dk.border}`,border:`1px solid ${hasIssues?"#2A1520":dk.border}`,borderLeftWidth:4,borderLeftColor:hasIssues?alertBorder:isToday?dk.teal:dk.border,opacity:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -221,15 +270,15 @@ function App() {
                     const actions={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};
                     const icons={heat:"🌡️",cold:"❄️",wind:"💨"};
                     const byPlant={};
-                    for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type);}
+                    for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type)}
                     const byAction={};
-                    for(const[plant,types]of Object.entries(byPlant)){const topType=priority.find(t=>types.has(t))||[...types][0];if(!byAction[topType])byAction[topType]=[];byAction[topType].push(plant);}
+                    for(const[plant,types]of Object.entries(byPlant)){const topType=priority.find(t=>types.has(t))||[...types][0];if(!byAction[topType])byAction[topType]=[];byAction[topType].push(plant)}
                     return(<div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
                       {priority.filter(t=>byAction[t]).map(type=>{const a=actions[type];return(
                         <div key={type} style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>
                           {icons[type]} {byAction[type].join(", ")} — {a.action}
-                        </div>);})}
-                    </div>);
+                        </div>)})}
+                    </div>)
                   })()}
                   {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
                 </div>
@@ -243,24 +292,34 @@ function App() {
               <div style={{marginTop:8,display:"flex",gap:12,flexWrap:"wrap"}}>
                 {groups.map(g=>(
                   <span key={g.id} style={{display:"inline-flex",gap:8}}>
-                    <button onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setSq("");setScr("add")}} style={{fontSize:11,color:dk.teal,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>edit {g.name}</button>
+                    <button onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add")}} style={{fontSize:11,color:dk.teal,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>edit {g.name}</button>
                     <button onClick={()=>setGroups(prev=>prev.filter(x=>x.id!==g.id))} style={{fontSize:11,color:dk.muted,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>remove</button>
                   </span>
                 ))}
               </div>
             </div>
           </>}
-          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null)}} style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
         </>}
 
+        {/* ADD */}
         {scr==="add"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>{editingGroup?"EDIT GROUP":"ADD PLANTS"}</div>
           </div>
-          {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12}}>
-            {selP.map((p,i)=><span key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{fontSize:11,padding:"4px 10px",borderRadius:6,background:dk.tealDim,color:dk.white,fontWeight:600,margin:3,cursor:"pointer"}}>{p.common_name} ✕</span>)}
-          </div>}
+
+          {selP.length>0&&(
+            <div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
+              {selP.map((p,i)=>(
+                <div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer",minWidth:0}}>
+                  <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} ✕</div>
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>🌡️{p.min_temp_f}–{p.max_temp_f}°F · 💨≤{p.max_wind_mph}mph{p.rain_sensitive?" · 🌧️":""}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div style={cs}>
             <input type="text" value={sq} onChange={e=>setSq(e.target.value)} placeholder="Search plants..." style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:filtered.length>0||sq.length>0?12:0}}/>
             {sq.length>0&&filtered.length===0&&<div style={{fontSize:13,color:dk.muted,padding:"8px 0",textAlign:"center"}}>No matches. Send me a photo in chat.</div>}
@@ -277,13 +336,32 @@ function App() {
                     {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>🌧️ sensitive</span>:null}
                   </div>
                   <div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div>
-                </div>);})}
+                </div>)})}
             </div>
           </div>
+
           {selP.length>0&&<>
             <div style={cs}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:6}}>GROUP NAME</div>
               <input type="text" value={gName} onChange={e=>setGName(e.target.value)} placeholder={`Patio Group ${groups.length+1}`} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div>
+              <div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
+              {[
+                {label:"🌡️ Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"°F",color:"#F87171"},
+                {label:"❄️ Cold tolerance",value:coldAdj,set:setColdAdj,unit:"°F",color:"#7AB8F5"},
+                {label:"💨 Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:"#BFA0E8"},
+              ].map(({label,value,set,unit,color})=>(
+                <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <div style={{fontSize:12,color:dk.mutedLight}}>{label}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <button onClick={()=>set(v=>Math.max(0,v-5))} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+                    <div style={{fontSize:14,fontWeight:700,color:value>0?color:dk.muted,minWidth:50,textAlign:"center"}}>{value>0?`+${value}${unit}`:"—"}</div>
+                    <button onClick={()=>set(v=>v+5)} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+                  </div>
+                </div>
+              ))}
             </div>
             <button onClick={saveGroup} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
               {editingGroup?`Update ${selP.length} Plant${selP.length!==1?"s":""}`:`Save & Watch ${selP.length} Plant${selP.length!==1?"s":""}`}
@@ -294,11 +372,25 @@ function App() {
           </div>
         </>}
 
+        {/* SETTINGS */}
         {scr==="set"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
             <button onClick={()=>{setScr("home");setErr(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>SETTINGS</div>
           </div>
+
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
+            {notifEnabled?(
+              <div style={{fontSize:13,color:dk.teal}}>✓ Notifications enabled. You'll be alerted each morning if plants need attention.</div>
+            ):(
+              <>
+                <div style={{fontSize:13,color:dk.muted,marginBottom:10,lineHeight:1.5}}>Get a notification when your plants need attention.</div>
+                <button onClick={enableNotifications} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer"}}>Enable Notifications</button>
+              </>
+            )}
+          </div>
+
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div>
             <div style={{fontSize:13,color:dk.muted,marginBottom:10}}>{savedZip?`Zip: ${savedZip}`:loc?`${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`:"Not set"}</div>
@@ -307,6 +399,7 @@ function App() {
               <button onClick={()=>lookupZip(zip)} disabled={zip.length<5} style={{padding:"10px 16px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Update</button>
             </div>
           </div>
+
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>DATA</div>
             <button onClick={()=>{if(confirm("Delete all plants?"))setGroups([])}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:dk.red,border:`1.5px solid ${dk.red}`,fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button>
@@ -315,6 +408,11 @@ function App() {
       </div>
     </div>
   );
+}
+
+// Register service worker
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(e=>console.log("SW registration failed:",e));
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
