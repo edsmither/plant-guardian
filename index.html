@@ -87,7 +87,7 @@ function buildTimeline(groups,wx){
   return days;
 }
 
-const dk={bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171"};
+const dk={bg:"#0B1120",card:"#152236",cardAlt:"#1A2A42",border:"#243552",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171",heat:"#FB923C",heatBg:"#251608"};
 const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
@@ -250,7 +250,7 @@ function App(){
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
                     <span style={{fontSize:24}}>{wIcon(day.weatherCode)}</span>
-                    <div><div style={{fontWeight:700,fontSize:14,color:isToday?dk.teal:dk.white}}>{day.dayName}</div><div style={{fontSize:11,color:dk.muted}}>{day.dateLabel}</div></div>
+                    <div><span style={{fontWeight:400,fontSize:14,color:isToday?dk.teal:dk.white}}>{day.dayName}</span><span style={{fontSize:14,color:dk.muted,marginLeft:6}}>{day.dateLabel}</span></div>
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°<span style={{fontWeight:400,color:dk.muted}}>/{Math.round(day.low)}°</span></div>
@@ -259,7 +259,7 @@ function App(){
                 </div>
                 {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>🪣 Collect rainwater — {day.rain.toFixed(1)}" expected</div>}
                 {hasIssues&&(()=>{
-                  const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};
+                  const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:dk.heatBg,color:dk.heat},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};
                   const icons={heat:"🌡️",cold:"❄️",wind:"💨"},byPlant={};
                   for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type)}
                   const byAction={};for(const[plant,types]of Object.entries(byPlant)){const topType=priority.find(t=>types.has(t))||[...types][0];if(!byAction[topType])byAction[topType]=[];byAction[topType].push(plant)}
@@ -274,8 +274,8 @@ function App(){
                     {resolvedTypes.map(type=>{const reminded=hasReminder(day.date,type);
                       return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,border:`1px solid ${dk.border}`,fontSize:11,color:dk.mutedLight,lineHeight:1.5,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
                         <span>{icons[type]} {byAction[type].join(", ")} — <span style={{color:dk.teal,fontWeight:600}}>✓ noted</span></span>
-                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}55`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm reminder</button>}
-                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}33`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm set ✕</button>}
+                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,fontWeight:500,cursor:"pointer"}}>🔔 6pm reminder</button>}
+                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.tealDim}55`,fontSize:10,color:dk.teal,fontWeight:500,cursor:"pointer"}}>🔔 6pm ✕</button>}
                       </div>)})}
                   </div>)})()}
                 {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
