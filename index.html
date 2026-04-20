@@ -87,7 +87,7 @@ function buildTimeline(groups,wx){
   return days;
 }
 
-const dk={bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
+const dk={bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171"};
 const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
@@ -274,8 +274,8 @@ function App(){
                     {resolvedTypes.map(type=>{const reminded=hasReminder(day.date,type);
                       return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,border:`1px solid ${dk.border}`,fontSize:11,color:dk.mutedLight,lineHeight:1.5,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
                         <span>{icons[type]} {byAction[type].join(", ")} — <span style={{color:dk.teal,fontWeight:600}}>✓ noted</span></span>
-                        {di===0&&!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}55`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm reminder</button>}
-                        {di===0&&reminded&&<span style={{fontSize:10,color:dk.gold,fontWeight:600}}>🔔 6pm set</span>}
+                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}55`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm reminder</button>}
+                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}33`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm set ✕</button>}
                       </div>)})}
                   </div>)})()}
                 {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
