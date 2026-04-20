@@ -126,12 +126,13 @@ function App(){
   const[coldAdj,setColdAdj]=useState(0);
   const[windAdj,setWindAdj]=useState(0);
   const[dismissed,setDismissed]=useState(stored.dismissed||{});
+  const[reminders,setReminders]=useState(stored.reminders||[]);
   const[detailPlant,setDetailPlant]=useState(null);
   const[actionLog,setActionLog]=useState(stored.actionLog||[]);
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
 
-  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog})},[groups,savedZip,loc,dismissed,actionLog]);
+  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders})},[groups,savedZip,loc,dismissed,actionLog,reminders]);
 
   useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},()=>{},{enableHighAccuracy:false,timeout:8000});
@@ -150,11 +151,16 @@ function App(){
 
   const toggleP=p=>setSelP(prev=>prev.find(x=>x.common_name===p.n)?prev.filter(x=>x.common_name!==p.n):[...prev,toPlant(p)]);
 
-  const resolveAlert=(date,type,plants,action)=>{
-    setDismissed(prev=>({...prev,[`${date}-${type}`]:action}));
-    setActionLog(prev=>[...prev,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);
-    if(action==="inside"&&plants){setGroups(prev=>prev.map(g=>({...g,plants:g.plants.map(p=>plants.includes(p.common_name)?{...p,indoors:true}:p)})))}
+  const resolveAlert=(date,type,plants)=>{
+    setDismissed(prev=>({...prev,[`${date}-${type}`]:"acknowledged"}));
+    setActionLog(prev=>[...prev,{date,type,plants:plants||[],action:"acknowledged",timestamp:new Date().toISOString()}]);
   };
+
+  const addReminder=(date,type,plants)=>{
+    setReminders(prev=>[...prev.filter(r=>!(r.date===date&&r.type===type)),{date,type,plants,time:"18:00"}]);
+  };
+
+  const hasReminder=(date,type)=>reminders.some(r=>r.date===date&&r.type===type);
 
   const markBackOutside=plantName=>{
     setGroups(prev=>prev.map(g=>({...g,plants:g.plants.map(p=>p.common_name===plantName?{...p,indoors:false}:p)})));
@@ -162,6 +168,22 @@ function App(){
   };
 
   const getAlertAction=(date,type)=>dismissed[`${date}-${type}`]||null;
+
+  useEffect(()=>{
+    if(!notifEnabled)return;
+    const now=new Date(),today=now.toISOString().split("T")[0];
+    const todayR=reminders.filter(r=>r.date===today);
+    const timers=todayR.map(r=>{
+      const[h,m]=r.time.split(":").map(Number),target=new Date();
+      target.setHours(h,m,0,0);
+      const delay=target-now;
+      if(delay<=0)return null;
+      return setTimeout(()=>{
+        navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts:[`${r.plants.join(", ")} — check before tonight`],url:window.location.href})});
+      },delay);
+    }).filter(Boolean);
+    return()=>timers.forEach(clearTimeout);
+  },[reminders,notifEnabled]);
 
   // Auto-log ignored yesterday
   useEffect(()=>{if(!timeline.length)return;
@@ -246,12 +268,15 @@ function App(){
                     {activeTypes.map(type=>{const a=actions[type];return(<div key={type}>
                       <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {byAction[type].join(", ")} — {a.action}</div>
                       <div style={{display:"flex",gap:6,marginTop:4}}>
-                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type],"covered")}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.border}`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>🛡️ covered</button>
-                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type],"inside")}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.border}`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🏠 brought inside</button>
+                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type])}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.teal}44`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>✓ Got it</button>
                       </div>
                     </div>)})}
-                    {resolvedTypes.map(type=>{const act=getAlertAction(day.date,type),label=act==="inside"?"🏠 brought inside":act==="covered"?"🛡️ covered":"— ignored";
-                      return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,fontSize:11,color:dk.mutedLight,lineHeight:1.5,opacity:0.6}}>{icons[type]} {byAction[type].join(", ")} — {actions[type].action} <span style={{color:dk.teal,fontWeight:600,marginLeft:6}}>✓ {label}</span></div>)})}
+                    {resolvedTypes.map(type=>{const reminded=hasReminder(day.date,type);
+                      return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,border:`1px solid ${dk.border}`,fontSize:11,color:dk.mutedLight,lineHeight:1.5,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
+                        <span>{icons[type]} {byAction[type].join(", ")} — <span style={{color:dk.teal,fontWeight:600}}>✓ noted</span></span>
+                        {di===0&&!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.gold}55`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🔔 6pm reminder</button>}
+                        {di===0&&reminded&&<span style={{fontSize:10,color:dk.gold,fontWeight:600}}>🔔 6pm set</span>}
+                      </div>)})}
                   </div>)})()}
                 {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
               </div>);
