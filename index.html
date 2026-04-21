@@ -92,6 +92,23 @@ const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
 
+function Donut({val,total,color,label,size=80,stroke=10}){
+  const r=(size-stroke)/2,circ=2*Math.PI*r,pct=total>0?Math.min(val/total,1):0,dash=circ*pct;
+  return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+    <div style={{position:"relative",width:size,height:size}}>
+      <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={dk.border} strokeWidth={stroke}/>
+        {pct>0&&<circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"/>}
+      </svg>
+      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+        <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{val}</div>
+        <div style={{fontSize:9,color:dk.muted}}>of {total}</div>
+      </div>
+    </div>
+    <div style={{fontSize:11,color:dk.muted,textAlign:"center",lineHeight:1.3}}>{label}</div>
+  </div>);
+}
+
 function sendNotif(timeline){
   if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
   if(!timeline||!timeline.length)return;
@@ -131,6 +148,8 @@ function App(){
   const[actionLog,setActionLog]=useState(stored.actionLog||[]);
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
+  const[histWx,setHistWx]=useState(null);
+  const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:"2026-04-01";
 
   useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders})},[groups,savedZip,loc,dismissed,actionLog,reminders]);
 
@@ -168,6 +187,14 @@ function App(){
   };
 
   const getAlertAction=(date,type)=>dismissed[`${date}-${type}`]||null;
+
+  useEffect(()=>{
+    if(!loc||scr!=="dash"||histWx)return;
+    const end=new Date(Date.now()-86400000).toISOString().split("T")[0];
+    if(seasonStart>=end)return;
+    fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${seasonStart}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`)
+    .then(r=>r.json()).then(d=>setHistWx(d)).catch(()=>{});
+  },[loc,scr]);
 
   useEffect(()=>{
     if(!notifEnabled)return;
@@ -299,7 +326,7 @@ function App(){
               </div>
             </div>
           </>}
-          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{position:"fixed",bottom:72,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
         </>}
 
         {scr==="add"&&<>
@@ -381,7 +408,59 @@ function App(){
             <button onClick={()=>{if(confirm("Delete all plants?"))setGroups([])}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:dk.red,border:`1.5px solid ${dk.red}`,fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button>
           </div>
         </>}
+
+        {scr==="dash"&&(()=>{
+          const allPlants=groups.flatMap(g=>g.plants.map(p=>({...p,heatAdj:g.heatAdj||0,coldAdj:g.coldAdj||0})));
+          const effMax=allPlants.length>0?Math.min(...allPlants.map(p=>p.max_temp_f+(p.heatAdj||0))):90;
+          const effMin=allPlants.length>0?Math.max(...allPlants.map(p=>p.min_temp_f-(p.coldAdj||0))):40;
+          let rainDays=0,heatDays=0,coldDays=0,totalDays=0;
+          if(histWx&&histWx.daily){const d=histWx.daily;totalDays=d.time.length;
+            for(let i=0;i<totalDays;i++){if(d.precipitation_sum[i]>0.1)rainDays++;if(allPlants.length&&d.temperature_2m_max[i]>effMax)heatDays++;if(allPlants.length&&d.temperature_2m_min[i]<effMin)coldDays++;}}
+          const alertsByPlant={};
+          for(const entry of actionLog){for(const plant of(entry.plants||[])){if(!alertsByPlant[plant])alertsByPlant[plant]={cold:0,heat:0,wind:0};if(entry.type in alertsByPlant[plant])alertsByPlant[plant][entry.type]++;}}
+          const seasonLabel=`${MN[parseInt(seasonStart.split("-")[1])-1]} ${parseInt(seasonStart.split("-")[2])} — today`;
+          return(<>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>DASHBOARD</div>
+            <div style={{fontSize:11,color:dk.muted,marginBottom:14}}>{seasonLabel}</div>
+            <div style={{...cs}}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:14}}>SEASON SO FAR</div>
+              {!histWx&&<div style={{textAlign:"center",color:dk.muted,padding:"20px 0",fontSize:13}}>Loading historical data…</div>}
+              {histWx&&<div style={{display:"flex",justifyContent:"space-around"}}>
+                <Donut val={rainDays} total={totalDays} color={dk.teal} label={`Rain days`}/>
+                <Donut val={heatDays} total={totalDays} color={dk.heat} label={`Heat days`}/>
+                <Donut val={coldDays} total={totalDays} color={"#7AB8F5"} label={`Cold days`}/>
+              </div>}
+              {histWx&&<div style={{marginTop:12,fontSize:10,color:dk.muted,textAlign:"center"}}>{totalDays} days tracked · thresholds based on your plants</div>}
+            </div>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>YOUR PLANTS</div>
+              {allPlants.length===0&&<div style={{fontSize:13,color:dk.muted,textAlign:"center",padding:"12px 0"}}>No plants added yet.</div>}
+              {allPlants.map((p,i)=>{const a=alertsByPlant[p.common_name]||{cold:0,heat:0,wind:0};const total=a.cold+a.heat+a.wind;const sig=total===0?dk.teal:total<=3?"#FBBF24":dk.red;const lbl=total===0?"thriving":total<=3?"watch":"struggling";
+                return(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:600,color:dk.white}}>{p.common_name}</div>
+                    <div style={{fontSize:10,color:sig,marginTop:2,fontWeight:600}}>{lbl}</div>
+                  </div>
+                  <div style={{display:"flex",gap:10,fontSize:11,color:dk.mutedLight}}>
+                    {a.cold>0&&<span style={{color:"#7AB8F5"}}>❄️ {a.cold}</span>}
+                    {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
+                    {a.wind>0&&<span style={{color:"#BFA0E8"}}>💨 {a.wind}</span>}
+                    {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
+                  </div>
+                </div>);})}
+            </div>
+          </>);
+        })()}
       </div>
+
+      {(scr==="home"||scr==="dash")&&<div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:dk.card,borderTop:`1px solid ${dk.border}`,display:"flex",zIndex:10}}>
+        <button onClick={()=>setScr("home")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="home"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+          <span style={{fontSize:20}}>🌿</span><span style={{fontSize:10,fontWeight:600}}>Home</span>
+        </button>
+        <button onClick={()=>setScr("dash")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="dash"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+          <span style={{fontSize:20}}>📊</span><span style={{fontSize:10,fontWeight:600}}>Dashboard</span>
+        </button>
+      </div>}
 
       {detailPlant&&<div onClick={()=>setDetailPlant(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:20,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
         <div onClick={e=>e.stopPropagation()} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:`1px solid ${dk.border}`,borderBottom:"none"}}>
