@@ -421,7 +421,7 @@ function App(){
         </>}
 
         {scr==="dash"&&(()=>{
-          const allPlants=groups.flatMap(g=>g.plants.map(p=>({...p,heatAdj:g.heatAdj||0,coldAdj:g.coldAdj||0})));
+          const allPlants=Object.values(groups.flatMap(g=>g.plants.map(p=>({...p,heatAdj:g.heatAdj||0,coldAdj:g.coldAdj||0}))).reduce((acc,p)=>(acc[p.common_name]??=p,acc),{}));
           const effMax=allPlants.length>0?Math.min(...allPlants.map(p=>p.max_temp_f+(p.heatAdj||0))):90;
           const effMin=allPlants.length>0?Math.max(...allPlants.map(p=>p.min_temp_f-(p.coldAdj||0))):40;
           let rainDays=0,heatDays=0,coldDays=0,totalDays=0;
