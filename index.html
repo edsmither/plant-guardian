@@ -87,7 +87,7 @@ function buildTimeline(groups,wx){
   return days;
 }
 
-const dk={bg:"#0B1120",card:"#152236",cardAlt:"#1A2A42",border:"#243552",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171",heat:"#FB923C",heatBg:"#251608",cold:"#7AB8F5",wind:"#BFA0E8"};
+const dk={bg:"#0B1120",card:"#152236",cardAlt:"#1A2A42",border:"#243552",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171",heat:"#EF4444",heatBg:"#2D0A0A",cold:"#7AB8F5",wind:"#BFA0E8"};
 const marchFirst=`${new Date().getFullYear()}-03-01`;
 const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
@@ -283,7 +283,7 @@ function App(){
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10}}>7-DAY OUTLOOK</div>
             {timeline.map((day,di)=>{
               const actionIssues=day.issues.filter(i=>i.type!=="rain"),hasIssues=actionIssues.length>0,isToday=di===0;
-              const borderColors={cold:"#4A90D9",heat:"#A08060",wind:"#9B6DD7"};
+              const borderColors={cold:"#4A90D9",heat:"#EF4444",wind:"#9B6DD7"};
               const primaryType=hasIssues?["cold","heat","wind"].find(t=>actionIssues.some(i=>i.type===t)):null;
               const alertBorder=primaryType?borderColors[primaryType]:dk.border;
               return(<div key={day.date} style={{background:hasIssues?dk.cardAlt:dk.card,borderRadius:12,padding:hasIssues?"14px":"10px 14px",marginBottom:8,borderLeft:`4px solid ${hasIssues?alertBorder:isToday?dk.teal:dk.border}`,border:`1px solid ${hasIssues?"#2A1520":dk.border}`,borderLeftWidth:4,borderLeftColor:hasIssues?alertBorder:isToday?dk.teal:dk.border}}>
