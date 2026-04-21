@@ -110,6 +110,20 @@ function Donut({val,total,color,label,size=80,stroke=10}){
   </div>);
 }
 
+function dryStatus(name,config,log,wx){
+  const{potSize="medium",soilType="standard"}=(config||{})[name]||{};
+  const base={small:3,medium:6,large:10}[potSize];
+  const mod={fast:0.65,standard:1,moisture:1.5}[soilType];
+  const exp=base*mod;
+  const entries=(log||[]).filter(e=>e.type==="watered"&&(e.plants||[]).includes(name));
+  if(!entries.length)return{status:"unknown",daysAgo:null,exp};
+  const daysAgo=(Date.now()-new Date(entries[entries.length-1].timestamp))/86400000;
+  const hi=wx?.daily?.temperature_2m_max?.[0]||75;
+  const adj=exp/(hi>95?1.5:hi>85?1.25:1);
+  const pct=daysAgo/adj;
+  return{status:pct>=1?"dry":pct>=0.7?"check":"fine",daysAgo,adj};
+}
+
 function groupIssuesByAction(issues){
   const pr=["cold","heat","wind"],bp={};
   for(const i of issues){if(i.type==="rain")continue;if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type)}
@@ -152,13 +166,14 @@ function App(){
   const[reminders,setReminders]=useState(stored.reminders||[]);
   const[detailPlant,setDetailPlant]=useState(null);
   const[actionLog,setActionLog]=useState(stored.actionLog||[]);
+  const[plantConfig,setPlantConfig]=useState(stored.plantConfig||{});
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
   const[histWx,setHistWx]=useState(null);
   const[normWx,setNormWx]=useState(stored.normWx||null);
   const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:marchFirst;
 
-  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders,normWx})},[groups,savedZip,loc,dismissed,actionLog,reminders,normWx]);
+  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders,normWx,plantConfig})},[groups,savedZip,loc,dismissed,actionLog,reminders,normWx,plantConfig]);
 
   useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},()=>{},{enableHighAccuracy:false,timeout:8000});
@@ -187,6 +202,9 @@ function App(){
   };
 
   const hasReminder=(date,type)=>reminders.some(r=>r.date===date&&r.type===type);
+
+  const logWatered=name=>setActionLog(prev=>[...prev,{date:new Date().toISOString().split("T")[0],type:"watered",plants:[name],action:"watered",timestamp:new Date().toISOString()}]);
+  const setPC=(name,field,val)=>setPlantConfig(prev=>({...prev,[name]:{...(prev[name]||{}),[field]:val}}));
 
   const markBackOutside=plantName=>{
     setGroups(prev=>prev.map(g=>({...g,plants:g.plants.map(p=>p.common_name===plantName?{...p,indoors:false}:p)})));
@@ -322,12 +340,15 @@ function App(){
             <div style={{marginTop:14}}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>YOUR PLANTS</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                {groups.map(g=>g.plants.map((p,i)=>
-                  <span key={g.id+i} onClick={()=>p.indoors?markBackOutside(p.common_name):setDetailPlant(p)}
-                    style={{fontSize:11,padding:"3px 9px",borderRadius:6,background:p.indoors?dk.bg:dk.cardAlt,color:p.indoors?dk.gold:dk.teal,fontWeight:600,border:`1px solid ${p.indoors?dk.gold+"40":dk.tealDim+"40"}`,cursor:"pointer"}}>
+                {groups.map(g=>g.plants.map((p,i)=>{
+                  const ds=dryStatus(p.common_name,plantConfig,actionLog,wx);
+                  const dClr={dry:dk.heat,check:"#FBBF24",fine:dk.teal,unknown:""}[ds.status];
+                  return(<span key={g.id+i} onClick={()=>p.indoors?markBackOutside(p.common_name):setDetailPlant(p)}
+                    style={{fontSize:11,padding:"3px 9px",borderRadius:6,background:p.indoors?dk.bg:dk.cardAlt,color:p.indoors?dk.gold:dk.teal,fontWeight:600,border:`1px solid ${p.indoors?dk.gold+"40":dk.tealDim+"40"}`,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:3}}>
                     {p.indoors?"🏠 ":""}{p.common_name}{p.indoors?" ↩":""}
-                  </span>
-                ))}
+                    {!p.indoors&&dClr&&<span style={{color:dClr,fontSize:9}}>💧</span>}
+                  </span>);
+                }))}
               </div>
               <div style={{marginTop:8,display:"flex",gap:12,flexWrap:"wrap"}}>
                 {groups.map(g=><span key={g.id} style={{display:"inline-flex",gap:8}}>
@@ -518,10 +539,37 @@ function App(){
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
               <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter in rain":"✓ Handles rain fine"}</div>
             </div>
-            {detailPlant.water_freq&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
-              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Watering</div>
-              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>💧 {detailPlant.water_freq}</div>
-            </div>}
+            {(()=>{
+              const pc=plantConfig[detailPlant.common_name]||{};
+              const ds=dryStatus(detailPlant.common_name,plantConfig,actionLog,wx);
+              const dClr={dry:dk.heat,check:"#FBBF24",fine:dk.teal,unknown:dk.muted}[ds.status];
+              const dMsg={dry:"Likely needs water",check:"Check the soil",fine:"Probably fine",unknown:"No history yet"}[ds.status];
+              return(<div style={{padding:"12px 14px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Watering Tracker</div>
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Pot Size</div>
+                  <div style={{display:"flex",gap:4}}>
+                    {["small","medium","large"].map(s=>(
+                      <button key={s} onClick={()=>setPC(detailPlant.common_name,"potSize",s)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${pc.potSize===s?dk.teal:dk.border}`,background:pc.potSize===s?`${dk.tealDim}44`:"none",color:pc.potSize===s?dk.teal:dk.muted,fontSize:11,cursor:"pointer",textTransform:"capitalize"}}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:12}}>
+                  <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Soil</div>
+                  <div style={{display:"flex",gap:4}}>
+                    {[{v:"fast",l:"Fast-drain"},{v:"standard",l:"Standard"},{v:"moisture",l:"Moisture+"}].map(({v,l})=>(
+                      <button key={v} onClick={()=>setPC(detailPlant.common_name,"soilType",v)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${pc.soilType===v?dk.teal:dk.border}`,background:pc.soilType===v?`${dk.tealDim}44`:"none",color:pc.soilType===v?dk.teal:dk.muted,fontSize:10,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:13,fontWeight:600,color:dClr}}>💧 {dMsg}</div>
+                  {ds.daysAgo!==null&&<div style={{fontSize:11,color:dk.muted,marginTop:2}}>watered {Math.round(ds.daysAgo)}d ago · est. dry in ~{Math.round(ds.adj)}d</div>}
+                  {detailPlant.water_freq&&<div style={{fontSize:11,color:dk.muted,marginTop:4,lineHeight:1.4}}>{detailPlant.water_freq}</div>}
+                </div>
+                <button onClick={()=>logWatered(detailPlant.common_name)} style={{width:"100%",padding:"9px",borderRadius:8,border:`1px solid ${dk.teal}66`,background:`${dk.tealDim}22`,color:dk.teal,fontSize:13,fontWeight:600,cursor:"pointer"}}>💧 Log Watered Today</button>
+              </div>);
+            })()}
             {detailPlant.fertilizer&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Fertilizer</div>
               <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>🌱 {detailPlant.fertilizer}</div>
