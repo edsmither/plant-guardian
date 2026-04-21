@@ -149,7 +149,9 @@ function App(){
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
   const[histWx,setHistWx]=useState(null);
+  const[normWx,setNormWx]=useState(null);
   const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:"2026-04-01";
+  const marchFirst=`${new Date().getFullYear()}-03-01`;
 
   useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders})},[groups,savedZip,loc,dismissed,actionLog,reminders]);
 
@@ -189,11 +191,20 @@ function App(){
   const getAlertAction=(date,type)=>dismissed[`${date}-${type}`]||null;
 
   useEffect(()=>{
-    if(!loc||scr!=="dash"||histWx)return;
-    const end=new Date(Date.now()-86400000).toISOString().split("T")[0];
-    if(seasonStart>=end)return;
-    fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${seasonStart}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`)
-    .then(r=>r.json()).then(d=>setHistWx(d)).catch(()=>{});
+    if(!loc||scr!=="dash")return;
+    const yest=new Date(Date.now()-86400000);
+    const end=yest.toISOString().split("T")[0];
+    const mm=String(yest.getMonth()+1).padStart(2,"0"),dd=String(yest.getDate()).padStart(2,"0");
+    if(!histWx&&marchFirst<=end){
+      fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${marchFirst}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`)
+      .then(r=>r.json()).then(d=>setHistWx(d)).catch(()=>{});
+    }
+    if(!normWx){
+      Promise.all([2022,2023,2024].map(y=>
+        fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${y}-03-01&end_date=${y}-${mm}-${dd}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`)
+        .then(r=>r.json())
+      )).then(results=>setNormWx(results)).catch(()=>{});
+    }
   },[loc,scr]);
 
   useEffect(()=>{
@@ -416,6 +427,11 @@ function App(){
           let rainDays=0,heatDays=0,coldDays=0,totalDays=0;
           if(histWx&&histWx.daily){const d=histWx.daily;totalDays=d.time.length;
             for(let i=0;i<totalDays;i++){if(d.precipitation_sum[i]>0.1)rainDays++;if(allPlants.length&&d.temperature_2m_max[i]>effMax)heatDays++;if(allPlants.length&&d.temperature_2m_min[i]<effMin)coldDays++;}}
+          let nRain=0,nHeat=0,nCold=0,nTotal=0;
+          if(normWx&&normWx.length){let rs=0,hs=0,cs=0,ts=0,n=0;
+            for(const yr of normWx){if(!yr.daily)continue;n++;ts+=yr.daily.time.length;
+              for(let i=0;i<yr.daily.time.length;i++){if(yr.daily.precipitation_sum[i]>0.1)rs++;if(allPlants.length&&yr.daily.temperature_2m_max[i]>effMax)hs++;if(allPlants.length&&yr.daily.temperature_2m_min[i]<effMin)cs++;}}
+            if(n){nRain=Math.round(rs/n);nHeat=Math.round(hs/n);nCold=Math.round(cs/n);nTotal=Math.round(ts/n);}}
           const alertsByPlant={};
           for(const entry of actionLog){for(const plant of(entry.plants||[])){if(!alertsByPlant[plant])alertsByPlant[plant]={cold:0,heat:0,wind:0};if(entry.type in alertsByPlant[plant])alertsByPlant[plant][entry.type]++;}}
           const seasonLabel=`${MN[parseInt(seasonStart.split("-")[1])-1]} ${parseInt(seasonStart.split("-")[2])} — today`;
@@ -423,14 +439,24 @@ function App(){
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>DASHBOARD</div>
             <div style={{fontSize:11,color:dk.muted,marginBottom:14}}>{seasonLabel}</div>
             <div style={{...cs}}>
-              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:14}}>SEASON SO FAR</div>
-              {!histWx&&<div style={{textAlign:"center",color:dk.muted,padding:"20px 0",fontSize:13}}>Loading historical data…</div>}
-              {histWx&&<div style={{display:"flex",justifyContent:"space-around"}}>
-                <Donut val={rainDays} total={totalDays} color={dk.teal} label={`Rain days`}/>
-                <Donut val={heatDays} total={totalDays} color={dk.heat} label={`Heat days`}/>
-                <Donut val={coldDays} total={totalDays} color={"#7AB8F5"} label={`Cold days`}/>
-              </div>}
-              {histWx&&<div style={{marginTop:12,fontSize:10,color:dk.muted,textAlign:"center"}}>{totalDays} days tracked · thresholds based on your plants</div>}
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>SEASON SO FAR</div>
+              <div style={{fontSize:10,color:dk.muted,marginBottom:14}}>Mar 1 — today · thresholds based on your plants</div>
+              {!histWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading…</div>}
+              {histWx&&<>
+                <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>This Year</div>
+                <div style={{display:"flex",justifyContent:"space-around",marginBottom:20}}>
+                  <Donut val={rainDays} total={totalDays} color={dk.teal} label="Rain days"/>
+                  <Donut val={heatDays} total={totalDays} color={dk.heat} label="Heat days"/>
+                  <Donut val={coldDays} total={totalDays} color="#7AB8F5" label="Cold days"/>
+                </div>
+                <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>3-Year Avg (2022–2024)</div>
+                {!normWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading…</div>}
+                {normWx&&<div style={{display:"flex",justifyContent:"space-around"}}>
+                  <Donut val={nRain} total={nTotal} color={dk.teal} label="Rain days" size={68} stroke={8}/>
+                  <Donut val={nHeat} total={nTotal} color={dk.heat} label="Heat days" size={68} stroke={8}/>
+                  <Donut val={nCold} total={nTotal} color="#7AB8F5" label="Cold days" size={68} stroke={8}/>
+                </div>}
+              </>}
             </div>
             <div style={cs}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>YOUR PLANTS</div>
