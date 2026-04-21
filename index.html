@@ -458,23 +458,32 @@ function App(){
                 </div>}
               </>}
             </div>
-            <div style={cs}>
-              <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>YOUR PLANTS</div>
-              {allPlants.length===0&&<div style={{fontSize:13,color:dk.muted,textAlign:"center",padding:"12px 0"}}>No plants added yet.</div>}
-              {allPlants.map((p,i)=>{const a=alertsByPlant[p.common_name]||{cold:0,heat:0,wind:0};const total=a.cold+a.heat+a.wind;const sig=total===0?dk.teal:total<=3?"#FBBF24":dk.red;const lbl=total===0?"thriving":total<=3?"watch":"struggling";
-                return(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:dk.white}}>{p.common_name}</div>
-                    <div style={{fontSize:10,color:sig,marginTop:2,fontWeight:600}}>{lbl}</div>
-                  </div>
-                  <div style={{display:"flex",gap:10,fontSize:11,color:dk.mutedLight}}>
-                    {a.cold>0&&<span style={{color:dk.cold}}>❄️ {a.cold}</span>}
-                    {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
-                    {a.wind>0&&<span style={{color:dk.wind}}>💨 {a.wind}</span>}
-                    {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
-                  </div>
-                </div>);})}
-            </div>
+            {(()=>{
+              const groups2=[
+                {key:"thriving",label:"Thriving",color:dk.teal,filter:t=>t===0},
+                {key:"watch",label:"Watch",color:"#FBBF24",filter:t=>t>0&&t<=3},
+                {key:"struggling",label:"Struggling",color:dk.red,filter:t=>t>3},
+              ];
+              const withTotals=allPlants.map(p=>{const a=alertsByPlant[p.common_name]||{cold:0,heat:0,wind:0};return{p,a,total:a.cold+a.heat+a.wind};});
+              return groups2.map(({key,label,color,filter})=>{
+                const plants=withTotals.filter(({total})=>filter(total));
+                if(!plants.length)return null;
+                return(<div key={key} style={{...cs}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color,marginBottom:10}}>{label}</div>
+                  {plants.map(({p,a,total},i)=>(
+                    <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
+                      <div style={{fontSize:13,fontWeight:600,color:dk.white}}>{p.common_name}</div>
+                      <div style={{display:"flex",gap:10,fontSize:11}}>
+                        {a.cold>0&&<span style={{color:dk.cold}}>❄️ {a.cold}</span>}
+                        {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
+                        {a.wind>0&&<span style={{color:dk.wind}}>💨 {a.wind}</span>}
+                        {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>);
+              });
+            })()}
           </>);
         })()}
       </div>
