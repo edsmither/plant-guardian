@@ -25,49 +25,49 @@ const WAPI="https://api.open-meteo.com/v1/forecast";
 const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const PL=[
-{n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},
-{n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},
-{n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette."},
-{n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold."},
-{n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50°F."},
-{n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet."},
-{n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind."},
-{n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity."},
-{n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60°F."},
-{n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind."},
-{n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible."},
-{n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant."},
-{n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold."},
-{n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold."},
-{n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,t:"Hardy."},
-{n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat."},
-{n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts."},
-{n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant."},
-{n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat."},
-{n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,t:"Blooms when stressed."},
-{n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,t:"Root rot risk in rain."},
-{n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet."},
-{n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold."},
-{n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat."},
-{n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable."},
-{n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind."},
-{n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive."},
-{n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant."},
-{n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance."},
-{n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts."},
-{n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going."},
-{n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,t:"Stores water in trunk."},
-{n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,t:"Very forgiving."},
-{n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,t:"Full sun, good drainage."},
-{n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun."},
-{n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold."},
-{n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,t:"Extremely tolerant."},
-{n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat."},
-{n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,t:"Needs great drainage."},
-{n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,t:"Hate sitting water."},
-{n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance."},
+{n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone.",wf:"Keep soil moist, not wet",fe:"Weekly at ¼ strength, bloom formula"},
+{n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind.",wf:"Weekly, let top inch dry",fe:"Monthly, balanced"},
+{n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette.",wf:"Every 2-3 weeks, let fully dry",fe:"Once in spring, cactus formula"},
+{n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold.",wf:"Weekly, let top inch dry",fe:"Every 6 weeks, phosphorus-rich"},
+{n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50°F.",wf:"Daily in heat, keep consistently moist",fe:"Every 2 weeks, balanced"},
+{n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet.",wf:"When top inch dries",fe:"Every 2 weeks, bloom formula"},
+{n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
+{n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity.",wf:"Keep consistently moist",fe:"Monthly spring/summer, balanced"},
+{n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60°F.",wf:"Keep moist during growing season",fe:"Every 2 weeks, balanced"},
+{n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind.",wf:"When top inch dries, use filtered water",fe:"Monthly, diluted balanced"},
+{n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible.",wf:"Every 2-3 weeks",fe:"Twice a year, balanced"},
+{n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant.",wf:"Every 1-2 weeks",fe:"Every 6 weeks, balanced"},
+{n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
+{n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold.",wf:"When top inch dries",fe:"Every 4 weeks, balanced"},
+{n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,t:"Hardy.",wf:"Every 1-2 weeks",fe:"Every 6 weeks, balanced"},
+{n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
+{n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts.",wf:"When top 2 inches dry",fe:"Monthly spring/summer, balanced"},
+{n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant.",wf:"When top inch dries",fe:"Every 2 weeks, bloom formula"},
+{n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat.",wf:"Daily in heat, keep moist",fe:"Every 2 weeks, bloom formula"},
+{n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,t:"Blooms when stressed.",wf:"Every 1-2 weeks, let dry between",fe:"Monthly spring/summer, balanced"},
+{n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,t:"Root rot risk in rain.",wf:"Every 2-3 weeks, let fully dry",fe:"Every 6 months, balanced"},
+{n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet.",wf:"Every 1-2 weeks, drought tolerant",fe:"Once in spring, low-nitrogen"},
+{n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold.",wf:"Keep moist, don't let dry out",fe:"Monthly spring/summer, palm formula"},
+{n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat.",wf:"Weekly, keep moist",fe:"Every 2 weeks, bloom formula"},
+{n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable.",wf:"Keep moist, daily in heat",fe:"Monthly, balanced"},
+{n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
+{n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive.",wf:"Every 7-10 days, let dry between",fe:"Every 2 weeks at ¼ strength, orchid formula"},
+{n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
+{n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance.",wf:"Weekly, keep moist",fe:"Every 6 weeks, balanced"},
+{n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts.",wf:"Every 1-2 weeks, let dry between",fe:"Monthly spring/summer, diluted balanced"},
+{n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
+{n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,t:"Stores water in trunk.",wf:"Every 2-3 weeks, let fully dry",fe:"Once in spring, cactus formula"},
+{n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,t:"Very forgiving.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
+{n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,t:"Full sun, good drainage.",wf:"Every 1-2 weeks, drought tolerant",fe:"Once in spring, balanced"},
+{n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
+{n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
+{n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,t:"Extremely tolerant.",wf:"Every 2-4 weeks",fe:"Every 6 weeks spring/summer, balanced"},
+{n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat.",wf:"Weekly, keep moist",fe:"Monthly spring/summer, balanced"},
+{n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,t:"Needs great drainage.",wf:"Every 2-3 weeks, let dry",fe:"Monthly spring/summer, diluted balanced"},
+{n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,t:"Hate sitting water.",wf:"Every 2-3 weeks, let fully dry",fe:"Once in spring, cactus formula"},
+{n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance.",wf:"Every 2-3 weeks",fe:"Every 6 weeks spring/summer, balanced"},
 ];
-function toPlant(p){return{common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t}}
+function toPlant(p){return{common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t,water_freq:p.wf||null,fertilizer:p.fe||null}}
 const wIcon=c=>c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
 
 function buildTimeline(groups,wx){
@@ -460,9 +460,9 @@ function App(){
             </div>
             {(()=>{
               const groups2=[
-                {key:"thriving",label:"Thriving",color:dk.teal,filter:t=>t===0},
-                {key:"watch",label:"Watch",color:"#FBBF24",filter:t=>t>0&&t<=3},
                 {key:"struggling",label:"Struggling",color:dk.red,filter:t=>t>3},
+                {key:"watch",label:"Watch",color:"#FBBF24",filter:t=>t>0&&t<=3},
+                {key:"thriving",label:"Thriving",color:dk.teal,filter:t=>t===0},
               ];
               const withTotals=allPlants.map(p=>{const a=alertsByPlant[p.common_name]||{cold:0,heat:0,wind:0};return{p,a,total:a.cold+a.heat+a.wind};});
               return groups2.map(({key,label,color,filter})=>{
@@ -472,7 +472,7 @@ function App(){
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color,marginBottom:10}}>{label}</div>
                   {plants.map(({p,a,total},i)=>(
                     <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
-                      <div style={{fontSize:13,fontWeight:600,color:dk.white}}>{p.common_name}</div>
+                      <div onClick={()=>{const full=PL.find(x=>x.n===p.common_name);if(full)setDetailPlant(toPlant(full));}} style={{fontSize:13,fontWeight:600,color:dk.white,cursor:"pointer",textDecoration:"underline",textDecorationColor:dk.border}}>{p.common_name}</div>
                       <div style={{display:"flex",gap:10,fontSize:11}}>
                         {a.cold>0&&<span style={{color:dk.cold}}>❄️ {a.cold}</span>}
                         {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
@@ -518,6 +518,14 @@ function App(){
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
               <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter in rain":"✓ Handles rain fine"}</div>
             </div>
+            {detailPlant.water_freq&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Watering</div>
+              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>💧 {detailPlant.water_freq}</div>
+            </div>}
+            {detailPlant.fertilizer&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Fertilizer</div>
+              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>🌱 {detailPlant.fertilizer}</div>
+            </div>}
             {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
               <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>{detailPlant.notes}</div>
