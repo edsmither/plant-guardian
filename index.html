@@ -87,7 +87,8 @@ function buildTimeline(groups,wx){
   return days;
 }
 
-const dk={bg:"#0B1120",card:"#152236",cardAlt:"#1A2A42",border:"#243552",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171",heat:"#FB923C",heatBg:"#251608"};
+const dk={bg:"#0B1120",card:"#152236",cardAlt:"#1A2A42",border:"#243552",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#94A3B8",mutedLight:"#CBD5E1",red:"#F87171",heat:"#FB923C",heatBg:"#251608",cold:"#7AB8F5",wind:"#BFA0E8"};
+const marchFirst=`${new Date().getFullYear()}-03-01`;
 const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
@@ -109,6 +110,13 @@ function Donut({val,total,color,label,size=80,stroke=10}){
   </div>);
 }
 
+function groupIssuesByAction(issues){
+  const pr=["cold","heat","wind"],bp={};
+  for(const i of issues){if(i.type==="rain")continue;if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type)}
+  const ba={};for(const[p,t]of Object.entries(bp)){const top=pr.find(x=>t.has(x))||[...t][0];if(!ba[top])ba[top]=[];ba[top].push(p)}
+  return ba;
+}
+
 function sendNotif(timeline){
   if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;
   if(!timeline||!timeline.length)return;
@@ -118,8 +126,7 @@ function sendNotif(timeline){
   if(ls===ts)return;
   localStorage.setItem("pg-last-notif",ts);
   const pr=["cold","heat","wind"],lb={heat:"above typical range",cold:"below typical range overnight",wind:"above typical wind range"};
-  const bp={};for(const i of ai){if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type)}
-  const ba={};for(const[p,t]of Object.entries(bp)){const top=pr.find(x=>t.has(x))||[...t][0];if(!ba[top])ba[top]=[];ba[top].push(p)}
+  const ba=groupIssuesByAction(ai);
   const alerts=pr.filter(t=>ba[t]).map(t=>`${ba[t].join(", ")} — ${lb[t]}`);
   navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts,url:window.location.href})});
 }
@@ -137,7 +144,6 @@ function App(){
   const[sq,setSq]=useState("");
   const[selP,setSelP]=useState([]);
   const[gName,setGName]=useState("");
-  const[saving,setSaving]=useState(false);
   const[editingGroup,setEditingGroup]=useState(null);
   const[heatAdj,setHeatAdj]=useState(0);
   const[coldAdj,setColdAdj]=useState(0);
@@ -149,11 +155,10 @@ function App(){
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
   const[histWx,setHistWx]=useState(null);
-  const[normWx,setNormWx]=useState(null);
-  const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:"2026-04-01";
-  const marchFirst=`${new Date().getFullYear()}-03-01`;
+  const[normWx,setNormWx]=useState(stored.normWx||null);
+  const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:marchFirst;
 
-  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders})},[groups,savedZip,loc,dismissed,actionLog,reminders]);
+  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders,normWx})},[groups,savedZip,loc,dismissed,actionLog,reminders,normWx]);
 
   useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},()=>{},{enableHighAccuracy:false,timeout:8000});
@@ -168,7 +173,7 @@ function App(){
 
   const lookupZip=async z=>{if(!z||z.length<5)return;setErr(null);
     try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(z)}&count=1&language=en&format=json`);const d=await r.json();
-      if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z)}else setErr("Couldn't find that zip.")}catch(e){setErr("Connection issue.")}};
+      if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z);setNormWx(null)}else setErr("Couldn't find that zip.")}catch(e){setErr("Connection issue.")}};
 
   const toggleP=p=>setSelP(prev=>prev.find(x=>x.common_name===p.n)?prev.filter(x=>x.common_name!==p.n):[...prev,toPlant(p)]);
 
@@ -223,22 +228,19 @@ function App(){
     return()=>timers.forEach(clearTimeout);
   },[reminders,notifEnabled]);
 
-  // Auto-log ignored yesterday
   useEffect(()=>{if(!timeline.length)return;
-    const y=new Date();y.setDate(y.getDate()-1);const ys=y.toISOString().split("T")[0];
+    const y=new Date(Date.now()-86400000);const ys=y.toISOString().split("T")[0];
     const yd=timeline.find(d=>d.date===ys);if(!yd)return;
-    const pr=["cold","heat","wind"],bp={};
-    for(const i of yd.issues){if(i.type==="rain")continue;if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type)}
-    const ba={};for(const[p,t]of Object.entries(bp)){const top=pr.find(x=>t.has(x))||[...t][0];if(!ba[top])ba[top]=[];ba[top].push(p)}
+    const pr=["cold","heat","wind"],ba=groupIssuesByAction(yd.issues);
     let ni=false;const nl=[];
     for(const t of pr){if(!ba[t])continue;if(!dismissed[`${ys}-${t}`]){nl.push({date:ys,type:t,plants:ba[t],action:"ignored",timestamp:new Date().toISOString()});ni=true}}
     if(ni){setDismissed(prev=>{const n={...prev};for(const l of nl)n[`${l.date}-${l.type}`]="ignored";return n});setActionLog(prev=>[...prev,...nl])}
   },[timeline]);
 
-  const saveGroup=()=>{if(!selP.length||saving)return;setSaving(true);
+  const saveGroup=()=>{if(!selP.length)return;
     if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants:selP,heatAdj,coldAdj,windAdj}:g))}
     else{setGroups(prev=>[...prev,{id:String(Date.now()),name:gName||`Patio Group ${groups.length+1}`,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}])}
-    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500)};
+    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)};
 
   const enableNotifications=async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifEnabled(p==="granted");if(p==="granted"&&timeline.length>0)sendNotif(timeline)};
 
@@ -297,10 +299,8 @@ function App(){
                 </div>
                 {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>🪣 Collect rainwater — {day.rain.toFixed(1)}" expected</div>}
                 {hasIssues&&(()=>{
-                  const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:dk.heatBg,color:dk.heat},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};
-                  const icons={heat:"🌡️",cold:"❄️",wind:"💨"},byPlant={};
-                  for(const iss of day.issues){if(iss.type==="rain")continue;if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();byPlant[iss.plant].add(iss.type)}
-                  const byAction={};for(const[plant,types]of Object.entries(byPlant)){const topType=priority.find(t=>types.has(t))||[...types][0];if(!byAction[topType])byAction[topType]=[];byAction[topType].push(plant)}
+                  const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:dk.heatBg,color:dk.heat},cold:{action:"below typical range overnight",bg:"#1A3050",color:dk.cold},wind:{action:"above typical wind range",bg:"#2A1E45",color:dk.wind}};
+                  const icons={heat:"🌡️",cold:"❄️",wind:"💨"},byAction=groupIssuesByAction(day.issues);
                   const activeTypes=priority.filter(t=>byAction[t]&&!getAlertAction(day.date,t)),resolvedTypes=priority.filter(t=>byAction[t]&&getAlertAction(day.date,t));
                   return(<div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
                     {activeTypes.map(type=>{const a=actions[type];return(<div key={type}>
@@ -378,7 +378,7 @@ function App(){
             <div style={cs}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div>
               <div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
-              {[{label:"🌡️ Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"°F",color:"#F87171"},{label:"❄️ Cold tolerance",value:coldAdj,set:setColdAdj,unit:"°F",color:"#7AB8F5"},{label:"💨 Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:"#BFA0E8"}].map(({label,value,set,unit,color})=>(
+              {[{label:"🌡️ Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"°F",color:dk.heat},{label:"❄️ Cold tolerance",value:coldAdj,set:setColdAdj,unit:"°F",color:dk.cold},{label:"💨 Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:dk.wind}].map(({label,value,set,unit,color})=>(
                 <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={{fontSize:12,color:dk.mutedLight}}>{label}</div>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -434,7 +434,7 @@ function App(){
             if(n){nRain=Math.round(rs/n);nHeat=Math.round(hs/n);nCold=Math.round(cs/n);nTotal=Math.round(ts/n);}}
           const alertsByPlant={};
           for(const entry of actionLog){for(const plant of(entry.plants||[])){if(!alertsByPlant[plant])alertsByPlant[plant]={cold:0,heat:0,wind:0};if(entry.type in alertsByPlant[plant])alertsByPlant[plant][entry.type]++;}}
-          const seasonLabel=`${MN[parseInt(seasonStart.split("-")[1])-1]} ${parseInt(seasonStart.split("-")[2])} — today`;
+          const sd=new Date(seasonStart+"T12:00:00");const seasonLabel=`${MN[sd.getMonth()]} ${sd.getDate()} — today`;
           return(<>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>DASHBOARD</div>
             <div style={{fontSize:11,color:dk.muted,marginBottom:14}}>{seasonLabel}</div>
@@ -447,14 +447,14 @@ function App(){
                 <div style={{display:"flex",justifyContent:"space-around",marginBottom:20}}>
                   <Donut val={rainDays} total={totalDays} color={dk.teal} label="Rain days"/>
                   <Donut val={heatDays} total={totalDays} color={dk.heat} label="Heat days"/>
-                  <Donut val={coldDays} total={totalDays} color="#7AB8F5" label="Cold days"/>
+                  <Donut val={coldDays} total={totalDays} color={dk.cold} label="Cold days"/>
                 </div>
                 <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>3-Year Avg (2022–2024)</div>
                 {!normWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading…</div>}
                 {normWx&&<div style={{display:"flex",justifyContent:"space-around"}}>
                   <Donut val={nRain} total={nTotal} color={dk.teal} label="Rain days" size={68} stroke={8}/>
                   <Donut val={nHeat} total={nTotal} color={dk.heat} label="Heat days" size={68} stroke={8}/>
-                  <Donut val={nCold} total={nTotal} color="#7AB8F5" label="Cold days" size={68} stroke={8}/>
+                  <Donut val={nCold} total={nTotal} color={dk.cold} label="Cold days" size={68} stroke={8}/>
                 </div>}
               </>}
             </div>
@@ -468,9 +468,9 @@ function App(){
                     <div style={{fontSize:10,color:sig,marginTop:2,fontWeight:600}}>{lbl}</div>
                   </div>
                   <div style={{display:"flex",gap:10,fontSize:11,color:dk.mutedLight}}>
-                    {a.cold>0&&<span style={{color:"#7AB8F5"}}>❄️ {a.cold}</span>}
+                    {a.cold>0&&<span style={{color:dk.cold}}>❄️ {a.cold}</span>}
                     {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
-                    {a.wind>0&&<span style={{color:"#BFA0E8"}}>💨 {a.wind}</span>}
+                    {a.wind>0&&<span style={{color:dk.wind}}>💨 {a.wind}</span>}
                     {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
                   </div>
                 </div>);})}
@@ -498,16 +498,16 @@ function App(){
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div>
-                <div style={{fontSize:14,fontWeight:700,color:"#F87171"}}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.heat}}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div>
               </div>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div>
-                <div style={{fontSize:14,fontWeight:700,color:"#BFA0E8"}}>💨 ≤ {detailPlant.max_wind_mph} mph</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.wind}}>💨 ≤ {detailPlant.max_wind_mph} mph</div>
               </div>
             </div>
             <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
-              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?"#7AB8F5":dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter in rain":"✓ Handles rain fine"}</div>
+              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter in rain":"✓ Handles rain fine"}</div>
             </div>
             {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
