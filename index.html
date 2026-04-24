@@ -25,15 +25,15 @@ const WAPI="https://api.open-meteo.com/v1/forecast";
 const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const PL=[
-{n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone.",wf:"Keep soil moist, not wet",fe:"Weekly at ¼ strength, bloom formula"},
+{n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone.",wf:"Keep soil moist, not wet",fe:"Weekly at 1/4 strength, bloom formula"},
 {n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind.",wf:"Weekly, let top inch dry",fe:"Monthly, balanced"},
 {n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette.",wf:"Every 2-3 weeks, let fully dry",fe:"Once in spring, cactus formula"},
 {n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold.",wf:"Weekly, let top inch dry",fe:"Every 6 weeks, phosphorus-rich"},
-{n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50°F.",wf:"Daily in heat, keep consistently moist",fe:"Every 2 weeks, balanced"},
+{n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50F.",wf:"Daily in heat, keep consistently moist",fe:"Every 2 weeks, balanced"},
 {n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet.",wf:"When top inch dries",fe:"Every 2 weeks, bloom formula"},
 {n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
 {n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity.",wf:"Keep consistently moist",fe:"Monthly spring/summer, balanced"},
-{n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60°F.",wf:"Keep moist during growing season",fe:"Every 2 weeks, balanced"},
+{n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60F.",wf:"Keep moist during growing season",fe:"Every 2 weeks, balanced"},
 {n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind.",wf:"When top inch dries, use filtered water",fe:"Monthly, diluted balanced"},
 {n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible.",wf:"Every 2-3 weeks",fe:"Twice a year, balanced"},
 {n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant.",wf:"Every 1-2 weeks",fe:"Every 6 weeks, balanced"},
@@ -51,7 +51,7 @@ const PL=[
 {n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat.",wf:"Weekly, keep moist",fe:"Every 2 weeks, bloom formula"},
 {n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable.",wf:"Keep moist, daily in heat",fe:"Monthly, balanced"},
 {n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind.",wf:"Every 1-2 weeks",fe:"Monthly spring/summer, balanced"},
-{n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive.",wf:"Every 7-10 days, let dry between",fe:"Every 2 weeks at ¼ strength, orchid formula"},
+{n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive.",wf:"Every 7-10 days, let dry between",fe:"Every 2 weeks at 1/4 strength, orchid formula"},
 {n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant.",wf:"When top inch dries",fe:"Monthly spring/summer, balanced"},
 {n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance.",wf:"Weekly, keep moist",fe:"Every 6 weeks, balanced"},
 {n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts.",wf:"Every 1-2 weeks, let dry between",fe:"Monthly spring/summer, diluted balanced"},
@@ -68,7 +68,7 @@ const PL=[
 {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance.",wf:"Every 2-3 weeks",fe:"Every 6 weeks spring/summer, balanced"},
 ];
 function toPlant(p){return{common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t,water_freq:p.wf||null,fertilizer:p.fe||null}}
-const wIcon=c=>c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
+const wIcon=c=>c<=1?"Sun":c<=3?"Partly":c<=48?"Cloud":c<=67?"Rain":c<=77?"Snow":c<=82?"Showers":c<=86?"Snow":"Storm";
 
 function buildTimeline(groups,wx){
   if(!wx||!groups.length)return[];
@@ -77,10 +77,10 @@ function buildTimeline(groups,wx){
     const dt=new Date(d.time[i]+"T12:00:00"),high=d.temperature_2m_max[i],low=d.temperature_2m_min[i],wind=d.wind_speed_10m_max[i],rain=d.precipitation_sum[i],issues=[];
     for(const g of groups){const ha=g.heatAdj||0,ca=g.coldAdj||0,wa=g.windAdj||0;
       for(const p of g.plants){if(p.indoors)continue;const emx=p.max_temp_f+ha,emn=p.min_temp_f-ca,ew=p.max_wind_mph+wa;
-        if(high>emx)issues.push({plant:p.common_name,type:"heat",icon:"🌡️",detail:`${Math.round(high)}°>${emx}°`});
-        if(low<emn)issues.push({plant:p.common_name,type:"cold",icon:"❄️",detail:`${Math.round(low)}°<${emn}°`});
-        if(wind>ew)issues.push({plant:p.common_name,type:"wind",icon:"💨",detail:`${Math.round(wind)}>${ew}mph`});
-        if(p.rain_sensitive&&rain>0.1)issues.push({plant:p.common_name,type:"rain",icon:"🌧️",detail:`${rain.toFixed(1)}" rain`});
+        if(high>emx)issues.push({plant:p.common_name,type:"heat",icon:"Heat",detail:`${Math.round(high)}>${emx}`});
+        if(low<emn)issues.push({plant:p.common_name,type:"cold",icon:"Cold",detail:`${Math.round(low)}<${emn}`});
+        if(wind>ew)issues.push({plant:p.common_name,type:"wind",icon:"Wind",detail:`${Math.round(wind)}>${ew}mph`});
+        if(p.rain_sensitive&&rain>0.1)issues.push({plant:p.common_name,type:"rain",icon:"Rain",detail:`${rain.toFixed(1)}" rain`});
     }}
     days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tomorrow":DN[dt.getDay()],dateLabel:`${MN[dt.getMonth()]} ${dt.getDate()}`,high,low,wind,rain,weatherCode:d.weathercode[i],issues,rainCollect:rain>0.1});
   }
@@ -92,6 +92,80 @@ const marchFirst=`${new Date().getFullYear()}-03-01`;
 const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
 function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
+const wateringOptions={
+  dry:{label:"Let dry out",hint:"Good for lower-moisture groups.",days:10},
+  balanced:{label:"Balanced",hint:"A steady weekly rhythm.",days:7},
+  moist:{label:"Keep evenly moist",hint:"Check sooner and water more often.",days:4},
+};
+
+function dateOnly(val){
+  if(!val)return"";
+  const dt=new Date(val);
+  if(Number.isNaN(dt.getTime()))return"";
+  return dt.toISOString().split("T")[0];
+}
+
+function addDays(val,days){
+  if(!val)return"";
+  const dt=new Date(`${dateOnly(val)}T12:00:00`);
+  dt.setDate(dt.getDate()+days);
+  return dt.toISOString().split("T")[0];
+}
+
+function formatDateLabel(val){
+  if(!val)return"Not yet";
+  const dt=new Date(`${dateOnly(val)}T12:00:00`);
+  if(Number.isNaN(dt.getTime()))return"Not yet";
+  return `${MN[dt.getMonth()]} ${dt.getDate()}`;
+}
+
+function daysUntil(val){
+  if(!val)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const dt=new Date(`${dateOnly(val)}T12:00:00`);
+  if(Number.isNaN(dt.getTime()))return null;
+  return Math.round((dt-today)/86400000);
+}
+
+function deriveNextCheckAt(lastWateredAt,wateringTolerance="balanced"){
+  return lastWateredAt?addDays(lastWateredAt,(wateringOptions[wateringTolerance]||wateringOptions.balanced).days):"";
+}
+
+function latestLegacyWateredAt(group,actionLog){
+  const names=new Set((group.plants||[]).map(p=>p.common_name));
+  const entries=(actionLog||[]).filter(e=>e.type==="watered"&&(e.plants||[]).some(name=>names.has(name)));
+  if(!entries.length)return"";
+  return entries[entries.length-1].timestamp||"";
+}
+
+function normalizePlant(p,groupId,index,plantConfig){
+  const cfg=plantConfig?.[p.common_name]||{};
+  return{
+    ...p,
+    id:p.id||`${groupId}-${p.common_name||"plant"}-${index}`,
+    groupId,
+    potSize:p.potSize||cfg.potSize||"medium",
+    soilType:p.soilType||cfg.soilType||"standard",
+  };
+}
+
+function normalizeGroups(groups,actionLog,plantConfig){
+  return(groups||[]).map((g,groupIndex)=>{
+    const groupId=g.id||`group-${groupIndex+1}`;
+    const plants=(g.plants||[]).map((p,plantIndex)=>normalizePlant(p,groupId,plantIndex,plantConfig));
+    const wateringTolerance=g.wateringTolerance||"balanced";
+    const lastWateredAt=g.lastWateredAt||latestLegacyWateredAt({...g,plants},actionLog)||"";
+    return{
+      ...g,
+      id:groupId,
+      plants,
+      wateringTolerance,
+      lastWateredAt,
+      wateringNotes:g.wateringNotes||"",
+      nextCheckAt:g.nextCheckAt||deriveNextCheckAt(lastWateredAt,wateringTolerance),
+    };
+  });
+}
 
 function Donut({val,total,color,label,size=80,stroke=10}){
   const r=(size-stroke)/2,circ=2*Math.PI*r,pct=total>0?Math.min(val/total,1):0,dash=circ*pct;
@@ -108,20 +182,6 @@ function Donut({val,total,color,label,size=80,stroke=10}){
     </div>
     <div style={{fontSize:11,color:dk.muted,textAlign:"center",lineHeight:1.3}}>{label}</div>
   </div>);
-}
-
-function dryStatus(name,config,log,wx){
-  const{potSize="medium",soilType="standard"}=(config||{})[name]||{};
-  const base={small:3,medium:6,large:10}[potSize];
-  const mod={fast:0.65,standard:1,moisture:1.5}[soilType];
-  const exp=base*mod;
-  const entries=(log||[]).filter(e=>e.type==="watered"&&(e.plants||[]).includes(name));
-  if(!entries.length)return{status:"unknown",daysAgo:null,exp};
-  const daysAgo=(Date.now()-new Date(entries[entries.length-1].timestamp))/86400000;
-  const hi=wx?.daily?.temperature_2m_max?.[0]||75;
-  const adj=exp/(hi>95?1.5:hi>85?1.25:1);
-  const pct=daysAgo/adj;
-  return{status:pct>=1?"dry":pct>=0.7?"check":"fine",daysAgo,adj};
 }
 
 function groupIssuesByAction(issues){
@@ -141,16 +201,17 @@ function sendNotif(timeline){
   localStorage.setItem("pg-last-notif",ts);
   const pr=["cold","heat","wind"],lb={heat:"above typical range",cold:"below typical range overnight",wind:"above typical wind range"};
   const ba=groupIssuesByAction(ai);
-  const alerts=pr.filter(t=>ba[t]).map(t=>`${ba[t].join(", ")} — ${lb[t]}`);
+  const alerts=pr.filter(t=>ba[t]).map(t=>`${ba[t].join(", ")} - ${lb[t]}`);
   navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts,url:window.location.href})});
 }
 
 function App(){
   const stored=ld();
+  const normalizedGroups=normalizeGroups(stored.groups||[],stored.actionLog||[],stored.plantConfig||{});
   const[scr,setScr]=useState("home");
   const[loc,setLoc]=useState(stored.loc||null);
   const[wx,setWx]=useState(null);
-  const[groups,setGroups]=useState(stored.groups||[]);
+  const[groups,setGroups]=useState(normalizedGroups);
   const[timeline,setTimeline]=useState([]);
   const[err,setErr]=useState(null);
   const[zip,setZip]=useState(stored.zip||"");
@@ -162,18 +223,20 @@ function App(){
   const[heatAdj,setHeatAdj]=useState(0);
   const[coldAdj,setColdAdj]=useState(0);
   const[windAdj,setWindAdj]=useState(0);
+  const[waterTol,setWaterTol]=useState("balanced");
+  const[waterNotes,setWaterNotes]=useState("");
+  const[nextCheckAt,setNextCheckAt]=useState("");
   const[dismissed,setDismissed]=useState(stored.dismissed||{});
   const[reminders,setReminders]=useState(stored.reminders||[]);
   const[detailPlant,setDetailPlant]=useState(null);
   const[actionLog,setActionLog]=useState(stored.actionLog||[]);
-  const[plantConfig,setPlantConfig]=useState(stored.plantConfig||{});
   const[wxLoading,setWxLoading]=useState(false);
   const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
   const[histWx,setHistWx]=useState(null);
   const[normWx,setNormWx]=useState(stored.normWx||null);
   const seasonStart=groups.length>0?groups.reduce((e,g)=>g.addedAt<e?g.addedAt:e,groups[0].addedAt).split("T")[0]:marchFirst;
 
-  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders,normWx,plantConfig})},[groups,savedZip,loc,dismissed,actionLog,reminders,normWx,plantConfig]);
+  useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog,reminders,normWx})},[groups,savedZip,loc,dismissed,actionLog,reminders,normWx]);
 
   useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;
     navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},()=>{},{enableHighAccuracy:false,timeout:8000});
@@ -203,12 +266,28 @@ function App(){
 
   const hasReminder=(date,type)=>reminders.some(r=>r.date===date&&r.type===type);
 
-  const logWatered=name=>setActionLog(prev=>[...prev,{date:new Date().toISOString().split("T")[0],type:"watered",plants:[name],action:"watered",timestamp:new Date().toISOString()}]);
-  const setPC=(name,field,val)=>setPlantConfig(prev=>({...prev,[name]:{...(prev[name]||{}),[field]:val}}));
+  const resetGroupEditor=()=>{
+    setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setWaterTol("balanced");setWaterNotes("");setNextCheckAt("");
+  };
 
-  const markBackOutside=plantName=>{
-    setGroups(prev=>prev.map(g=>({...g,plants:g.plants.map(p=>p.common_name===plantName?{...p,indoors:false}:p)})));
-    setActionLog(prev=>[...prev,{date:new Date().toISOString().split("T")[0],type:"return",plants:[plantName],action:"back-outside",timestamp:new Date().toISOString()}]);
+  const updatePlantField=(groupId,plantId,field,val)=>{
+    setGroups(prev=>prev.map(g=>g.id!==groupId?g:{...g,plants:g.plants.map(p=>p.id===plantId?{...p,[field]:val}:p)}));
+    setDetailPlant(prev=>prev&&prev.id===plantId?{...prev,[field]:val}:prev);
+  };
+
+  const markGroupWatered=groupId=>{
+    const now=new Date().toISOString();
+    const today=now.split("T")[0];
+    setGroups(prev=>prev.map(g=>g.id!==groupId?g:{...g,lastWateredAt:now,nextCheckAt:deriveNextCheckAt(today,g.wateringTolerance)}));
+    setActionLog(prev=>[...prev,{date:today,type:"watered-group",groups:[groupId],action:"watered",timestamp:now}]);
+  };
+
+  const markBackOutside=(groupId,plantId)=>{
+    const targetGroup=groups.find(g=>g.id===groupId);
+    const targetPlant=targetGroup?.plants.find(p=>p.id===plantId);
+    setGroups(prev=>prev.map(g=>g.id!==groupId?g:{...g,plants:g.plants.map(p=>p.id===plantId?{...p,indoors:false}:p)}));
+    setActionLog(prev=>[...prev,{date:new Date().toISOString().split("T")[0],type:"return",plants:targetPlant?[targetPlant.common_name]:[],action:"back-outside",timestamp:new Date().toISOString()}]);
+    setDetailPlant(prev=>prev&&prev.id===plantId?{...prev,indoors:false}:prev);
   };
 
   const getAlertAction=(date,type)=>dismissed[`${date}-${type}`]||null;
@@ -240,7 +319,7 @@ function App(){
       const delay=target-now;
       if(delay<=0)return null;
       return setTimeout(()=>{
-        navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts:[`${r.plants.join(", ")} — check before tonight`],url:window.location.href})});
+        navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts:[`${r.plants.join(", ")} - check before tonight`],url:window.location.href})});
       },delay);
     }).filter(Boolean);
     return()=>timers.forEach(clearTimeout);
@@ -256,9 +335,11 @@ function App(){
   },[timeline]);
 
   const saveGroup=()=>{if(!selP.length)return;
-    if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants:selP,heatAdj,coldAdj,windAdj}:g))}
-    else{setGroups(prev=>[...prev,{id:String(Date.now()),name:gName||`Patio Group ${groups.length+1}`,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}])}
-    setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)};
+    const groupId=editingGroup||String(Date.now());
+    const plants=selP.map((p,i)=>({...p,id:p.id||`${groupId}-${Date.now()}-${i}`,groupId,potSize:p.potSize||"medium",soilType:p.soilType||"standard"}));
+    if(editingGroup){setGroups(prev=>prev.map(g=>g.id===editingGroup?{...g,name:gName||g.name,plants,heatAdj,coldAdj,windAdj,wateringTolerance:waterTol,wateringNotes:waterNotes.trim(),nextCheckAt,lastWateredAt:g.lastWateredAt||""}:g))}
+    else{setGroups(prev=>[...prev,{id:groupId,name:gName||`Patio Group ${groups.length+1}`,plants,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj,wateringTolerance:waterTol,wateringNotes:waterNotes.trim(),lastWateredAt:"",nextCheckAt}])}
+    setScr("home");resetGroupEditor()};
 
   const enableNotifications=async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifEnabled(p==="granted");if(p==="granted"&&timeline.length>0)sendNotif(timeline)};
 
@@ -272,11 +353,11 @@ function App(){
         <div>
           <div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>PLANT GUARDIAN</div>
           <div style={{fontSize:22,fontWeight:700,color:dk.white,letterSpacing:-0.5}}>
-            {wx?`${Math.round(wx.daily.temperature_2m_max[0])}°F`:"—"}
-            <span style={{fontSize:14,fontWeight:400,color:dk.muted,marginLeft:8}}>{pc>0?`${pc} plants`:""}{issueCount>0?` · ${issueCount} alerts`:pc>0?" · all clear":""}</span>
+            {wx?`${Math.round(wx.daily.temperature_2m_max[0])}F`:"-"}
+            <span style={{fontSize:14,fontWeight:400,color:dk.muted,marginLeft:8}}>{pc>0?`${pc} plants`:""}{issueCount>0?` - ${issueCount} alerts`:pc>0?" - all clear":""}</span>
           </div>
         </div>
-        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:14,color:dk.muted}}>⚙️</button>}
+        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:14,color:dk.muted}}>Settings</button>}
       </div>
 
       <div style={{padding:"14px 18px 100px"}}>
@@ -294,7 +375,7 @@ function App(){
           {wxLoading&&<div style={{...cs,textAlign:"center",color:dk.muted,padding:20}}>Loading forecast...</div>}
 
           {groups.length===0&&loc?<div style={{textAlign:"center",padding:"56px 24px"}}>
-            <div style={{fontSize:48,marginBottom:14}}>🌿</div>
+            <div style={{fontSize:48,marginBottom:14}}>Plant</div>
             <div style={{fontSize:18,fontWeight:700,color:dk.gold,marginBottom:8}}>No plants yet</div>
             <div style={{fontSize:13,color:dk.muted,lineHeight:1.6}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
           </div>:groups.length>0&&<>
@@ -311,65 +392,97 @@ function App(){
                     <div><span style={{fontWeight:400,fontSize:14,color:isToday?dk.teal:dk.white}}>{day.dayName}</span><span style={{fontSize:14,color:dk.muted,marginLeft:6}}>{day.dateLabel}</span></div>
                   </div>
                   <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°<span style={{fontWeight:400,color:dk.muted}}>/{Math.round(day.low)}°</span></div>
-                    <div style={{fontSize:10,color:dk.muted}}>{day.wind>0?`💨${Math.round(day.wind)}`:""}{day.rain>0?` 🌧️${day.rain.toFixed(1)}"`:""}</div>
+                    <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{Math.round(day.high)}<span style={{fontWeight:400,color:dk.muted}}>/{Math.round(day.low)}</span></div>
+                    <div style={{fontSize:10,color:dk.muted}}>{day.wind>0?`Wind${Math.round(day.wind)}`:""}{day.rain>0?` Rain${day.rain.toFixed(1)}"`:""}</div>
                   </div>
                 </div>
-                {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>🪣 Collect rainwater — {day.rain.toFixed(1)}" expected</div>}
+                {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>Collect rainwater - {day.rain.toFixed(1)}" expected</div>}
                 {hasIssues&&(()=>{
                   const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:dk.heatBg,color:dk.heat},cold:{action:"below typical range overnight",bg:"#1A3050",color:dk.cold},wind:{action:"above typical wind range",bg:"#2A1E45",color:dk.wind}};
-                  const icons={heat:"🌡️",cold:"❄️",wind:"💨"},byAction=groupIssuesByAction(day.issues);
+                  const icons={heat:"Heat",cold:"Cold",wind:"Wind"},byAction=groupIssuesByAction(day.issues);
                   const activeTypes=priority.filter(t=>byAction[t]&&!getAlertAction(day.date,t)),resolvedTypes=priority.filter(t=>byAction[t]&&getAlertAction(day.date,t));
                   return(<div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
                     {activeTypes.map(type=>{const a=actions[type];return(<div key={type}>
-                      <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {byAction[type].join(", ")} — {a.action}</div>
+                      <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {byAction[type].join(", ")} - {a.action}</div>
                       <div style={{display:"flex",gap:6,marginTop:4}}>
-                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type])}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.teal}44`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>✓ Got it</button>
+                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type])}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.teal}44`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>OK Got it</button>
                       </div>
                     </div>)})}
                     {resolvedTypes.map(type=>{const reminded=hasReminder(day.date,type);
                       return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,border:`1px solid ${dk.border}`,fontSize:11,color:dk.mutedLight,lineHeight:1.5,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
-                        <span>{icons[type]} {byAction[type].join(", ")} — <span style={{color:dk.teal,fontWeight:600}}>✓ noted</span></span>
-                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,fontWeight:500,cursor:"pointer"}}>🔔 6pm reminder</button>}
-                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.tealDim}55`,fontSize:10,color:dk.teal,fontWeight:500,cursor:"pointer"}}>🔔 6pm ✕</button>}
+                        <span>{icons[type]} {byAction[type].join(", ")} - <span style={{color:dk.teal,fontWeight:600}}>OK noted</span></span>
+                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,fontWeight:500,cursor:"pointer"}}>Reminder 6pm reminder</button>}
+                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.tealDim}55`,fontSize:10,color:dk.teal,fontWeight:500,cursor:"pointer"}}>Reminder 6pm X</button>}
                       </div>)})}
                   </div>)})()}
-                {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>✓ All plants fine today</div>}
+                {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>OK All plants fine today</div>}
               </div>);
             })}
+
             <div style={{marginTop:14}}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>YOUR PLANTS</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                {groups.map(g=>g.plants.map((p,i)=>{
-                  const ds=dryStatus(p.common_name,plantConfig,actionLog,wx);
-                  const dClr={dry:dk.heat,check:"#FBBF24",fine:dk.teal,unknown:""}[ds.status];
-                  return(<span key={g.id+i} onClick={()=>p.indoors?markBackOutside(p.common_name):setDetailPlant(p)}
-                    style={{fontSize:11,padding:"3px 9px",borderRadius:6,background:p.indoors?dk.bg:dk.cardAlt,color:p.indoors?dk.gold:dk.teal,fontWeight:600,border:`1px solid ${p.indoors?dk.gold+"40":dk.tealDim+"40"}`,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:3}}>
-                    {p.indoors?"🏠 ":""}{p.common_name}{p.indoors?" ↩":""}
-                    {!p.indoors&&dClr&&<span style={{color:dClr,fontSize:9}}>💧</span>}
-                  </span>);
-                }))}
-              </div>
-              <div style={{marginTop:8,display:"flex",gap:12,flexWrap:"wrap"}}>
-                {groups.map(g=><span key={g.id} style={{display:"inline-flex",gap:8}}>
-                  <button onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add")}} style={{fontSize:11,color:dk.teal,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>edit {g.name}</button>
-                  <button onClick={()=>setGroups(prev=>prev.filter(x=>x.id!==g.id))} style={{fontSize:11,color:dk.muted,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>remove</button>
-                </span>)}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                {groups.map(g=>{
+                  const nextCheckDelta=daysUntil(g.nextCheckAt);
+                  const nextCheckColor=nextCheckDelta===null?dk.muted:nextCheckDelta<0?dk.heat:nextCheckDelta<=1?"#FBBF24":dk.teal;
+                  return(<div key={g.id} style={{...cs,marginBottom:0,background:dk.cardAlt}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:12}}>
+                      <div>
+                        <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{g.name}</div>
+                        <div style={{fontSize:12,color:dk.muted,marginTop:3}}>{g.plants.length} plant{g.plants.length!==1?"s":""} - {wateringOptions[g.wateringTolerance]?.label||wateringOptions.balanced.label}</div>
+                      </div>
+                      <button onClick={()=>markGroupWatered(g.id)} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${dk.teal}66`,background:`${dk.tealDim}22`,color:dk.teal,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Mark Group Watered</button>
+                    </div>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>
+                      <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                        <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Last Watered</div>
+                        <div style={{fontSize:14,fontWeight:700,color:g.lastWateredAt?dk.white:dk.muted}}>{formatDateLabel(g.lastWateredAt)}</div>
+                      </div>
+                      <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                        <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Next Check</div>
+                        <div style={{fontSize:14,fontWeight:700,color:nextCheckColor}}>{g.nextCheckAt?formatDateLabel(g.nextCheckAt):"When needed"}</div>
+                      </div>
+                    </div>
+                    {g.wateringNotes&&<div style={{padding:"9px 11px",borderRadius:10,background:"#11253B",border:`1px solid ${dk.border}`,fontSize:12,color:dk.mutedLight,lineHeight:1.5,marginBottom:10}}>{g.wateringNotes}</div>}
+                    <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Plants</div>
+                    <div style={{border:`1px solid ${dk.border}`,borderRadius:10,overflow:"hidden",background:dk.bg}}>
+                      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.5fr) minmax(82px,0.8fr) minmax(88px,0.9fr)",gap:8,padding:"9px 12px",borderBottom:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8}}>
+                        <div>Plant Name</div>
+                        <div>Pot Size</div>
+                        <div>Soil Type</div>
+                      </div>
+                      {g.plants.map((p,idx)=>(
+                        <button key={p.id} onClick={()=>p.indoors?markBackOutside(g.id,p.id):setDetailPlant({...p,groupName:g.name})} style={{width:"100%",display:"grid",gridTemplateColumns:"minmax(0,1.5fr) minmax(82px,0.8fr) minmax(88px,0.9fr)",gap:8,padding:"11px 12px",border:"none",borderTop:idx>0?`1px solid ${dk.border}`:"none",background:"transparent",color:dk.white,cursor:"pointer",textAlign:"left",alignItems:"center"}}>
+                          <div style={{minWidth:0}}>
+                            <div style={{fontSize:13,fontWeight:700,color:dk.white,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.common_name}</div>
+                            {p.indoors&&<div style={{fontSize:10,color:dk.gold,marginTop:3}}>Indoors - tap to return</div>}
+                          </div>
+                          <div style={{fontSize:12,color:dk.mutedLight,textTransform:"capitalize"}}>{p.potSize}</div>
+                          <div style={{fontSize:12,color:dk.mutedLight}}>{p.soilType==="fast"?"Fast-drain":p.soilType==="moisture"?"Moisture+": "Standard"}</div>
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{marginTop:10,display:"flex",gap:12,flexWrap:"wrap"}}>
+                      <button onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setWaterTol(g.wateringTolerance||"balanced");setWaterNotes(g.wateringNotes||"");setNextCheckAt(g.nextCheckAt||"");setSq("");setScr("add")}} style={{fontSize:11,color:dk.teal,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>edit group</button>
+                      <button onClick={()=>setGroups(prev=>prev.filter(x=>x.id!==g.id))} style={{fontSize:11,color:dk.muted,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline"}}>remove group</button>
+                    </div>
+                  </div>);
+                })}
               </div>
             </div>
           </>}
-          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{position:"fixed",bottom:72,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+          <button onClick={()=>{setScr("add");resetGroupEditor();setErr(null)}} style={{position:"fixed",bottom:72,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
         </>}
 
         {scr==="add"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <button onClick={()=>{setScr("home");setErr(null);resetGroupEditor()}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>Back</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>{editingGroup?"EDIT GROUP":"ADD PLANTS"}</div>
           </div>
           {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
             {selP.map((p,i)=><div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer",minWidth:0}}>
-              <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} ✕</div>
-              <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>🌡️{p.min_temp_f}–{p.max_temp_f}°F · 💨≤{p.max_wind_mph}mph{p.rain_sensitive?" · 🌧️":""}</div>
+              <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} X</div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>Heat {p.min_temp_f}-{p.max_temp_f}F - wind up to {p.max_wind_mph} mph{p.rain_sensitive?" - Rain":""}</div>
             </div>)}
           </div>}
           <div style={cs}>
@@ -380,12 +493,12 @@ function App(){
                 <div key={i} onClick={()=>toggleP(p)} style={{padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none",cursor:"pointer",opacity:sel?0.45:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div><div style={{fontWeight:600,fontSize:14,color:dk.white}}>{p.n}</div><div style={{fontSize:11,color:dk.muted,fontStyle:"italic"}}>{p.s}</div></div>
-                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"✓":""}</div>
+                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"OK":""}</div>
                   </div>
                   <div style={{marginTop:6}}>
-                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>🌡️ {p.mn}–{p.mx}°F</span>
-                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>💨 ≤{p.w} mph</span>
-                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>🌧️ sensitive</span>:null}
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>Heat {p.mn}-{p.mx}F</span>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>Wind up to {p.w} mph</span>
+                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>Rain sensitive</span>:null}
                   </div>
                   <div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div>
                 </div>)})}
@@ -399,31 +512,46 @@ function App(){
             <div style={cs}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div>
               <div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
-              {[{label:"🌡️ Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"°F",color:dk.heat},{label:"❄️ Cold tolerance",value:coldAdj,set:setColdAdj,unit:"°F",color:dk.cold},{label:"💨 Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:dk.wind}].map(({label,value,set,unit,color})=>(
+              {[{label:"Heat Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"F",color:dk.heat},{label:"Cold Cold tolerance",value:coldAdj,set:setColdAdj,unit:"F",color:dk.cold},{label:"Wind Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:dk.wind}].map(({label,value,set,unit,color})=>(
                 <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={{fontSize:12,color:dk.mutedLight}}>{label}</div>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <button onClick={()=>set(v=>Math.max(0,v-5))} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
-                    <div style={{fontSize:14,fontWeight:700,color:value>0?color:dk.muted,minWidth:50,textAlign:"center"}}>{value>0?`+${value}${unit}`:"—"}</div>
+                    <button onClick={()=>set(v=>Math.max(0,v-5))} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>-</button>
+                    <div style={{fontSize:14,fontWeight:700,color:value>0?color:dk.muted,minWidth:50,textAlign:"center"}}>{value>0?`+${value}${unit}`:"-"}</div>
                     <button onClick={()=>set(v=>v+5)} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
                   </div>
                 </div>))}
+            </div>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>GROUP WATERING</div>
+              <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:12}}>
+                {Object.entries(wateringOptions).map(([value,opt])=>(
+                  <button key={value} onClick={()=>setWaterTol(value)} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${waterTol===value?dk.teal:dk.border}`,background:waterTol===value?`${dk.tealDim}22`:dk.bg,color:waterTol===value?dk.white:dk.mutedLight,cursor:"pointer",textAlign:"left"}}>
+                    <div style={{fontSize:13,fontWeight:700}}>{opt.label}</div>
+                    <div style={{fontSize:11,color:waterTol===value?dk.teal:dk.muted,marginTop:3}}>{opt.hint}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Next Check</div>
+              <input type="date" value={nextCheckAt} onChange={e=>setNextCheckAt(e.target.value)} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:12}}/>
+              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Watering Notes</div>
+              <textarea value={waterNotes} onChange={e=>setWaterNotes(e.target.value.slice(0,160))} rows="3" placeholder="Optional notes for this group..." style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:13,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"vertical"}}/>
             </div>
             <button onClick={saveGroup} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
               {editingGroup?`Update ${selP.length} Plant${selP.length!==1?"s":""}`:`Save & Watch ${selP.length} Plant${selP.length!==1?"s":""}`}
             </button>
           </>}
-          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>📸 <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.</div>
+          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>Photo <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.</div>
         </>}
 
         {scr==="set"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <button onClick={()=>{setScr("home");setErr(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>Back</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>SETTINGS</div>
           </div>
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
-            {notifEnabled?<div style={{fontSize:13,color:dk.teal}}>✓ Notifications enabled. You'll be alerted each morning if plants need attention.</div>
+            {notifEnabled?<div style={{fontSize:13,color:dk.teal}}>OK Notifications enabled. You'll be alerted each morning if plants need attention.</div>
             :<><div style={{fontSize:13,color:dk.muted,marginBottom:10,lineHeight:1.5}}>Get a notification when your plants need attention.</div>
               <button onClick={enableNotifications} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer"}}>Enable Notifications</button></>}
           </div>
@@ -455,14 +583,14 @@ function App(){
             if(n){nRain=Math.round(rs/n);nHeat=Math.round(hs/n);nCold=Math.round(cs/n);nTotal=Math.round(ts/n);}}
           const alertsByPlant={};
           for(const entry of actionLog){for(const plant of(entry.plants||[])){if(!alertsByPlant[plant])alertsByPlant[plant]={cold:0,heat:0,wind:0};if(entry.type in alertsByPlant[plant])alertsByPlant[plant][entry.type]++;}}
-          const sd=new Date(seasonStart+"T12:00:00");const seasonLabel=`${MN[sd.getMonth()]} ${sd.getDate()} — today`;
+          const sd=new Date(seasonStart+"T12:00:00");const seasonLabel=`${MN[sd.getMonth()]} ${sd.getDate()} - today`;
           return(<>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>DASHBOARD</div>
             <div style={{fontSize:11,color:dk.muted,marginBottom:14}}>{seasonLabel}</div>
             <div style={{...cs}}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:4}}>SEASON SO FAR</div>
-              <div style={{fontSize:10,color:dk.muted,marginBottom:14}}>Mar 1 — today · thresholds based on your plants</div>
-              {!histWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading…</div>}
+              <div style={{fontSize:10,color:dk.muted,marginBottom:14}}>Mar 1 - today - thresholds based on your plants</div>
+              {!histWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading...</div>}
               {histWx&&<>
                 <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>This Year</div>
                 <div style={{display:"flex",justifyContent:"space-around",marginBottom:20}}>
@@ -470,8 +598,8 @@ function App(){
                   <Donut val={heatDays} total={totalDays} color={dk.heat} label="Heat days"/>
                   <Donut val={coldDays} total={totalDays} color={dk.cold} label="Cold days"/>
                 </div>
-                <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>3-Year Avg (2022–2024)</div>
-                {!normWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading…</div>}
+                <div style={{fontSize:10,fontWeight:700,color:dk.mutedLight,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>3-Year Avg (2022-2024)</div>
+                {!normWx&&<div style={{textAlign:"center",color:dk.muted,padding:"12px 0",fontSize:13}}>Loading...</div>}
                 {normWx&&<div style={{display:"flex",justifyContent:"space-around"}}>
                   <Donut val={nRain} total={nTotal} color={dk.teal} label="Rain days" size={68} stroke={8}/>
                   <Donut val={nHeat} total={nTotal} color={dk.heat} label="Heat days" size={68} stroke={8}/>
@@ -493,11 +621,11 @@ function App(){
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color,marginBottom:10}}>{label}</div>
                   {plants.map(({p,a,total},i)=>(
                     <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
-                      <div onClick={()=>{const full=PL.find(x=>x.n===p.common_name);if(full)setDetailPlant(toPlant(full));}} style={{fontSize:13,fontWeight:600,color:dk.white,cursor:"pointer",textDecoration:"underline",textDecorationColor:dk.border}}>{p.common_name}</div>
+                      <div onClick={()=>{const full=PL.find(x=>x.n===p.common_name);if(full)setDetailPlant({...toPlant(full),potSize:p.potSize,soilType:p.soilType,groupId:p.groupId});}} style={{fontSize:13,fontWeight:600,color:dk.white,cursor:"pointer",textDecoration:"underline",textDecorationColor:dk.border}}>{p.common_name}</div>
                       <div style={{display:"flex",gap:10,fontSize:11}}>
-                        {a.cold>0&&<span style={{color:dk.cold}}>❄️ {a.cold}</span>}
-                        {a.heat>0&&<span style={{color:dk.heat}}>🌡️ {a.heat}</span>}
-                        {a.wind>0&&<span style={{color:dk.wind}}>💨 {a.wind}</span>}
+                        {a.cold>0&&<span style={{color:dk.cold}}>Cold {a.cold}</span>}
+                        {a.heat>0&&<span style={{color:dk.heat}}>Heat {a.heat}</span>}
+                        {a.wind>0&&<span style={{color:dk.wind}}>Wind {a.wind}</span>}
                         {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
                       </div>
                     </div>
@@ -511,10 +639,10 @@ function App(){
 
       {(scr==="home"||scr==="dash")&&<div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:dk.card,borderTop:`1px solid ${dk.border}`,display:"flex",zIndex:10}}>
         <button onClick={()=>setScr("home")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="home"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:20}}>🌿</span><span style={{fontSize:10,fontWeight:600}}>Home</span>
+          <span style={{fontSize:20}}>Plant</span><span style={{fontSize:10,fontWeight:600}}>Home</span>
         </button>
         <button onClick={()=>setScr("dash")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="dash"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:20}}>📊</span><span style={{fontSize:10,fontWeight:600}}>Dashboard</span>
+          <span style={{fontSize:20}}>Stats</span><span style={{fontSize:10,fontWeight:600}}>Dashboard</span>
         </button>
       </div>}
 
@@ -522,57 +650,48 @@ function App(){
         <div onClick={e=>e.stopPropagation()} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:`1px solid ${dk.border}`,borderBottom:"none"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
             <div><div style={{fontSize:18,fontWeight:700,color:dk.white}}>{detailPlant.common_name}</div><div style={{fontSize:13,color:dk.muted,fontStyle:"italic"}}>{detailPlant.scientific_name}</div></div>
-            <button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>✕</button>
+            <button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>X</button>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div>
-                <div style={{fontSize:14,fontWeight:700,color:dk.heat}}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.heat}}>Heat {detailPlant.min_temp_f} - {detailPlant.max_temp_f}F</div>
               </div>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div>
-                <div style={{fontSize:14,fontWeight:700,color:dk.wind}}>💨 ≤ {detailPlant.max_wind_mph} mph</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.wind}}>Wind up to {detailPlant.max_wind_mph} mph</div>
               </div>
             </div>
             <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
-              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter in rain":"✓ Handles rain fine"}</div>
+              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"Rain Sensitive - cover or shelter in rain":"OK Handles rain fine"}</div>
             </div>
-            {(()=>{
-              const pc=plantConfig[detailPlant.common_name]||{};
-              const ds=dryStatus(detailPlant.common_name,plantConfig,actionLog,wx);
-              const dClr={dry:dk.heat,check:"#FBBF24",fine:dk.teal,unknown:dk.muted}[ds.status];
-              const dMsg={dry:"Likely needs water",check:"Check the soil",fine:"Probably fine",unknown:"No history yet"}[ds.status];
-              return(<div style={{padding:"12px 14px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
-                <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Watering Tracker</div>
-                <div style={{marginBottom:8}}>
-                  <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Pot Size</div>
-                  <div style={{display:"flex",gap:4}}>
-                    {["small","medium","large"].map(s=>(
-                      <button key={s} onClick={()=>setPC(detailPlant.common_name,"potSize",s)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${pc.potSize===s?dk.teal:dk.border}`,background:pc.potSize===s?`${dk.tealDim}44`:"none",color:pc.potSize===s?dk.teal:dk.muted,fontSize:11,cursor:"pointer",textTransform:"capitalize"}}>{s}</button>
-                    ))}
-                  </div>
+
+            <div style={{padding:"12px 14px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+              <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>Plant Details</div>
+              {detailPlant.groupName&&<div style={{fontSize:12,color:dk.mutedLight,marginBottom:12}}>This plant belongs to <span style={{color:dk.white,fontWeight:700}}>{detailPlant.groupName}</span>. Routine watering is managed on the group card.</div>}
+              <div style={{marginBottom:8}}>
+                <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Pot Size</div>
+                <div style={{display:"flex",gap:4}}>
+                  {["small","medium","large"].map(s=>(
+                    <button key={s} onClick={()=>updatePlantField(detailPlant.groupId,detailPlant.id,"potSize",s)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${detailPlant.potSize===s?dk.teal:dk.border}`,background:detailPlant.potSize===s?`${dk.tealDim}44`:"none",color:detailPlant.potSize===s?dk.teal:dk.muted,fontSize:11,cursor:"pointer",textTransform:"capitalize"}}>{s}</button>
+                  ))}
                 </div>
-                <div style={{marginBottom:12}}>
-                  <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Soil</div>
-                  <div style={{display:"flex",gap:4}}>
-                    {[{v:"fast",l:"Fast-drain"},{v:"standard",l:"Standard"},{v:"moisture",l:"Moisture+"}].map(({v,l})=>(
-                      <button key={v} onClick={()=>setPC(detailPlant.common_name,"soilType",v)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${pc.soilType===v?dk.teal:dk.border}`,background:pc.soilType===v?`${dk.tealDim}44`:"none",color:pc.soilType===v?dk.teal:dk.muted,fontSize:10,cursor:"pointer"}}>{l}</button>
-                    ))}
-                  </div>
+              </div>
+              <div style={{marginBottom:10}}>
+                <div style={{fontSize:10,color:dk.muted,marginBottom:5}}>Soil</div>
+                <div style={{display:"flex",gap:4}}>
+                  {[{v:"fast",l:"Fast-drain"},{v:"standard",l:"Standard"},{v:"moisture",l:"Moisture+"}].map(({v,l})=>(
+                    <button key={v} onClick={()=>updatePlantField(detailPlant.groupId,detailPlant.id,"soilType",v)} style={{flex:1,padding:"5px 0",borderRadius:6,border:`1px solid ${detailPlant.soilType===v?dk.teal:dk.border}`,background:detailPlant.soilType===v?`${dk.tealDim}44`:"none",color:detailPlant.soilType===v?dk.teal:dk.muted,fontSize:10,cursor:"pointer"}}>{l}</button>
+                  ))}
                 </div>
-                <div style={{marginBottom:10}}>
-                  <div style={{fontSize:13,fontWeight:600,color:dClr}}>💧 {dMsg}</div>
-                  {ds.daysAgo!==null&&<div style={{fontSize:11,color:dk.muted,marginTop:2}}>watered {Math.round(ds.daysAgo)}d ago · est. dry in ~{Math.round(ds.adj)}d</div>}
-                  {detailPlant.water_freq&&<div style={{fontSize:11,color:dk.muted,marginTop:4,lineHeight:1.4}}>{detailPlant.water_freq}</div>}
-                </div>
-                <button onClick={()=>logWatered(detailPlant.common_name)} style={{width:"100%",padding:"9px",borderRadius:8,border:`1px solid ${dk.teal}66`,background:`${dk.tealDim}22`,color:dk.teal,fontSize:13,fontWeight:600,cursor:"pointer"}}>💧 Log Watered Today</button>
-              </div>);
-            })()}
+              </div>
+              {detailPlant.water_freq&&<div style={{fontSize:11,color:dk.muted,lineHeight:1.4}}>Reference: {detailPlant.water_freq}</div>}
+            </div>
             {detailPlant.fertilizer&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Fertilizer</div>
-              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>🌱 {detailPlant.fertilizer}</div>
+              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>Feed {detailPlant.fertilizer}</div>
             </div>}
             {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
