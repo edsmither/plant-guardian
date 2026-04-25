@@ -68,7 +68,27 @@ const PL=[
 {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance.",wf:"Every 2-3 weeks",fe:"Every 6 weeks spring/summer, balanced"},
 ];
 function toPlant(p){return{common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t,water_freq:p.wf||null,fertilizer:p.fe||null}}
-const wIcon=c=>c<=1?"Sun":c<=3?"Partly":c<=48?"Cloud":c<=67?"Rain":c<=77?"Snow":c<=82?"Showers":c<=86?"Snow":"Storm";
+const ui={
+  settings:"\u2699\uFE0F",
+  plant:"\u{1F33F}",
+  stats:"\u{1F4CA}",
+  heat:"\u{1F321}\uFE0F",
+  cold:"\u2744\uFE0F",
+  wind:"\u{1F4A8}",
+  rain:"\u{1F327}\uFE0F",
+  sun:"\u2600\uFE0F",
+  partly:"\u26C5",
+  cloud:"\u2601\uFE0F",
+  showers:"\u{1F326}\uFE0F",
+  snow:"\u{1F328}\uFE0F",
+  storm:"\u26C8\uFE0F",
+  ok:"\u2713",
+  back:"\u2190",
+  close:"\u2715",
+  photo:"\u{1F4F8}",
+  reminder:"\u{1F514}",
+};
+const wIcon=c=>c<=1?ui.sun:c<=3?ui.partly:c<=48?ui.cloud:c<=67?ui.rain:c<=77?ui.snow:c<=82?ui.showers:c<=86?ui.snow:ui.storm;
 
 function buildTimeline(groups,wx){
   if(!wx||!groups.length)return[];
@@ -77,10 +97,10 @@ function buildTimeline(groups,wx){
     const dt=new Date(d.time[i]+"T12:00:00"),high=d.temperature_2m_max[i],low=d.temperature_2m_min[i],wind=d.wind_speed_10m_max[i],rain=d.precipitation_sum[i],issues=[];
     for(const g of groups){const ha=g.heatAdj||0,ca=g.coldAdj||0,wa=g.windAdj||0;
       for(const p of g.plants){if(p.indoors)continue;const emx=p.max_temp_f+ha,emn=p.min_temp_f-ca,ew=p.max_wind_mph+wa;
-        if(high>emx)issues.push({plant:p.common_name,type:"heat",icon:"Heat",detail:`${Math.round(high)}>${emx}`});
-        if(low<emn)issues.push({plant:p.common_name,type:"cold",icon:"Cold",detail:`${Math.round(low)}<${emn}`});
-        if(wind>ew)issues.push({plant:p.common_name,type:"wind",icon:"Wind",detail:`${Math.round(wind)}>${ew}mph`});
-        if(p.rain_sensitive&&rain>0.1)issues.push({plant:p.common_name,type:"rain",icon:"Rain",detail:`${rain.toFixed(1)}" rain`});
+        if(high>emx)issues.push({plant:p.common_name,type:"heat",icon:ui.heat,detail:`${Math.round(high)}>${emx}`});
+        if(low<emn)issues.push({plant:p.common_name,type:"cold",icon:ui.cold,detail:`${Math.round(low)}<${emn}`});
+        if(wind>ew)issues.push({plant:p.common_name,type:"wind",icon:ui.wind,detail:`${Math.round(wind)}>${ew}mph`});
+        if(p.rain_sensitive&&rain>0.1)issues.push({plant:p.common_name,type:"rain",icon:ui.rain,detail:`${rain.toFixed(1)}" rain`});
     }}
     days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tomorrow":DN[dt.getDay()],dateLabel:`${MN[dt.getMonth()]} ${dt.getDate()}`,high,low,wind,rain,weatherCode:d.weathercode[i],issues,rainCollect:rain>0.1});
   }
@@ -357,7 +377,7 @@ function App(){
             <span style={{fontSize:14,fontWeight:400,color:dk.muted,marginLeft:8}}>{pc>0?`${pc} plants`:""}{issueCount>0?` - ${issueCount} alerts`:pc>0?" - all clear":""}</span>
           </div>
         </div>
-        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:14,color:dk.muted}}>Settings</button>}
+        {scr==="home"&&<button onClick={()=>setScr("set")} aria-label="Settings" style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:14,color:dk.muted}}>{ui.settings}</button>}
       </div>
 
       <div style={{padding:"14px 18px 100px"}}>
@@ -375,7 +395,7 @@ function App(){
           {wxLoading&&<div style={{...cs,textAlign:"center",color:dk.muted,padding:20}}>Loading forecast...</div>}
 
           {groups.length===0&&loc?<div style={{textAlign:"center",padding:"56px 24px"}}>
-            <div style={{fontSize:48,marginBottom:14}}>Plant</div>
+            <div style={{fontSize:48,marginBottom:14}}>{ui.plant}</div>
             <div style={{fontSize:18,fontWeight:700,color:dk.gold,marginBottom:8}}>No plants yet</div>
             <div style={{fontSize:13,color:dk.muted,lineHeight:1.6}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
           </div>:groups.length>0&&<>
@@ -393,29 +413,29 @@ function App(){
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:16,fontWeight:700,color:dk.white}}>{Math.round(day.high)}<span style={{fontWeight:400,color:dk.muted}}>/{Math.round(day.low)}</span></div>
-                    <div style={{fontSize:10,color:dk.muted}}>{day.wind>0?`Wind${Math.round(day.wind)}`:""}{day.rain>0?` Rain${day.rain.toFixed(1)}"`:""}</div>
+                    <div style={{fontSize:10,color:dk.muted}}>{day.wind>0?`${ui.wind}${Math.round(day.wind)}`:""}{day.rain>0?` ${ui.rain}${day.rain.toFixed(1)}"`:""}</div>
                   </div>
                 </div>
                 {day.rainCollect&&<div style={{marginTop:8,padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",fontWeight:400}}>Collect rainwater - {day.rain.toFixed(1)}" expected</div>}
                 {hasIssues&&(()=>{
                   const priority=["cold","heat","wind"],actions={heat:{action:"above typical range",bg:dk.heatBg,color:dk.heat},cold:{action:"below typical range overnight",bg:"#1A3050",color:dk.cold},wind:{action:"above typical wind range",bg:"#2A1E45",color:dk.wind}};
-                  const icons={heat:"Heat",cold:"Cold",wind:"Wind"},byAction=groupIssuesByAction(day.issues);
+                  const icons={heat:ui.heat,cold:ui.cold,wind:ui.wind},byAction=groupIssuesByAction(day.issues);
                   const activeTypes=priority.filter(t=>byAction[t]&&!getAlertAction(day.date,t)),resolvedTypes=priority.filter(t=>byAction[t]&&getAlertAction(day.date,t));
                   return(<div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
                     {activeTypes.map(type=>{const a=actions[type];return(<div key={type}>
                       <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {byAction[type].join(", ")} - {a.action}</div>
                       <div style={{display:"flex",gap:6,marginTop:4}}>
-                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type])}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.teal}44`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>OK Got it</button>
+                        <button onClick={e=>{e.stopPropagation();resolveAlert(day.date,type,byAction[type])}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.teal}44`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>{ui.ok} Got it</button>
                       </div>
                     </div>)})}
                     {resolvedTypes.map(type=>{const reminded=hasReminder(day.date,type);
                       return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,border:`1px solid ${dk.border}`,fontSize:11,color:dk.mutedLight,lineHeight:1.5,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
-                        <span>{icons[type]} {byAction[type].join(", ")} - <span style={{color:dk.teal,fontWeight:600}}>OK noted</span></span>
-                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,fontWeight:500,cursor:"pointer"}}>Reminder 6pm reminder</button>}
-                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.tealDim}55`,fontSize:10,color:dk.teal,fontWeight:500,cursor:"pointer"}}>Reminder 6pm X</button>}
+                        <span>{icons[type]} {byAction[type].join(", ")} - <span style={{color:dk.teal,fontWeight:600}}>{ui.ok} noted</span></span>
+                        {!reminded&&<button onClick={e=>{e.stopPropagation();addReminder(day.date,type,byAction[type])}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.border}`,fontSize:10,color:dk.muted,fontWeight:500,cursor:"pointer"}}>{ui.reminder} 6pm reminder</button>}
+                        {reminded&&<button onClick={e=>{e.stopPropagation();setReminders(prev=>prev.filter(r=>!(r.date===day.date&&r.type===type)))}} style={{padding:"3px 8px",borderRadius:6,background:"none",border:`1px solid ${dk.tealDim}55`,fontSize:10,color:dk.teal,fontWeight:500,cursor:"pointer"}}>{ui.reminder} 6pm {ui.close}</button>}
                       </div>)})}
                   </div>)})()}
-                {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>OK All plants fine today</div>}
+                {!hasIssues&&<div style={{marginTop:5,fontSize:11,color:dk.teal,fontWeight:600}}>{ui.ok} All plants fine today</div>}
               </div>);
             })}
 
@@ -476,13 +496,13 @@ function App(){
 
         {scr==="add"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null);resetGroupEditor()}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>Back</button>
+            <button onClick={()=>{setScr("home");setErr(null);resetGroupEditor()}} aria-label="Back" style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>{ui.back}</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>{editingGroup?"EDIT GROUP":"ADD PLANTS"}</div>
           </div>
           {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
             {selP.map((p,i)=><div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer",minWidth:0}}>
-              <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} X</div>
-              <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>Heat {p.min_temp_f}-{p.max_temp_f}F - wind up to {p.max_wind_mph} mph{p.rain_sensitive?" - Rain":""}</div>
+              <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} {ui.close}</div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>{ui.heat} {p.min_temp_f}-{p.max_temp_f}F - {ui.wind} up to {p.max_wind_mph} mph{p.rain_sensitive?` - ${ui.rain}`:""}</div>
             </div>)}
           </div>}
           <div style={cs}>
@@ -493,12 +513,12 @@ function App(){
                 <div key={i} onClick={()=>toggleP(p)} style={{padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none",cursor:"pointer",opacity:sel?0.45:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div><div style={{fontWeight:600,fontSize:14,color:dk.white}}>{p.n}</div><div style={{fontSize:11,color:dk.muted,fontStyle:"italic"}}>{p.s}</div></div>
-                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"OK":""}</div>
+                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?ui.ok:""}</div>
                   </div>
                   <div style={{marginTop:6}}>
-                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>Heat {p.mn}-{p.mx}F</span>
-                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>Wind up to {p.w} mph</span>
-                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>Rain sensitive</span>:null}
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>{ui.heat} {p.mn}-{p.mx}F</span>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>{ui.wind} up to {p.w} mph</span>
+                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>{ui.rain} sensitive</span>:null}
                   </div>
                   <div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div>
                 </div>)})}
@@ -512,7 +532,7 @@ function App(){
             <div style={cs}>
               <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div>
               <div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
-              {[{label:"Heat Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"F",color:dk.heat},{label:"Cold Cold tolerance",value:coldAdj,set:setColdAdj,unit:"F",color:dk.cold},{label:"Wind Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:dk.wind}].map(({label,value,set,unit,color})=>(
+              {[{label:`${ui.heat} Heat tolerance`,value:heatAdj,set:setHeatAdj,unit:"F",color:dk.heat},{label:`${ui.cold} Cold tolerance`,value:coldAdj,set:setColdAdj,unit:"F",color:dk.cold},{label:`${ui.wind} Wind tolerance`,value:windAdj,set:setWindAdj,unit:" mph",color:dk.wind}].map(({label,value,set,unit,color})=>(
                 <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={{fontSize:12,color:dk.mutedLight}}>{label}</div>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -541,17 +561,17 @@ function App(){
               {editingGroup?`Update ${selP.length} Plant${selP.length!==1?"s":""}`:`Save & Watch ${selP.length} Plant${selP.length!==1?"s":""}`}
             </button>
           </>}
-          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>Photo <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.</div>
+          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>{ui.photo} <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.</div>
         </>}
 
         {scr==="set"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null)}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>Back</button>
+            <button onClick={()=>{setScr("home");setErr(null)}} aria-label="Back" style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>{ui.back}</button>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>SETTINGS</div>
           </div>
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
-            {notifEnabled?<div style={{fontSize:13,color:dk.teal}}>OK Notifications enabled. You'll be alerted each morning if plants need attention.</div>
+            {notifEnabled?<div style={{fontSize:13,color:dk.teal}}>{ui.ok} Notifications enabled. You'll be alerted each morning if plants need attention.</div>
             :<><div style={{fontSize:13,color:dk.muted,marginBottom:10,lineHeight:1.5}}>Get a notification when your plants need attention.</div>
               <button onClick={enableNotifications} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer"}}>Enable Notifications</button></>}
           </div>
@@ -623,9 +643,9 @@ function App(){
                     <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none"}}>
                       <div onClick={()=>{const full=PL.find(x=>x.n===p.common_name);if(full)setDetailPlant({...toPlant(full),potSize:p.potSize,soilType:p.soilType,groupId:p.groupId});}} style={{fontSize:13,fontWeight:600,color:dk.white,cursor:"pointer",textDecoration:"underline",textDecorationColor:dk.border}}>{p.common_name}</div>
                       <div style={{display:"flex",gap:10,fontSize:11}}>
-                        {a.cold>0&&<span style={{color:dk.cold}}>Cold {a.cold}</span>}
-                        {a.heat>0&&<span style={{color:dk.heat}}>Heat {a.heat}</span>}
-                        {a.wind>0&&<span style={{color:dk.wind}}>Wind {a.wind}</span>}
+                        {a.cold>0&&<span style={{color:dk.cold}}>{ui.cold} {a.cold}</span>}
+                        {a.heat>0&&<span style={{color:dk.heat}}>{ui.heat} {a.heat}</span>}
+                        {a.wind>0&&<span style={{color:dk.wind}}>{ui.wind} {a.wind}</span>}
                         {total===0&&<span style={{color:dk.muted,fontSize:10}}>no alerts</span>}
                       </div>
                     </div>
@@ -639,10 +659,10 @@ function App(){
 
       {(scr==="home"||scr==="dash")&&<div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:dk.card,borderTop:`1px solid ${dk.border}`,display:"flex",zIndex:10}}>
         <button onClick={()=>setScr("home")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="home"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:20}}>Plant</span><span style={{fontSize:10,fontWeight:600}}>Home</span>
+          <span style={{fontSize:20}}>{ui.plant}</span><span style={{fontSize:10,fontWeight:600}}>Home</span>
         </button>
         <button onClick={()=>setScr("dash")} style={{flex:1,padding:"10px 0 8px",background:"none",border:"none",color:scr==="dash"?dk.teal:dk.muted,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:20}}>Stats</span><span style={{fontSize:10,fontWeight:600}}>Dashboard</span>
+          <span style={{fontSize:20}}>{ui.stats}</span><span style={{fontSize:10,fontWeight:600}}>Dashboard</span>
         </button>
       </div>}
 
@@ -650,22 +670,22 @@ function App(){
         <div onClick={e=>e.stopPropagation()} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:`1px solid ${dk.border}`,borderBottom:"none"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
             <div><div style={{fontSize:18,fontWeight:700,color:dk.white}}>{detailPlant.common_name}</div><div style={{fontSize:13,color:dk.muted,fontStyle:"italic"}}>{detailPlant.scientific_name}</div></div>
-            <button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>X</button>
+            <button onClick={()=>setDetailPlant(null)} aria-label="Close" style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>{ui.close}</button>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             <div style={{display:"flex",gap:10}}>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div>
-                <div style={{fontSize:14,fontWeight:700,color:dk.heat}}>Heat {detailPlant.min_temp_f} - {detailPlant.max_temp_f}F</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.heat}}>{ui.heat} {detailPlant.min_temp_f} - {detailPlant.max_temp_f}F</div>
               </div>
               <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
                 <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div>
-                <div style={{fontSize:14,fontWeight:700,color:dk.wind}}>Wind up to {detailPlant.max_wind_mph} mph</div>
+                <div style={{fontSize:14,fontWeight:700,color:dk.wind}}>{ui.wind} up to {detailPlant.max_wind_mph} mph</div>
               </div>
             </div>
             <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
-              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?"Rain Sensitive - cover or shelter in rain":"OK Handles rain fine"}</div>
+              <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?dk.cold:dk.teal}}>{detailPlant.rain_sensitive?`${ui.rain} Sensitive - cover or shelter in rain`:`${ui.ok} Handles rain fine`}</div>
             </div>
 
             <div style={{padding:"12px 14px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
@@ -691,7 +711,7 @@ function App(){
             </div>
             {detailPlant.fertilizer&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Fertilizer</div>
-              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>Feed {detailPlant.fertilizer}</div>
+              <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>{ui.plant} {detailPlant.fertilizer}</div>
             </div>}
             {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
               <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
