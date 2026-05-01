@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B1120">
+<link rel="manifest" href="manifest.json">
+<title>Plant Guardian</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0B1120;color:#F1F5F9;min-height:100vh}
+#root{max-width:480px;margin:0 auto;min-height:100vh}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+const DN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const PL = [
+  {n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},
+  {n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},
+  {n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette."},
+  {n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold."},
+  {n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat. Blackens below 50°F."},
+  {n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet."},
+  {n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind."},
+  {n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity."},
+  {n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60°F."},
+  {n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind."},
+  {n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible."},
+  {n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant."},
+  {n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold."},
+  {n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold."},
+  {n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,t:"Hardy."},
+  {n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat."},
+  {n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts."},
+  {n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant."},
+  {n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat."},
+  {n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,t:"Blooms when stressed."},
+  {n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,t:"Root rot risk in rain."},
+  {n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet."},
+  {n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold."},
+  {n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat."},
+  {n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable."},
+  {n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind."},
+  {n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive."},
+  {n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant."},
+  {n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance."},
+  {n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts."},
+  {n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going."},
+  {n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,t:"Stores water in trunk."},
+  {n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,t:"Very forgiving."},
+  {n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,t:"Full sun, good drainage."},
+  {n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun."},
+  {n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold."},
+  {n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,t:"Extremely tolerant."},
+  {n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat."},
+  {n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,t:"Needs great drainage."},
+  {n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,t:"Hate sitting water."},
+  {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance."},
+];
+
+function toPlant(p) { return { common_name: p.n, scientific_name: p.s, min_temp_f: p.mn, max_temp_f: p.mx, max_wind_mph: p.w, rain_sensitive: !!p.r, notes: p.t }; }
+const wIcon = c => c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
+
+function buildTimeline(groups, wx) {
+  if (!wx || !groups.length) return [];
+  const d = wx.daily, days = [];
+  for (let i = 0; i < d.time.length; i++) {
+    const dt = new Date(d.time[i] + "T12:00:00"), high = d.temperature_2m_max[i], low = d.temperature_2m_min[i], wind = d.wind_speed_10m_max[i], rain = d.precipitation_sum[i], issues = [];
+    for (const g of groups) { const ha = g.heatAdj||0, ca = g.coldAdj||0, wa = g.windAdj||0;
+      for (const p of g.plants) { if (p.indoors) continue; const emx = p.max_temp_f+ha, emn = p.min_temp_f-ca, ew = p.max_wind_mph+wa;
+        if (high > emx) issues.push({ plant: p.common_name, type: "heat", icon: "🌡️" });
+        if (low < emn) issues.push({ plant: p.common_name, type: "cold", icon: "❄️" });
+        if (wind > ew) issues.push({ plant: p.common_name, type: "wind", icon: "💨" });
+        if (p.rain_sensitive && rain > 0.1) issues.push({ plant: p.common_name, type: "rain", icon: "🌧️" });
+      }
+    }
+    days.push({ date: d.time[i], dayName: i===0?"Today":i===1?"Tmrw":DN[dt.getDay()].slice(0,3), dateLabel: `${MN[dt.getMonth()]} ${dt.getDate()}`, high, low, wind, rain, wc: d.weathercode[i], issues, rainCollect: rain > 0.1 });
+  }
+  return days;
+}
+
+// Get plant status for today
+function getPlantStatus(plantName, timeline, dismissed) {
+  if (!timeline.length) return "ok";
+  const today = timeline[0];
+  const issues = today.issues.filter(i => i.plant === plantName && i.type !== "rain");
+  if (!issues.length) return "ok";
+  // Check if all resolved
+  const types = [...new Set(issues.map(i => i.type))];
+  const allResolved = types.every(t => dismissed[`${today.date}-${t}`]);
+  if (allResolved) return "resolved";
+  return issues[0].type; // primary issue type
+}
+
+const dk = { bg: "#0B1120", card: "#111B2E", cardAlt: "#162035", border: "#1E2D4A", gold: "#E8B931", goldDim: "#C49A1C", teal: "#2DD4BF", tealDim: "#0D9488", white: "#F1F5F9", muted: "#64748B", mutedLight: "#94A3B8", red: "#F87171" };
+const cs = { background: dk.card, borderRadius: 12, padding: 14, marginBottom: 10, border: `1px solid ${dk.border}` };
+const statusColors = { ok: dk.teal, heat: "#F87171", cold: "#7AB8F5", wind: "#BFA0E8", resolved: dk.muted };
+const statusDots = { ok: "✓", heat: "🌡️", cold: "❄️", wind: "💨", resolved: "✓" };
+
+function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
+function sendNotif(timeline){if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted")return;if(!timeline||!timeline.length)return;const today=timeline[0],ai=today.issues.filter(i=>i.type!=="rain");if(!ai.length)return;const ls=localStorage.getItem("pg-last-notif"),ts=new Date().toISOString().split("T")[0];if(ls===ts)return;localStorage.setItem("pg-last-notif",ts);const pr=["cold","heat","wind"],lb={heat:"above typical range",cold:"below typical range overnight",wind:"above typical wind range"};const bp={};for(const i of ai){if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type)}const ba={};for(const[p,t]of Object.entries(bp)){const top=pr.find(x=>t.has(x))||[...t][0];if(!ba[top])ba[top]=[];ba[top].push(p)}const alerts=pr.filter(t=>ba[t]).map(t=>`${ba[t].join(", ")} — ${lb[t]}`);navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts,url:window.location.href})})}
+
+function App() {
+  const stored=ld();
+  const [scr, setScr] = useState("home");
+  const [loc, setLoc] = useState(stored.loc||null);
+  const [wx, setWx] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [timeline, setTimeline] = useState([]);
+  const [err, setErr] = useState(null);
+  const [ready, setReady] = useState(false);
+  const [zip, setZip] = useState(stored.zip||"");
+  const [savedZip, setSavedZip] = useState(stored.zip||null);
+  const [sq, setSq] = useState("");
+  const [selP, setSelP] = useState([]);
+  const [gName, setGName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [editingGroup, setEditingGroup] = useState(null);
+  const [heatAdj, setHeatAdj] = useState(0);
+  const [coldAdj, setColdAdj] = useState(0);
+  const [windAdj, setWindAdj] = useState(0);
+  const [dismissed, setDismissed] = useState({});
+  const [detailPlant, setDetailPlant] = useState(null);
+  const [actionLog, setActionLog] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = {value: localStorage.getItem("pg-data")};
+        if (!cancelled && r && r.value) {
+          const d = JSON.parse(r.value);
+          if (d.groups && d.groups.length > 0) setGroups(d.groups);
+          if (d.zip) { setSavedZip(d.zip); setZip(d.zip); if (d.loc) setLoc(d.loc); }
+          if (d.dismissed) setDismissed(d.dismissed);
+          if (d.actionLog) setActionLog(d.actionLog);
+        }
+      } catch (e) {}
+      if (!cancelled) setReady(true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    const timer = setTimeout(() => {
+      (async () => { try { localStorage.setItem("pg-data", JSON.stringify({ groups, zip: savedZip, loc, dismissed, actionLog })); } catch (e) {} })();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [groups, savedZip, loc, ready, dismissed, actionLog]);
+
+  const [wxLoading,setWxLoading]=useState(false);
+  const [notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
+  useEffect(()=>{if(!loc)return;setWxLoading(true);
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=7`)
+    .then(r=>r.json()).then(d=>{setWx(d);setWxLoading(false)}).catch(()=>{setErr("Couldn't fetch weather.");setWxLoading(false)});
+  },[loc]);
+
+  useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude})},()=>{},{enableHighAccuracy:false,timeout:8000})},[]);
+  useEffect(()=>{const tl=buildTimeline(groups,wx);setTimeline(tl);if(tl.length>0&&notifEnabled)sendNotif(tl)},[groups,wx]);
+
+  const lookupZip=async z=>{if(!z||z.length<5)return;setErr(null);try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(z)}&count=1&language=en&format=json`);const d=await r.json();if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z)}else setErr("Couldn't find that zip.")}catch(e){setErr("Connection issue.")}};
+  const enableNotifications=async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifEnabled(p==="granted");if(p==="granted"&&timeline.length>0)sendNotif(timeline)};
+  const resolveAlert = (date, type, plants, action) => {
+    setDismissed(prev => ({ ...prev, [`${date}-${type}`]: action }));
+    setActionLog(prev => [...prev, { date, type, plants: plants || [], action, timestamp: new Date().toISOString() }]);
+    if (action === "inside" && plants) {
+      setGroups(prev => prev.map(g => ({ ...g, plants: g.plants.map(p => plants.includes(p.common_name) ? { ...p, indoors: true } : p) })));
+    }
+  };
+
+  const markBackOutside = (plantName) => {
+    setGroups(prev => prev.map(g => ({ ...g, plants: g.plants.map(p => p.common_name === plantName ? { ...p, indoors: false } : p) })));
+    setActionLog(prev => [...prev, { date: new Date().toISOString().split("T")[0], type: "return", plants: [plantName], action: "back-outside", timestamp: new Date().toISOString() }]);
+  };
+
+  const getAlertAction = (date, type) => dismissed[`${date}-${type}`] || null;
+  const toggleP = p => setSelP(prev => prev.find(x => x.common_name === p.n) ? prev.filter(x => x.common_name !== p.n) : [...prev, toPlant(p)]);
+
+  const saveGroup = () => {
+    if (!selP.length || saving) return; setSaving(true);
+    if (editingGroup) { setGroups(prev => prev.map(g => g.id === editingGroup ? { ...g, name: gName || g.name, plants: selP, heatAdj, coldAdj, windAdj } : g)); }
+    else { setGroups(prev => [...prev, { id: String(Date.now()), name: gName || `Patio Group ${groups.length + 1}`, plants: selP, addedAt: new Date().toISOString(), heatAdj, coldAdj, windAdj }]); }
+    setScr("home"); setSelP([]); setGName(""); setSq(""); setEditingGroup(null); setHeatAdj(0); setColdAdj(0); setWindAdj(0);
+    setTimeout(() => setSaving(false), 500);
+  };
+
+  const pc = groups.reduce((s, g) => s + g.plants.length, 0);
+  const allPlants = groups.flatMap(g => g.plants);
+  const outdoorPlants = allPlants.filter(p => !p.indoors);
+  const indoorPlants = allPlants.filter(p => p.indoors);
+  const todayIssues = timeline.length > 0 ? timeline[0].issues.filter(i => i.type !== "rain") : [];
+  const todayAlertCount = todayIssues.length;
+  const todayRain = timeline.length > 0 && timeline[0].rainCollect;
+  const filtered = sq.length > 0 ? PL.filter(p => p.n.toLowerCase().includes(sq.trim().toLowerCase()) || p.s.toLowerCase().includes(sq.trim().toLowerCase())) : [];
+
+  // Group today's issues by action type
+  const getTodayActions = () => {
+    if (!timeline.length) return {};
+    const day = timeline[0], priority = ["cold", "heat", "wind"];
+    const byPlant = {};
+    for (const iss of day.issues) { if (iss.type === "rain") continue; if (!byPlant[iss.plant]) byPlant[iss.plant] = new Set(); byPlant[iss.plant].add(iss.type); }
+    const byAction = {};
+    for (const [plant, types] of Object.entries(byPlant)) { const top = priority.find(t => types.has(t)) || [...types][0]; if (!byAction[top]) byAction[top] = []; byAction[top].push(plant); }
+    return byAction;
+  };
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: dk.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", color: dk.white }}>
+
+      {/* Header */}
+      <div style={{ padding: "16px 18px 12px", borderBottom: `1px solid ${dk.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: dk.gold }}>PLANT GUARDIAN</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {scr === "home" && <button onClick={() => setScr("set")} style={{ background: dk.cardAlt, border: `1px solid ${dk.border}`, borderRadius: 8, padding: "4px 8px", cursor: "pointer", fontSize: 13, color: dk.muted }}>⚙️</button>}
+        </div>
+      </div>
+
+      <div style={{ padding: "12px 14px 100px" }}>
+        {err && <div style={{ ...cs, background: "#7F1D1D", borderColor: dk.red }}><div style={{ fontSize: 13, color: "#FCA5A5" }}>{err}</div></div>}
+
+        {/* ═══ HOME — DASHBOARD ═══ */}
+        {scr === "home" && <>
+
+          {!loc&&!wxLoading&&<div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>SET YOUR LOCATION</div>
+            <div style={{fontSize:13,color:dk.muted,marginBottom:10}}>Enter your zip code for weather forecasts.</div>
+            <div style={{display:"flex",gap:8}}>
+              <input type="text" inputMode="numeric" value={zip} onChange={e=>setZip(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>{if(e.key==="Enter")lookupZip(zip)}} placeholder="e.g. 78641" style={{flex:1,padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/>
+              <button onClick={()=>lookupZip(zip)} disabled={zip.length<5} style={{padding:"10px 20px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Go</button>
+            </div>
+          </div>}
+          {wxLoading&&<div style={{...cs,textAlign:"center",color:dk.muted,padding:20}}>Loading forecast...</div>}
+          {groups.length === 0 && loc ? (
+            <div style={{ textAlign: "center", padding: "56px 24px" }}>
+              <div style={{ fontSize: 48, marginBottom: 14 }}>🌿</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: dk.gold, marginBottom: 8 }}>No plants yet</div>
+              <div style={{ fontSize: 13, color: dk.muted, lineHeight: 1.6 }}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
+            </div>
+          ) : (
+            <>
+              {/* ── Stat cards row ── */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                {/* Today's temp */}
+                <div style={{ ...cs, marginBottom: 0, textAlign: "center", padding: "12px 8px" }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>TODAY</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: dk.white }}>
+                    {wx ? `${Math.round(wx.daily.temperature_2m_max[0])}°` : "—"}
+                  </div>
+                  <div style={{ fontSize: 11, color: dk.muted }}>
+                    {wx ? `${Math.round(wx.daily.temperature_2m_min[0])}° low` : ""}
+                  </div>
+                </div>
+
+                {/* Plants monitored */}
+                <div style={{ ...cs, marginBottom: 0, textAlign: "center", padding: "12px 8px" }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>OUTSIDE</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: dk.teal }}>{outdoorPlants.length}</div>
+                  <div style={{ fontSize: 11, color: dk.muted }}>
+                    {indoorPlants.length > 0 ? `${indoorPlants.length} inside` : "plants"}
+                  </div>
+                </div>
+
+                {/* Alerts */}
+                <div style={{ ...cs, marginBottom: 0, textAlign: "center", padding: "12px 8px" }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>ALERTS</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: todayAlertCount > 0 ? dk.red : dk.teal }}>
+                    {todayAlertCount > 0 ? todayAlertCount : "✓"}
+                  </div>
+                  <div style={{ fontSize: 11, color: dk.muted }}>
+                    {todayAlertCount > 0 ? "today" : "all clear"}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Today's actions ── */}
+              {(todayAlertCount > 0 || todayRain) && (() => {
+                const byAction = getTodayActions();
+                const priority = ["cold", "heat", "wind"];
+                const actions = {
+                  heat: { action: "above typical range", bg: "#2A2018", color: "#F87171" },
+                  cold: { action: "below typical range overnight", bg: "#1A3050", color: "#7AB8F5" },
+                  wind: { action: "above typical wind range", bg: "#2A1E45", color: "#BFA0E8" },
+                };
+                const icons = { heat: "🌡️", cold: "❄️", wind: "💨" };
+                const todayDate = timeline[0]?.date;
+
+                return (
+                  <div style={{ ...cs, padding: "12px" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold, marginBottom: 8 }}>TODAY'S ACTIONS</div>
+
+                    {todayRain && (
+                      <div style={{ padding: "5px 10px", borderRadius: 8, background: "#03221A", fontSize: 11, color: "#6EE7B7", marginBottom: 6 }}>
+                        🪣 Collect rainwater — {timeline[0].rain.toFixed(1)}" expected
+                      </div>
+                    )}
+
+                    {priority.filter(t => byAction[t]).map(type => {
+                      const a = actions[type];
+                      const resolved = getAlertAction(todayDate, type);
+                      if (resolved) {
+                        const label = resolved === "inside" ? "🏠 inside" : resolved === "covered" ? "🛡️ covered" : "ignored";
+                        return (
+                          <div key={type} style={{ padding: "5px 10px", borderRadius: 8, background: dk.card, fontSize: 11, color: dk.mutedLight, opacity: 0.6, marginBottom: 4 }}>
+                            {icons[type]} {byAction[type].join(", ")} — {a.action} <span style={{ color: dk.teal, fontWeight: 600, marginLeft: 6 }}>✓ {label}</span>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={type} style={{ marginBottom: 6 }}>
+                          <div style={{ padding: "5px 10px", borderRadius: 8, background: a.bg, fontSize: 11, color: a.color, lineHeight: 1.5 }}>
+                            {icons[type]} {byAction[type].join(", ")} — {a.action}
+                          </div>
+                          <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                            <button onClick={() => resolveAlert(todayDate, type, byAction[type], "covered")}
+                              style={{ flex: 1, padding: "5px 8px", borderRadius: 6, background: dk.cardAlt, border: `1px solid ${dk.border}`, fontSize: 10, color: dk.teal, fontWeight: 600, cursor: "pointer" }}>
+                              🛡️ covered
+                            </button>
+                            <button onClick={() => resolveAlert(todayDate, type, byAction[type], "inside")}
+                              style={{ flex: 1, padding: "5px 8px", borderRadius: 6, background: dk.cardAlt, border: `1px solid ${dk.border}`, fontSize: 10, color: dk.gold, fontWeight: 600, cursor: "pointer" }}>
+                              🏠 brought inside
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* ── Upcoming alerts ── */}
+              {timeline.slice(1).some(d => d.issues.filter(i => i.type !== "rain").length > 0) && (
+                <div style={{ ...cs, padding: "12px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold, marginBottom: 8 }}>UPCOMING</div>
+                  {timeline.slice(1).filter(d => d.issues.filter(i => i.type !== "rain").length > 0).map(day => {
+                    const dayIssues = day.issues.filter(i => i.type !== "rain");
+                    const icns = { heat: "🌡️", cold: "❄️", wind: "💨" };
+                    const plantSet = new Set(dayIssues.map(i => i.plant));
+                    const typeSet = new Set(dayIssues.map(i => i.type));
+                    return (
+                      <div key={day.date} style={{ padding: "6px 0", borderTop: `1px solid ${dk.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: dk.white }}>{day.dayName}</span>
+                          <span style={{ fontSize: 11, color: dk.muted, marginLeft: 6 }}>{day.dateLabel}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: dk.mutedLight, textAlign: "right", maxWidth: "55%" }}>
+                          {[...typeSet].map(t => icns[t]).join("")} {[...plantSet].join(", ")}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* ── 7-Day strip ── */}
+              <div style={{ ...cs, padding: "10px 12px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold, marginBottom: 8 }}>7-DAY OUTLOOK</div>
+                <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
+                  {timeline.map((day, i) => {
+                    const dayIssues = day.issues.filter(x => x.type !== "rain");
+                    const hasAlert = dayIssues.length > 0;
+                    const isToday = i === 0;
+                    return (
+                      <div key={day.date} style={{
+                        flex: "1 0 0", minWidth: 48, textAlign: "center", padding: "6px 4px", borderRadius: 8,
+                        background: isToday ? dk.cardAlt : "transparent",
+                        border: hasAlert ? `1px solid ${dk.red}40` : isToday ? `1px solid ${dk.teal}30` : "1px solid transparent",
+                      }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: isToday ? dk.teal : dk.muted }}>{day.dayName}</div>
+                        <div style={{ fontSize: 16, margin: "2px 0" }}>{wIcon(day.wc)}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: dk.white }}>{Math.round(day.high)}°</div>
+                        <div style={{ fontSize: 10, color: dk.muted }}>{Math.round(day.low)}°</div>
+                        {hasAlert && <div style={{ fontSize: 8, color: dk.red, marginTop: 2 }}>●{dayIssues.length}</div>}
+                        {day.rainCollect && !hasAlert && <div style={{ fontSize: 8, color: "#6EE7B7", marginTop: 2 }}>🪣</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Plant status table ── */}
+              <div style={{ ...cs, padding: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold }}>PLANT STATUS</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {groups.map(g => (
+                      <button key={g.id} onClick={() => { setEditingGroup(g.id); setSelP(g.plants); setGName(g.name); setHeatAdj(g.heatAdj||0); setColdAdj(g.coldAdj||0); setWindAdj(g.windAdj||0); setSq(""); setScr("add"); }}
+                        style={{ fontSize: 10, color: dk.teal, background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                        edit
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Table header */}
+                <div style={{ display: "flex", padding: "4px 0", borderBottom: `1px solid ${dk.border}`, marginBottom: 2 }}>
+                  <div style={{ flex: 2, fontSize: 9, fontWeight: 700, color: dk.muted, textTransform: "uppercase", letterSpacing: 1 }}>Plant</div>
+                  <div style={{ flex: 2, fontSize: 9, fontWeight: 700, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, textAlign: "center" }}>Range</div>
+                  <div style={{ flex: 1, fontSize: 9, fontWeight: 700, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, textAlign: "right" }}>Alerts</div>
+                </div>
+
+                {/* Outdoor plants */}
+                {outdoorPlants.map((p, i) => {
+                  const status = getPlantStatus(p.common_name, timeline, dismissed);
+                  const clr = statusColors[status] || dk.teal;
+                  const alertCount = actionLog.filter(l => l.plants.includes(p.common_name) && l.action !== "back-outside").length;
+                  return (
+                    <div key={i} onClick={() => setDetailPlant(p)}
+                      style={{ display: "flex", alignItems: "center", padding: "7px 0", borderBottom: `1px solid ${dk.border}20`, cursor: "pointer" }}>
+                      <div style={{ flex: 2, display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                        <div style={{ width: 6, height: 6, borderRadius: 3, background: clr, flexShrink: 0 }} />
+                        <div style={{ fontSize: 12, fontWeight: 600, color: dk.white, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.common_name}</div>
+                      </div>
+                      <div style={{ flex: 2, fontSize: 10, color: dk.mutedLight, textAlign: "center" }}>
+                        🌡️{p.min_temp_f}–{p.max_temp_f}° 💨{p.max_wind_mph}
+                      </div>
+                      <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: alertCount > 0 ? dk.gold : dk.muted, textAlign: "right" }}>
+                        {alertCount || "—"}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Indoor plants */}
+                {indoorPlants.length > 0 && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: 10, color: dk.gold, fontWeight: 600, marginBottom: 4 }}>🏠 INDOORS</div>
+                    {indoorPlants.map((p, i) => {
+                      const alertCount = actionLog.filter(l => l.plants.includes(p.common_name) && l.action !== "back-outside").length;
+                      return (
+                        <div key={i} onClick={() => markBackOutside(p.common_name)}
+                          style={{ display: "flex", alignItems: "center", padding: "7px 0", borderBottom: `1px solid ${dk.border}20`, cursor: "pointer" }}>
+                          <div style={{ flex: 2, display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                            <div style={{ fontSize: 10 }}>↩</div>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: dk.gold, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.common_name}</div>
+                          </div>
+                          <div style={{ flex: 2, fontSize: 10, color: dk.mutedLight, textAlign: "center" }}>
+                            🌡️{p.min_temp_f}–{p.max_temp_f}° 💨{p.max_wind_mph}
+                          </div>
+                          <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: alertCount > 0 ? dk.gold : dk.muted, textAlign: "right" }}>
+                            {alertCount || "—"}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          <button onClick={() => { setScr("add"); setSelP([]); setGName(""); setSq(""); setErr(null); setEditingGroup(null); setHeatAdj(0); setColdAdj(0); setWindAdj(0); }}
+            style={{ position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, background: `linear-gradient(135deg, ${dk.gold}, ${dk.goldDim})`, color: dk.bg, border: "none", fontSize: 28, fontWeight: 300, cursor: "pointer", boxShadow: `0 4px 16px ${dk.gold}44`, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+        </>}
+
+        {/* ═══ ADD / EDIT ═══ */}
+        {scr === "add" && <>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <button onClick={() => { setScr("home"); setErr(null); setEditingGroup(null); setHeatAdj(0); setColdAdj(0); setWindAdj(0); }} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: dk.gold, padding: 4 }}>←</button>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold }}>{editingGroup ? "EDIT GROUP" : "ADD PLANTS"}</div>
+          </div>
+
+          {selP.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", marginBottom: 12, gap: 6 }}>
+              {selP.map((p, i) => (
+                <div key={i} onClick={() => setSelP(prev => prev.filter((_, j) => j !== i))} style={{ padding: "6px 10px", borderRadius: 8, background: dk.tealDim, cursor: "pointer" }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: dk.white }}>{p.common_name} ✕</div>
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>🌡️{p.min_temp_f}–{p.max_temp_f}°F · 💨≤{p.max_wind_mph}mph{p.rain_sensitive ? " · 🌧️" : ""}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={cs}>
+            <input type="text" value={sq} onChange={e => setSq(e.target.value)} placeholder="Search plants..."
+              style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: `1.5px solid ${dk.border}`, fontSize: 15, background: dk.bg, color: dk.white, outline: "none", fontFamily: "inherit", boxSizing: "border-box", marginBottom: filtered.length > 0 || sq.length > 0 ? 12 : 0 }} />
+            {sq.length > 0 && filtered.length === 0 && <div style={{ fontSize: 13, color: dk.muted, padding: "8px 0", textAlign: "center" }}>No matches. Send me a photo in chat.</div>}
+            <div style={{ maxHeight: 340, overflowY: "auto" }}>
+              {filtered.map((p, i) => { const sel = selP.some(x => x.common_name === p.n); return (
+                <div key={i} onClick={() => toggleP(p)} style={{ padding: "10px 0", borderTop: i > 0 ? `1px solid ${dk.border}` : "none", cursor: "pointer", opacity: sel ? 0.45 : 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div><div style={{ fontWeight: 600, fontSize: 14, color: dk.white }}>{p.n}</div><div style={{ fontSize: 11, color: dk.muted, fontStyle: "italic" }}>{p.s}</div></div>
+                    <div style={{ width: 22, height: 22, borderRadius: 11, border: sel ? "none" : `2px solid ${dk.border}`, background: sel ? dk.teal : "transparent", display: "flex", alignItems: "center", justifyContent: "center", color: dk.bg, fontSize: 13, flexShrink: 0 }}>{sel ? "✓" : ""}</div>
+                  </div>
+                  <div style={{ marginTop: 6 }}>
+                    <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#78350F", color: "#FCD34D", marginRight: 4 }}>🌡️ {p.mn}–{p.mx}°F</span>
+                    <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#1E3A5F", color: "#93C5FD", marginRight: 4 }}>💨 ≤{p.w} mph</span>
+                    {p.r ? <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "#312E81", color: "#A5B4FC" }}>🌧️ sensitive</span> : null}
+                  </div>
+                  <div style={{ fontSize: 11, color: dk.muted, marginTop: 4 }}>{p.t}</div>
+                </div>); })}
+            </div>
+          </div>
+
+          {selP.length > 0 && <>
+            <div style={cs}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: dk.gold, marginBottom: 6 }}>GROUP NAME</div>
+              <input type="text" value={gName} onChange={e => setGName(e.target.value)} placeholder={`Patio Group ${groups.length + 1}`}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: `1.5px solid ${dk.border}`, fontSize: 14, background: dk.bg, color: dk.white, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            </div>
+            <div style={cs}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: dk.gold, marginBottom: 12 }}>TOLERANCE ADJUSTMENTS</div>
+              <div style={{ fontSize: 11, color: dk.muted, marginBottom: 12, lineHeight: 1.5 }}>Your plants handle more than the textbook says? Adjust here.</div>
+              {[
+                { label: "🌡️ Heat tolerance", value: heatAdj, set: setHeatAdj, unit: "°F", color: "#F87171" },
+                { label: "❄️ Cold tolerance", value: coldAdj, set: setColdAdj, unit: "°F", color: "#7AB8F5" },
+                { label: "💨 Wind tolerance", value: windAdj, set: setWindAdj, unit: " mph", color: "#BFA0E8" },
+              ].map(({ label, value, set, unit, color }) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: dk.mutedLight }}>{label}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button onClick={() => set(v => Math.max(0, v - 5))} style={{ width: 28, height: 28, borderRadius: 6, background: dk.bg, border: `1px solid ${dk.border}`, color: dk.white, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: value > 0 ? color : dk.muted, minWidth: 50, textAlign: "center" }}>{value > 0 ? `+${value}${unit}` : "—"}</div>
+                    <button onClick={() => set(v => v + 5)} style={{ width: 28, height: 28, borderRadius: 6, background: dk.bg, border: `1px solid ${dk.border}`, color: dk.white, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={saveGroup} style={{ width: "100%", padding: "12px 24px", borderRadius: 10, border: "none", background: `linear-gradient(135deg, ${dk.gold}, ${dk.goldDim})`, color: dk.bg, fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+              {editingGroup ? `Update ${selP.length} Plant${selP.length !== 1 ? "s" : ""}` : `Save & Watch ${selP.length} Plant${selP.length !== 1 ? "s" : ""}`}
+            </button>
+          </>}
+
+          <div style={{ marginTop: 16, background: dk.cardAlt, border: `1px dashed ${dk.border}`, borderRadius: 12, padding: 16, textAlign: "center", fontSize: 12, color: dk.muted, lineHeight: 1.5 }}>
+            📸 <strong style={{ color: dk.mutedLight }}>Can't find your plant?</strong><br />Send me a photo in the chat and I'll identify it.
+          </div>
+        </>}
+
+        {/* ═══ SETTINGS ═══ */}
+        {scr === "set" && <>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <button onClick={() => { setScr("home"); setErr(null); }} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: dk.gold, padding: 4 }}>←</button>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: dk.gold }}>SETTINGS</div>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
+            {notifEnabled?<div style={{fontSize:13,color:dk.teal}}>✓ Notifications enabled</div>
+            :<><div style={{fontSize:13,color:dk.muted,marginBottom:10}}>Get alerted when plants need attention.</div>
+              <button onClick={enableNotifications} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer"}}>Enable Notifications</button></>}
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div>
+            <div style={{fontSize:13,color:dk.muted,marginBottom:10}}>{savedZip?`Zip: ${savedZip}`:loc?`${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}`:"Not set"}</div>
+            <div style={{display:"flex",gap:8}}>
+              <input type="text" inputMode="numeric" value={zip} onChange={e=>setZip(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>{if(e.key==="Enter")lookupZip(zip)}} placeholder="Change zip..." style={{flex:1,padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/>
+              <button onClick={()=>lookupZip(zip)} disabled={zip.length<5} style={{padding:"10px 16px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Update</button>
+            </div>
+          </div>
+          <div style={cs}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: dk.gold, marginBottom: 8 }}>DATA</div>
+            <button onClick={() => { if (confirm("Delete all plants?")) { setGroups([]); setDismissed({}); setActionLog([]); } }}
+              style={{ width: "100%", padding: "12px 24px", borderRadius: 10, background: "transparent", color: dk.red, border: `1.5px solid ${dk.red}`, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+              Delete All Plants
+            </button>
+          </div>
+        </>}
+      </div>
+
+      {/* Plant detail overlay */}
+      {detailPlant && (
+        <div onClick={() => setDetailPlant(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 20, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: dk.card, borderRadius: "16px 16px 0 0", padding: "20px 18px 32px", width: "100%", maxWidth: 480, border: `1px solid ${dk.border}`, borderBottom: "none" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: dk.white }}>{detailPlant.common_name}</div>
+                <div style={{ fontSize: 13, color: dk.muted, fontStyle: "italic" }}>{detailPlant.scientific_name}</div>
+              </div>
+              <button onClick={() => setDetailPlant(null)} style={{ background: "none", border: "none", fontSize: 18, color: dk.muted, cursor: "pointer", padding: 4 }}>✕</button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: dk.bg, border: `1px solid ${dk.border}` }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Temperature</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#F87171" }}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div>
+                </div>
+                <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: dk.bg, border: `1px solid ${dk.border}` }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Wind</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#BFA0E8" }}>💨 ≤ {detailPlant.max_wind_mph} mph</div>
+                </div>
+              </div>
+              <div style={{ padding: "10px 12px", borderRadius: 10, background: dk.bg, border: `1px solid ${dk.border}` }}>
+                <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Rain Sensitivity</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: detailPlant.rain_sensitive ? "#7AB8F5" : dk.teal }}>{detailPlant.rain_sensitive ? "🌧️ Sensitive — cover or shelter in rain" : "✓ Handles rain fine"}</div>
+              </div>
+              {detailPlant.notes && (
+                <div style={{ padding: "10px 12px", borderRadius: 10, background: dk.bg, border: `1px solid ${dk.border}` }}>
+                  <div style={{ fontSize: 10, color: dk.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Notes</div>
+                  <div style={{ fontSize: 13, color: dk.mutedLight, lineHeight: 1.5 }}>{detailPlant.notes}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(e=>console.log("SW reg failed:",e))}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

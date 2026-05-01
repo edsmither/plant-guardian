@@ -1,0 +1,16 @@
+{
+  "name": "Plant Guardian",
+  "short_name": "PlantGuard",
+  "description": "Weather-aware patio plant monitoring",
+  "start_url": "/plant-guardian/",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#0B1120",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
