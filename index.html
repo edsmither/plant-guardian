@@ -1,172 +1,738 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0B1120">
-<link rel="manifest" href="manifest.json">
-<title>Plant Guardian</title>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',system-ui,sans-serif;background:#0B1120;color:#F1F5F9;min-height:100vh}#root{max-width:480px;margin:0 auto;min-height:100vh}</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0B1120"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Plant Guardian"/>
+  <title>Plant Guardian</title>
+  <link rel="manifest" href="manifest.json"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0B1120; }
+    body { -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+    #root { min-height: 100vh; }
+    textarea, input { font-family: inherit; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1E2D4A; border-radius: 2px; }
+  </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const {useState,useEffect}=React;
-const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const PL=[{n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},{n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},{n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,t:"Don't let water sit in rosette."},{n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold."},{n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat."},{n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet."},{n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind."},{n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity."},{n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60F."},{n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind."},{n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,t:"Nearly indestructible."},{n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant."},{n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold."},{n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold."},{n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,t:"Hardy."},{n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat."},{n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts."},{n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant."},{n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat."},{n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,t:"Blooms when stressed."},{n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,t:"Root rot risk in rain."},{n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet."},{n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold."},{n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat."},{n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable."},{n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind."},{n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive."},{n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant."},{n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance."},{n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts."},{n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going."},{n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,t:"Stores water in trunk."},{n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,t:"Very forgiving."},{n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,t:"Full sun, good drainage."},{n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun."},{n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold."},{n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,t:"Extremely tolerant."},{n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat."},{n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,t:"Needs great drainage."},{n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,t:"Hate sitting water."},{n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,t:"Very low maintenance."}];
-const toP=p=>({common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,notes:p.t});
-const wI=c=>c<=1?"\u2600\uFE0F":c<=3?"\u26C5":c<=48?"\u2601\uFE0F":c<=67?"\uD83C\uDF27\uFE0F":c<=77?"\uD83C\uDF28\uFE0F":c<=82?"\uD83C\uDF26\uFE0F":c<=86?"\uD83C\uDF28\uFE0F":"\u26C8\uFE0F";
-function bTL(groups,wx){if(!wx||!groups.length)return[];const d=wx.daily,days=[];for(let i=0;i<d.time.length;i++){const dt=new Date(d.time[i]+"T12:00:00"),hi=d.temperature_2m_max[i],lo=d.temperature_2m_min[i],wi=d.wind_speed_10m_max[i],ra=d.precipitation_sum[i],iss=[];for(const g of groups){const ha=g.heatAdj||0,ca=g.coldAdj||0,wa=g.windAdj||0;for(const p of g.plants){if(p.indoors)continue;const emx=p.max_temp_f+ha,emn=p.min_temp_f-ca,ew=p.max_wind_mph+wa;if(hi>emx)iss.push({plant:p.common_name,type:"heat",icon:"\uD83C\uDF21\uFE0F"});if(lo<emn)iss.push({plant:p.common_name,type:"cold",icon:"\u2744\uFE0F"});if(wi>ew)iss.push({plant:p.common_name,type:"wind",icon:"\uD83D\uDCA8"});if(p.rain_sensitive&&ra>0.1)iss.push({plant:p.common_name,type:"rain",icon:"\uD83C\uDF27\uFE0F"});}}days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tmrw":DN[dt.getDay()].slice(0,3),dateLabel:MN[dt.getMonth()]+" "+dt.getDate(),high:hi,low:lo,wind:wi,rain:ra,wc:d.weathercode[i],issues:iss,rainCollect:ra>0.1});}return days;}
-function gPS(name,tl,dis){if(!tl.length)return"ok";const t=tl[0],iss=t.issues.filter(i=>i.plant===name&&i.type!=="rain");if(!iss.length)return"ok";const types=[...new Set(iss.map(i=>i.type))];if(types.every(t2=>dis[t.date+"-"+t2]))return"resolved";return iss[0].type;}
-const dk={bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
-const cs={background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:"1px solid "+dk.border};
-const sCl={ok:dk.teal,heat:"#F87171",cold:"#7AB8F5",wind:"#BFA0E8",resolved:dk.muted};
-function ld(){try{return JSON.parse(localStorage.getItem("pg-data")||"{}")}catch(e){return{}}}
-function sv(d){try{localStorage.setItem("pg-data",JSON.stringify(d))}catch(e){}}
-function sN(tl){if(!("serviceWorker" in navigator)||!("Notification" in window)||Notification.permission!=="granted"||!tl||!tl.length)return;const t=tl[0],ai=t.issues.filter(i=>i.type!=="rain");if(!ai.length)return;const ls=localStorage.getItem("pg-last-notif"),ts=new Date().toISOString().split("T")[0];if(ls===ts)return;localStorage.setItem("pg-last-notif",ts);const pr=["cold","heat","wind"],lb={heat:"above typical range",cold:"below typical range overnight",wind:"above typical wind range"};const bp={};for(const i of ai){if(!bp[i.plant])bp[i.plant]=new Set();bp[i.plant].add(i.type);}const ba={};for(const[p,t2]of Object.entries(bp)){const top=pr.find(x=>t2.has(x))||[...t2][0];if(!ba[top])ba[top]=[];ba[top].push(p);}const alerts=pr.filter(t3=>ba[t3]).map(t3=>ba[t3].join(", ")+" - "+lb[t3]);navigator.serviceWorker.ready.then(reg=>{reg.active.postMessage({type:"CHECK_ALERTS",alerts:alerts,url:window.location.href});});}
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script>
+    // Polyfill window.storage using localStorage
+    window.storage = {
+      get: (key) => Promise.resolve(localStorage.getItem(key) ? { key, value: localStorage.getItem(key) } : null),
+      set: (key, value) => { localStorage.setItem(key, value); return Promise.resolve({ key, value }); },
+      delete: (key) => { localStorage.removeItem(key); return Promise.resolve({ key, deleted: true }); },
+      list: (prefix) => {
+        const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix));
+        return Promise.resolve({ keys: keys.map(k => ({ name: k })) });
+      }
+    };
+  </script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+const DN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DROUGHT_NAMES = new Set(["Aloe Vera","Cast Iron Plant","Dracaena","Hoya","Jade Plant","Ponytail Palm","Pothos","Rosemary","Snake Plant","String of Pearls","Succulents (mixed)","ZZ Plant"]);
+const PL = [
+  {n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},
+  {n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},
+  {n:"Aloe Vera",s:"Aloe barbadensis",mn:40,mx:100,w:30,r:1,d:1,t:"Don't let water sit in rosette."},
+  {n:"Anthurium",s:"Anthurium andraeanum",mn:60,mx:90,w:15,r:0,t:"No direct sun, no cold."},
+  {n:"Basil",s:"Ocimum basilicum",mn:50,mx:90,w:20,r:0,t:"Bolts in heat."},
+  {n:"Begonia",s:"Begonia spp.",mn:55,mx:85,w:15,r:1,t:"Mildew risk when wet."},
+  {n:"Bird of Paradise",s:"Strelitzia reginae",mn:50,mx:100,w:20,r:0,t:"Loves sun. Leaves tear in wind."},
+  {n:"Boston Fern",s:"Nephrolepis exaltata",mn:50,mx:90,w:15,r:0,t:"Loves humidity."},
+  {n:"Caladium",s:"Caladium bicolor",mn:60,mx:95,w:15,r:0,t:"Dormant below 60 F."},
+  {n:"Calathea",s:"Calathea spp.",mn:60,mx:85,w:15,r:0,t:"Fussy. Hates cold, heat, wind."},
+  {n:"Cast Iron Plant",s:"Aspidistra elatior",mn:40,mx:90,w:25,r:0,d:1,t:"Nearly indestructible."},
+  {n:"Chinese Evergreen",s:"Aglaonema",mn:55,mx:90,w:20,r:0,t:"Great patio shade plant."},
+  {n:"Croton",s:"Codiaeum variegatum",mn:60,mx:95,w:20,r:0,t:"Drops leaves in cold."},
+  {n:"Dieffenbachia",s:"Dieffenbachia spp.",mn:55,mx:90,w:15,r:0,t:"Toxic. Droops in cold."},
+  {n:"Dracaena",s:"Dracaena spp.",mn:50,mx:95,w:25,r:0,d:1,t:"Hardy."},
+  {n:"English Ivy",s:"Hedera helix",mn:35,mx:85,w:30,r:0,t:"Hates heat."},
+  {n:"Fiddle Leaf Fig",s:"Ficus lyrata",mn:55,mx:95,w:20,r:0,t:"Hates drafts."},
+  {n:"Geranium",s:"Pelargonium",mn:40,mx:95,w:25,r:0,t:"Classic patio plant."},
+  {n:"Hibiscus",s:"Hibiscus rosa-sinensis",mn:55,mx:100,w:25,r:0,t:"Loves heat."},
+  {n:"Hoya",s:"Hoya carnosa",mn:50,mx:95,w:20,r:0,d:1,t:"Blooms when stressed."},
+  {n:"Jade Plant",s:"Crassula ovata",mn:40,mx:100,w:25,r:1,d:1,t:"Root rot risk in rain."},
+  {n:"Lavender",s:"Lavandula",mn:35,mx:100,w:30,r:1,t:"Loves heat. Hates wet feet."},
+  {n:"Majesty Palm",s:"Ravenea rivularis",mn:50,mx:95,w:20,r:0,t:"Fronds brown in cold."},
+  {n:"Mandevilla",s:"Mandevilla spp.",mn:50,mx:100,w:20,r:0,t:"Tropical vine. Loves heat."},
+  {n:"Mint",s:"Mentha",mn:35,mx:90,w:25,r:0,t:"Nearly unkillable."},
+  {n:"Monstera",s:"Monstera deliciosa",mn:55,mx:90,w:20,r:0,t:"Leaves shred in wind."},
+  {n:"Orchid",s:"Phalaenopsis spp.",mn:60,mx:85,w:10,r:1,t:"Very sensitive."},
+  {n:"Parlor Palm",s:"Chamaedorea elegans",mn:50,mx:90,w:15,r:0,t:"Low light tolerant."},
+  {n:"Peace Lily",s:"Spathiphyllum",mn:55,mx:85,w:15,r:0,t:"Low heat tolerance."},
+  {n:"Peperomia",s:"Peperomia obtusifolia",mn:55,mx:90,w:15,r:0,t:"Compact. Sensitive to overwatering and cold drafts."},
+  {n:"Philodendron",s:"Philodendron spp.",mn:55,mx:90,w:20,r:0,t:"Easy going."},
+  {n:"Ponytail Palm",s:"Beaucarnea recurvata",mn:40,mx:100,w:30,r:1,d:1,t:"Stores water in trunk."},
+  {n:"Pothos",s:"Epipremnum aureum",mn:50,mx:90,w:25,r:0,d:1,t:"Very forgiving."},
+  {n:"Rosemary",s:"Rosmarinus officinalis",mn:30,mx:100,w:30,r:0,d:1,t:"Full sun, good drainage."},
+  {n:"Rubber Plant",s:"Ficus elastica",mn:50,mx:95,w:25,r:0,t:"Tough. Sunburn in sudden direct sun."},
+  {n:"Schefflera",s:"Schefflera actinophylla",mn:50,mx:95,w:25,r:0,t:"Drops leaves in cold."},
+  {n:"Snake Plant",s:"Sansevieria trifasciata",mn:50,mx:100,w:30,r:0,d:1,t:"Extremely tolerant."},
+  {n:"Spider Plant",s:"Chlorophytum comosum",mn:45,mx:90,w:25,r:0,t:"Tip burn in heat."},
+  {n:"String of Pearls",s:"Senecio rowleyanus",mn:45,mx:95,w:20,r:1,d:1,t:"Needs great drainage."},
+  {n:"Succulents (mixed)",s:"Various",mn:40,mx:100,w:30,r:1,d:1,t:"Hate sitting water."},
+  {n:"ZZ Plant",s:"Zamioculcas zamiifolia",mn:55,mx:90,w:20,r:0,d:1,t:"Very low maintenance."},
+];
+const toP = p => ({ common_name: p.n, scientific_name: p.s, min_temp_f: p.mn, max_temp_f: p.mx, max_wind_mph: p.w, rain_sensitive: !!p.r, drought_tolerant: !!p.d, notes: p.t });
+const wI = c => c<=1?"☀️":c<=3?"⛅":c<=48?"☁️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌦️":c<=86?"🌨️":"⛈️";
 
-function App(){
-const stored=ld();
-const[scr,setScr]=useState("home");
-const[loc,setLoc]=useState(stored.loc||null);
-const[wx,setWx]=useState(null);
-const[groups,setGroups]=useState(stored.groups||[]);
-const[timeline,setTimeline]=useState([]);
-const[err,setErr]=useState(null);
-const[zip,setZip]=useState(stored.zip||"");
-const[savedZip,setSavedZip]=useState(stored.zip||null);
-const[sq,setSq]=useState("");
-const[selP,setSelP]=useState([]);
-const[gName,setGName]=useState("");
-const[saving,setSaving]=useState(false);
-const[editingGroup,setEditingGroup]=useState(null);
-const[heatAdj,setHeatAdj]=useState(0);
-const[coldAdj,setColdAdj]=useState(0);
-const[windAdj,setWindAdj]=useState(0);
-const[dismissed,setDismissed]=useState(stored.dismissed||{});
-const[detailPlant,setDetailPlant]=useState(null);
-const[actionLog,setActionLog]=useState(stored.actionLog||[]);
-const[wxLoading,setWxLoading]=useState(false);
-const[notifEnabled,setNotifEnabled]=useState("Notification" in window&&Notification.permission==="granted");
+function bTL(groups, wx) {
+  if (!wx || !groups.length) return [];
+  const d = wx.daily, days = [];
+  for (let i = 0; i < d.time.length; i++) {
+    const dt = new Date(d.time[i]+"T12:00:00"), hi = d.temperature_2m_max[i], lo = d.temperature_2m_min[i], wi = d.wind_speed_10m_max[i], ra = d.precipitation_sum[i], iss = [];
+    for (const g of groups) { const ha=g.heatAdj||0, ca=g.coldAdj||0, wa=g.windAdj||0;
+      for (const p of g.plants) { if (p.indoors) continue; const emx=p.max_temp_f+ha, emn=p.min_temp_f-ca, ew=p.max_wind_mph+wa;
+        if (hi>emx) iss.push({plant:p.common_name,type:"heat",icon:"🌡️"});
+        if (lo<emn) iss.push({plant:p.common_name,type:"cold",icon:"❄️"});
+        if (wi>ew) iss.push({plant:p.common_name,type:"wind",icon:"💨"});
+        if (p.rain_sensitive&&ra>0.1) iss.push({plant:p.common_name,type:"rain",icon:"🌧️"});
+      }
+    }
+    days.push({date:d.time[i],dayName:i===0?"Today":i===1?"Tmrw":DN[dt.getDay()].slice(0,3),dateLabel:`${MN[dt.getMonth()]} ${dt.getDate()}`,high:hi,low:lo,wind:wi,rain:ra,wc:d.weathercode[i],issues:iss,rainCollect:ra>0.1});
+  }
+  return days;
+}
 
-useEffect(()=>{sv({groups,zip:savedZip,loc,dismissed,actionLog});},[groups,savedZip,loc,dismissed,actionLog]);
-useEffect(()=>{if(loc)return;if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(pos=>{setLoc({lat:pos.coords.latitude,lon:pos.coords.longitude});},()=>{},{enableHighAccuracy:false,timeout:8000});},[]);
-useEffect(()=>{if(!loc)return;setWxLoading(true);fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.lat+"&longitude="+loc.lon+"&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&forecast_days=7").then(r=>r.json()).then(d=>{setWx(d);setWxLoading(false);}).catch(()=>{setErr("Could not fetch weather.");setWxLoading(false);});},[loc]);
-useEffect(()=>{const tl=bTL(groups,wx);setTimeline(tl);if(tl.length>0&&notifEnabled)sN(tl);},[groups,wx]);
+function gPS(name,tl,dis) {
+  if (!tl.length) return "ok";
+  const t=tl[0], iss=t.issues.filter(i=>i.plant===name&&i.type!=="rain");
+  if (!iss.length) return "ok";
+  const types=[...new Set(iss.map(i=>i.type))];
+  if (types.every(t2=>dis[`${t.date}-${t2}`])) return "resolved";
+  return iss[0].type;
+}
 
-const lookupZip=function(z){if(!z||z.length<5)return;setErr(null);fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(z)+"&count=1&language=en&format=json").then(function(r){return r.json();}).then(function(d){if(d.results&&d.results.length>0){setLoc({lat:d.results[0].latitude,lon:d.results[0].longitude});setSavedZip(z);}else{setErr("Could not find that zip.");}}).catch(function(){setErr("Connection issue.");});};
-const enableNotif=function(){if(!("Notification" in window))return;Notification.requestPermission().then(function(p){setNotifEnabled(p==="granted");if(p==="granted"&&timeline.length>0)sN(timeline);});};
-const resolveAlert=function(date,type,plants,action){const key=date+"-"+type;setDismissed(function(prev){const n=Object.assign({},prev);n[key]=action;return n;});setActionLog(function(prev){return prev.concat([{date:date,type:type,plants:plants||[],action:action,timestamp:new Date().toISOString()}]);});if(action==="inside"&&plants){setGroups(function(prev){return prev.map(function(g){return Object.assign({},g,{plants:g.plants.map(function(p){return plants.indexOf(p.common_name)>=0?Object.assign({},p,{indoors:true}):p;})});});});}};
-const markBack=function(name){setGroups(function(prev){return prev.map(function(g){return Object.assign({},g,{plants:g.plants.map(function(p){return p.common_name===name?Object.assign({},p,{indoors:false}):p;})});});});setActionLog(function(prev){return prev.concat([{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);});};
-const getAA=function(date,type){return dismissed[date+"-"+type]||null;};
-const toggleP=function(p){setSelP(function(prev){return prev.find(function(x){return x.common_name===p.n;})?prev.filter(function(x){return x.common_name!==p.n;}):[].concat(prev,[toP(p)]);});};
-const saveGroup=function(){if(!selP.length||saving)return;setSaving(true);if(editingGroup){setGroups(function(prev){return prev.map(function(g){return g.id===editingGroup?Object.assign({},g,{name:gName||g.name,plants:selP,heatAdj:heatAdj,coldAdj:coldAdj,windAdj:windAdj}):g;});});}else{setGroups(function(prev){return prev.concat([{id:String(Date.now()),name:gName||"Patio Group "+(groups.length+1),plants:selP,addedAt:new Date().toISOString(),heatAdj:heatAdj,coldAdj:coldAdj,windAdj:windAdj}]);});}setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(function(){setSaving(false);},500);};
+function getConsecHeatDays(tl) {
+  let n = 0;
+  for (const day of tl) { if (day.issues.some(i=>i.type==="heat")) n++; else break; }
+  return n;
+}
 
-const pc=groups.reduce(function(s,g){return s+g.plants.length;},0);
-const allP=groups.reduce(function(a,g){return a.concat(g.plants);},[]);
-const outP=allP.filter(function(p){return!p.indoors;});
-const inP=allP.filter(function(p){return p.indoors;});
-const todayI=timeline.length>0?timeline[0].issues.filter(function(i){return i.type!=="rain";}):[];
-const todayAC=todayI.length;
-const todayR=timeline.length>0&&timeline[0].rainCollect;
-const filtered=sq.length>0?PL.filter(function(p){var q=sq.trim().toLowerCase();return p.n.toLowerCase().indexOf(q)>=0||p.s.toLowerCase().indexOf(q)>=0;}):[];
+const LOGO = "iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAS60lEQVR42u2cS4xc2Xnff+ec+6h3dTe7m00238MxydGMRiONNZKtyIJlwbAAPwEjAQJkI8DLwCsvsgocBN4GyCpAgCwNe2nYgOGNAzlyAlmSlZFmRjI5nCGb7Gd1dVXduu9zzpfFraGsJLDlaT7aQn1AgyDRLN776+/5/86hAoSlfWzTSwRLgEuAS4BLgEtbAlwCXAJcAlzaTxlArRVKnW2AajnK/RR6oFq43Wf+xXnWz3cXf7YE+JPHBBDEit/5gzu89YuXQDXhvAT4E+Y9QXj5jT6+VfLSmx0QhcjSA39CExD42V8d8ujRCZt3FHdev4T3gjZqCfAffBgD3sFnv7rCaz+/zv7OnAd7j/id33+ZbreNd3LmQlmfNXhXXm3zm797lW44oK4t9344pX0p4/f/y1cwJkDkbEE8EwCVbuBt3Qz59d9boRcNCFSIE4sYxbe//QHbb1j+43/9NYwJ8V5QZwSiPgvwxMPGjYDf+HdrXLpwgdm0IilSxAt1LhyOSr777j2uvZXyn//ot+h0OoiXJ+3OP2+A6vTw1q8bvvK7A4oyQtsew0Gf6bQGUeSpI0ksHz4+4lvfucsbv9TlP/y3X6DdiYHTQXwaPwAD/PunAVFp9U9juZiBOmuat74W0+oFHO/WmFhoxW3arRaHh0eMjkusN2Szkk4vICtKfG/Gm597ib/608eg/D/p31VKYRbV/Gm0RqcCGLQMUSvAVv7HBkKlFVopUAqF+v97qWqa5Zu/GqFDgzGGbCqEQUyr7bC1cHA442B3TjqD9c0Ww1XNwWHGh/fGvP5z6/R6Xb7/16Omd5T/9/O1Vs2X0WilkMU3Nb8oLl9do6pqrPXPGeACSGst5upXrrC22afbayG1UBU1IouHlP/rhYxqwkYpEFh5JSBa0yQHAoGiyODxgxlOVwQRHB1MGO1bTNfQ7mjKCnYfpEzGJZUtWLsakI0DDj6cL4SHBpjSCvE8eQ7x8gTe5nafL/7yLf7N773GV//VVf78j9/HWf+xR8Xg4/a6ANlRyXRc0LvQIhgKr37xEi0J8Kllup8wPUyYHWUk45wyr/Du7xGNofaKo/cFjcd6obNqOP6wxtk5h6MCySy2FiRR5F1FMrYc75a0B5q33z5hNhrRudChPQzIp/bHPcPApStrXLrR56Xbq9x+5SbXb20SrWccZjtsbEb84X96hyKzGKNwTp4jwCc5TDjZmdDd2qIVdfne39xj4/o629c2ufzKNV4ZtAhVSGhDklHCdDdh9+4he+8fMZkmJD+soA26raiygDwBpxWPflCTTKDVshQpVMpTZxV1VmOVQoWak8eOdOQo64TKebSBW59a5dU3V3n9zU3uvHKdlS1Pq9cGFdBvr5Kmwjf+9lvMZsdE5jrf/V+Hi5CW02E4zd+Mr3SJr0dcvr5FcVTw+MMDWsMOJoD+uTbtQYvt7S22Lq6jtdBqd6jmJZODOcluwoN3d3nw3iPqzBJsaDprIXXl8aUw3BCsg8pqsB7RQmctxM5h8qBGrHD1Vou3fmGFL355m9uvnafV7pGlliwVIhNz7/5jTGgwUcSDnfvMZjNevfMqs3LMH3ztb5ns/KgbeL4e+KSqNTE9nY546dZLrAyGfP+bP0CHBhFhfpJzsjujum2J4oij0d+hQ+j1u8QXI770uc/jZp73/urvePsb7zG7V9DaDPAWTh4Ipg1V5tABxGua+WNHfui4djvgS7+9wZtfWOP8+gBj1xgdZRhpcTLL0AqUKXlwsEfhPNOTI7Ki4sqlbYqqZJrMcLUB3KkU0Y9fhRdJN9xsYTpQZyUqLLh2e5tzaxvsvLdHPinQGLwXJtOEsqqpyopOp02/P6DOhPf+911UpLnxqRtc/cQ2rrKMPjjBZg6lFL7w+ApMrCnHgrLCl//1gK9+7Rzb14ecnMw52K3Is5pxMmP3aMTR0TF5lbE3GvPOvV3m04wiq7hyZZNbV64Rt2A2n/A//yShzv6hAqKeA8D1FuGaxgSG5CTnJDni4rVN7nzyFqOHJ5x8MAbT9OvJKMF7h3VCVVmMDnBW2Ns9QrxhPs/YvHGOrWsbzA7n5McFKIUG3EzYuGb4tX+7yq1PD5mdCGXusNZRZhoJLFWhOTic0e52OBwfczDKmY9TwsCzdr7Pzcub9DoRra7h8HiPv/nTjCqXU4m1pwYYDWN0XxME0O8NqQuYpWMuXjnHZ7/0BmVRsvv2HrZw+ErwHrwX/EK2qgtHNk8JgpDV1VV27u9ROaG/0aPMS6qkQnJh9YbhM/+yy+p6xM77JfM8p9OJyFPN/n6K16CDgMe7E1ToeP9+QjqbExhF2O/wxqubDHsdwJAVc8aTnG/+WYItXjBA0w2I1mKcrTEtGK70qTLHzsOHtIchn/zcbc5d3ODRu7uUJwU6NjjnwQtGG7J5hi8diCKdZ2RJRjKeU8wqHJ4qdfQuwK1fCQkDRZ4Ko1GNCTXWeZxTPNopCENNVlmORxmzuWM2KlBiyYm5cb1HLD2mswpnwamMx7sTvvsXJa6SU42jpwYYtCKitZhsmiHaU9Ylw3MDlAt4sPOYvJ7z8mvXuPXJlzncPWbycEJdWkTAlY58mlPnFqU0rnIU84LJ/gTvhHxcEq14Ln0+oMqEINR45agywTqP0opOJ2A8sRzsz/AoDh6VJJMS7YWkNFzYCsB6TAjrq11yN+HBzpSTqeP+Nyvq3L9YD0QrwvUWWMHmlrAVoEPDpStbDAddJpOUMis4f2GFT3/xdc5tn2P37h7ZbkptHWKFOqtxlcfWjqqoqdOaalYi3rJyS1DQhFqkEK8pUsFoEKURhOPDgnTiyXJPOXfEWhiniv6KYdBXbF1sM+i1yMqC+/cTnNOUvuLu/6ixxYsC+NFQ4oRorY2JDE7A1Q5bV+RVhiiPOEVVVHgjDFaGXL9zlU9/6XXKOufxu3u4aY02Glc6qqzEZhaXW3wqtLeFcAWyY8HEis7AIB5O9i39lRCUIkst0xMhGVvEO0Ljmc41Yag5tw7XrvaxFu7fn/Hwg5R2W3P+cszO/ZSH3/K4yr+gEH5CUAg6EUE3xDsPrglNV3uq2tFqd/FW8eD+Y2bzhLzI6PRj3vqlz3D9tcscH5xw8sEE7z1KFK60UAsEQveawRaq8b4ATAQ60sxGDu8F0UKewTwRspkw7AjHR5qgozm/FbG+FVHXNfuPa+ZJzfaVFv2VkLe/MyYOQ3a+U2PLFw1QgThP2Ivw1jWDuxO8FcIoAq3o9XsMOkNGe8fs7R8yy6Zkac75i1v87JffoH2uzd4P96imFTrQSCWYPuiOxhZCEAk6VIRthfNQZ4IOwUSG+Ynn+KFl0PcUuULFmo2LhpU1wzzx7LxfoZRiZcOgI+HuO3OG/S6r6yHv/GWOr+XFAlSRxlcOPOhOgC0sCoV4wVqHLRx5mqNDQ7ffZ3w8Jg4jJicTZvM5ioAbn7zO7c+/RDHPObw3AgHV1jgniIcgUOhQI17jakWZOnytSKae2YFH145uX5HkmuE5TRxqxgc1R48qVtcDLr/UJs88D+5nBD7gs5/bYHxc8oOvF43A8SIB6tCgWgFuVqJaASZuFj/eeVxpESu4wpElOSIe62q6gxbKK5LZjMoWZGmGU/DKF24xWOnw8N3HeOfRgcZX0uxMlMJaoUo9rlA4B2UqVFMYrEFWKIyBwChmRxYTBJzbjljdCLB1TTrzKAc3bw+4cXOVw8OMd/97jrxwgHGA7gVI5bGzCtM2oBXeSiOqehqpyApVWeOVMDmZIdqxdWGT+TQl7kTUZU2ellx4+Tznb57j4Xd3qTPX5IiFtudr8Lb5bJsLda4wWmh1wdZgQoUVGK5HdAeKTqcRU4/2LNOjilt3+tx8aQPrakb7Je99PUP86WTp0wOMNKYXNbmw8vhpjW4ZVNi0GCLgvUeU4GqH0Ewi1npMO2gKj2hW1lYoy5JHH+6j2yFXPrHOzrf3ENeIFd4J+OaJfQF2Lkgp9FdhPgMvmqhnMIFaTDxC0IbRnmW8V7N9JeLWJ1bJswqUYTL2vPv15NS6/ukBGk0wiBHv0a0QXznctAYDOtaLzZVu1C/fqMMm0BBAOi1w1pEkc8JWRFlUFHnJ8d6EeKXDcKvFwTsj8GpRrUAqcLkgJcQdUEZRlYqop5sqXglehHhgON51pGPH9Vst7nxqwDypiMMWw/WY9++Ouf/XxYtfKimlMMMIJx6tNUEnxFuPn1mkatoPwQPNTsLXHmdds6cwCl9rqqImyzJWzw9ZW+tTFAXTw4zuVpd2TzO+O0PpxamPuvnSAQRdRVlB2G/g+rrpFz0wPXRIKrz+hZitqzHp1CIeVtbazIqMu99L2f++PfWpr9M30gLBWogODb60iAhhv4UKNC6p8alrvk832qHSGoVqjmlgUNqglKJMKtIiBTy1tRSpJRnl9C62KGYZ5VGNMs2uQymIV0GFCnSzxEIgagfUhSc/cgwG8MYvdli/ZDjeLem0I4ZrAdNZzklS8uF3CqYP3ZMfzMderJ16JyyCy2rC1RgWIeydxXQC0C1cUuGnDjIPA41qLVbRuVCmJXVUN6GuwXmHyx1hHFJMLBqFrQLW76yS7BSIBWVARVDnoKTxQhM0Lc9svyY0sH0zZOuORiLh8fslvZ5BxSX7+5assFgc4w/9j+13XgzAhbnEEa9rfOAIwog4jhHnqMOSCkHaAW5W4Y8dqiXQV+hAgQXRgpNmt2udYpKnBLEmjlp4DdlBQXRtwPBam8m9DCKFOFCRQocKRFFMHFIJKxuarVshw4vNQZvjnYrVjYhWV1FkitFRjTOO2ZEn3fNPZTf8VBbrUntMJ0DFUBc1xgSEnYj2ShcRwVmLjoNmxVg4KJoTBYKAF8Q28pYsphptFKI93gm+dhRJTWc9It3LEaXQUbNLkBpcKuga1i5rNu5o1i62qXNLkTrOnY/ZvtRGGeFov2ZyLBDD0fc8+b5/Kqden87JBGiqcL9pom3tcJXDBAHd1R4mMNiqxiOIXqwhCt94oF80sgqUB3HgrSMcBgQdjS0tdeIgUtjE4kuPMhqxgs8haivWfkbT3VZ0ByFVahELJgjorYC1wuTYc7jr0B1NXXj2vmEX7dFZAlh6iBQqUFDTiKY000R7pU1ntYMyCu/cj9aIlkY4gCczNLKA6FnkNo9LXQMOwSX+STXurCtW7xg65wwaMCiKzBN3Ne2uosxgb6fiaN+iQ40PhN1vWqrR6aaPZwIQwBeC6YSIbxQOEcFWNXVZoUNN3ImJex2CdoSzDu+b0KWGRaeD2EZi16YJUTz40oNr8qZLHApF/5Kmf1PT3zRUMyFLPN43x01UKMxPHEePPSY2eKuotefkgSN5xz/VuwlP/ZqDahn0SlObTGQwQUCVlwTGYOKA7lofrTVVWZGPc8rjtAnnj2bSUEHYKDFKNaOYiOALj4409sgyuKHoXTWYUOFKoSqEVkcTdBqPTyeWYqqIh4qoo6lKIZ87km83aeOpvi/P4J6Iahv0MAAnKKMxscFZ1xQLFMZool6EaYXYrKYY57jEgl0cUgpAdRXK6OYRnSC2UWYGlzXdC1CXzUlVZ6Gz0uxZdCgUU6HKhNaqoZh4fNA4efEDj0/lqb/xM7too1oa3Qvw3qND3UwegWnym/N4awkiQ9iKEAVVWuImdeONLDwxWDTJHqQSupc13StQJRC0FO1h46X5zFPOPco0o5yJFB7BCvgKqnseKeWZvO0zvamkYo3uGUR+NIXoVkDUixHrqaYFtqzRoUG3NL5wuOlCkVaLDK0VWCEcagavGOpU0Eronw+oco8rhHTsMKFGVBPSogUihZ8L9U6jkj+rN332V72MQrUb8QDfzM461ph2SBhGOO+pZgVSOzAKao/PPdgftTfaKDovG3QMrhCCVtMBK62p0kb9VqGiTgQVg4rBjQR3JM/8LZ/PXTkFxLppcVTTqqAalTloh+gowFWOelo2/YsTpJInTxZf1ASrimoqmBhMq/kcYzTF1Ddj4EfFwYEfC5I/n5s5z/eyoVGoWIFWT4RMpcHEAbrV5Ec3r5tF+0L/M21FfE1jM0GFEK1oNEI5gfrvnSoQq/CpR2byXN/sxdzWNKpRUsxHJ1mbawsqaKquFA5ZHBtuXTZItJCq2o0D27JptkU1aUHm4OfSQH/OFvAizC2mDtPAxKjm97VrZtzFpKJjhWo3864KwOULhd8LgoIc/EygenEX6QJepLkG5mIOayYR/9HBZgjXNK4SVAQqWOxEXKNKkwiSvfgbiAFnwXyT70TTwHSggsb7bCpN3vTgS5BckLk08M+AnQ2AT0AuMrJAONTNla52U2hcDjJ9ftX1nyfAjxRiBbqjcKpRoN0c/LE8UW6WAP+xIh1pJABRgszAj3zjnWfQztaF60VPp3sKMeDnzURxVuGdPQ/8KELDRgQ4y573Yhvpf+yhgo+mC868Lf/fmJ+qHLgEuAS4tCXAJcAlwCXApS0BLgEuAS4BLm0J8Nnb/wEWkp8tGWIm/AAAAABJRU5ErkJggg==";
 
-const getTA=function(){if(!timeline.length)return{};const day=timeline[0],pr=["cold","heat","wind"],bp={};for(var j=0;j<day.issues.length;j++){var iss=day.issues[j];if(iss.type==="rain")continue;if(!bp[iss.plant])bp[iss.plant]=new Set();bp[iss.plant].add(iss.type);}const ba={};var entries=Object.entries(bp);for(var k=0;k<entries.length;k++){var plant=entries[k][0],types=entries[k][1];var top=pr.find(function(t){return types.has(t);})||Array.from(types)[0];if(!ba[top])ba[top]=[];ba[top].push(plant);}return ba;};
+// ── Security helpers ─────────────────────────────────────────────
+const sanitize = (str, maxLen=200) => {
+  if (typeof str !== "string") return "";
+  return str.replace(/[<>&"'`]/g, "").slice(0, maxLen).trim();
+};
+const safeInt = (val, fallback=0, min=-50, max=200) => {
+  const n = Number(val);
+  return isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+};
+const validateGroup = (g) => {
+  if (!g || typeof g !== "object") return null;
+  if (typeof g.id !== "string" && typeof g.id !== "number") return null;
+  return {
+    id: String(g.id).slice(0, 40),
+    name: sanitize(g.name || "My Plants", 60),
+    plants: Array.isArray(g.plants) ? g.plants.slice(0, 200).map(validatePlant).filter(Boolean) : [],
+    heatAdj: safeInt(g.heatAdj, 0, 0, 30),
+    coldAdj: safeInt(g.coldAdj, 0, 0, 30),
+    windAdj: safeInt(g.windAdj, 0, 0, 20),
+    addedAt: typeof g.addedAt === "string" ? g.addedAt.slice(0, 30) : new Date().toISOString(),
+  };
+};
+const validatePlant = (p) => {
+  if (!p || typeof p !== "object") return null;
+  if (typeof p.common_name !== "string" || !p.common_name.trim()) return null;
+  return {
+    common_name: sanitize(p.common_name, 80),
+    scientific_name: sanitize(p.scientific_name || "", 80),
+    min_temp_f: safeInt(p.min_temp_f, 50, -20, 100),
+    max_temp_f: safeInt(p.max_temp_f, 95, 40, 130),
+    max_wind_mph: safeInt(p.max_wind_mph, 20, 0, 80),
+    rain_sensitive: !!p.rain_sensitive,
+    drought_tolerant: !!p.drought_tolerant,
+    notes: sanitize(p.notes || "", 300),
+    indoors: !!p.indoors,
+  };
+};
+const validateStoredData = (raw) => {
+  try {
+    const d = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (!d || typeof d !== "object") return null;
+    return {
+      groups: Array.isArray(d.groups) ? d.groups.slice(0, 20).map(validateGroup).filter(Boolean) : [],
+      zip: typeof d.zip === "string" ? d.zip.replace(/\D/g,"").slice(0,5) : "78641",
+      loc: (d.loc && isFinite(d.loc.lat) && isFinite(d.loc.lon)) ? { lat: Number(d.loc.lat), lon: Number(d.loc.lon) } : null,
+      dismissed: (d.dismissed && typeof d.dismissed === "object") ? d.dismissed : {},
+      actionLog: Array.isArray(d.actionLog) ? d.actionLog.slice(-500) : [],
+      wateringLog: Array.isArray(d.wateringLog) ? d.wateringLog.slice(-200) : [],
+      alertAckedDate: typeof d.alertAckedDate === "string" ? d.alertAckedDate.slice(0,10) : "",
+    };
+  } catch { return null; }
+};
 
-return(
-<div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white}}>
-<div style={{padding:"16px 18px 12px",borderBottom:"1px solid "+dk.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-<div style={{fontSize:11,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:dk.gold}}>PLANT GUARDIAN</div>
-{scr==="home"&&<button onClick={function(){setScr("set");}} style={{background:dk.cardAlt,border:"1px solid "+dk.border,borderRadius:8,padding:"4px 8px",cursor:"pointer",fontSize:13,color:dk.muted}}>&#9881;&#65039;</button>}
-</div>
-<div style={{padding:"12px 14px 100px"}}>
-{err&&<div style={Object.assign({},cs,{background:"#7F1D1D",borderColor:dk.red})}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
+const VAPID_PUBLIC_KEY = "BDPbVR8bQY5KMT0ignaMjWYO0XM6nVv7ArPNwuHicCsrAFwqgXv5rWLFweLV25rNCzOEcLxZim_tvpvejM4qjfQ";
+const WORKER_URL = "https://plant-guardian-push.sericah007.workers.dev";
 
-{scr==="home"&&<div>
-{!loc&&!wxLoading&&<div style={cs}>
-<div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>SET YOUR LOCATION</div>
-<div style={{fontSize:13,color:dk.muted,marginBottom:10}}>Enter your zip code for weather forecasts.</div>
-<div style={{display:"flex",gap:8}}>
-<input type="text" inputMode="numeric" value={zip} onChange={function(e){setZip(e.target.value.replace(/\D/g,"").slice(0,5));}} onKeyDown={function(e){if(e.key==="Enter")lookupZip(zip);}} placeholder="e.g. 78641" style={{flex:1,padding:"10px 12px",borderRadius:8,border:"1.5px solid "+dk.border,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/>
-<button onClick={function(){lookupZip(zip);}} disabled={zip.length<5} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,"+dk.gold+","+dk.goldDim+")",color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Go</button>
-</div></div>}
-{wxLoading&&<div style={Object.assign({},cs,{textAlign:"center",color:dk.muted,padding:20})}>Loading forecast...</div>}
+const dk = {bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
+const cs = {background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
+const sCl = {ok:dk.teal,heat:"#F87171",cold:"#7AB8F5",wind:"#BFA0E8",resolved:dk.muted};
+const hd = {fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10};
+const tr = {display:"flex",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${dk.border}30`};
+const tc = {fontSize:11,color:dk.mutedLight};
 
-{groups.length===0&&loc?<div style={{textAlign:"center",padding:"56px 24px"}}>
-<div style={{fontSize:48,marginBottom:14}}>&#127807;</div>
-<div style={{fontSize:18,fontWeight:700,color:dk.gold,marginBottom:8}}>No plants yet</div>
-<div style={{fontSize:13,color:dk.muted,lineHeight:1.6}}>Tap + to add your patio plants.<br/>I will watch the weather for them.</div>
-</div>:groups.length>0&&<div>
+function App() {
+  const [scr,setScr]=useState("home");
+  const [loc,setLoc]=useState({lat:30.5788,lon:-97.853});
+  const [wx,setWx]=useState(null);
+  const [groups,setGroups]=useState([]);
+  const [timeline,setTimeline]=useState([]);
+  const [err,setErr]=useState(null);
+  const [ready,setReady]=useState(false);
+  const [zip,setZip]=useState("78641");
+  const [savedZip,setSavedZip]=useState("78641");
+  const [sq,setSq]=useState("");
+  const [selP,setSelP]=useState([]);
+  const [gName,setGName]=useState("");
+  const [saving,setSaving]=useState(false);
+  const [editingGroup,setEditingGroup]=useState(null);
+  const [heatAdj,setHeatAdj]=useState(0);
+  const [coldAdj,setColdAdj]=useState(0);
+  const [windAdj,setWindAdj]=useState(0);
+  const [dismissed,setDismissed]=useState({});
+  const [detailPlant,setDetailPlant]=useState(null);
+  const [actionLog,setActionLog]=useState([]);
+  const [wateringLog,setWateringLog]=useState([]);
+  const [showWaterModal,setShowWaterModal]=useState(false);
+  const [waterNotes,setWaterNotes]=useState("");
+  const [alertModal,setAlertModal]=useState(null);
+  const [alertAckedDate,setAlertAckedDate]=useState("");
+  const [pushEnabled,setPushEnabled]=useState(false);
+  const [pushPending,setPushPending]=useState(false);
+  const refToday=useRef(null);
+  const refOutlook=useRef(null);
+  const refPlants=useRef(null);
+  const scrollTo=(ref)=>ref.current?.scrollIntoView({behavior:"smooth",block:"start"});
 
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-<div style={Object.assign({},cs,{marginBottom:0,textAlign:"center",padding:"12px 8px"})}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>TODAY</div><div style={{fontSize:28,fontWeight:700,color:dk.white}}>{wx?Math.round(wx.daily.temperature_2m_max[0])+"°":"—"}</div><div style={{fontSize:11,color:dk.muted}}>{wx?Math.round(wx.daily.temperature_2m_min[0])+"° low":""}</div></div>
-<div style={Object.assign({},cs,{marginBottom:0,textAlign:"center",padding:"12px 8px"})}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>OUTSIDE</div><div style={{fontSize:28,fontWeight:700,color:dk.teal}}>{outP.length}</div><div style={{fontSize:11,color:dk.muted}}>{inP.length>0?inP.length+" inside":"plants"}</div></div>
-<div style={Object.assign({},cs,{marginBottom:0,textAlign:"center",padding:"12px 8px"})}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>ALERTS</div><div style={{fontSize:28,fontWeight:700,color:todayAC>0?dk.red:dk.teal}}>{todayAC>0?todayAC:"\u2713"}</div><div style={{fontSize:11,color:dk.muted}}>{todayAC>0?"today":"all clear"}</div></div>
-</div>
+  useEffect(()=>{
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/plant-guardian/sw.js").catch(e=>console.warn("SW reg failed:",e));
+    }
+    window.storage.get("pg-push").then(r=>{ if(r?.value==="enabled") setPushEnabled(true); }).catch(()=>{});
+  },[]);
 
-{(todayAC>0||todayR)&&function(){var ba=getTA(),pr=["cold","heat","wind"];var acts={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#BFA0E8"}};var icons={heat:"\uD83C\uDF21\uFE0F",cold:"\u2744\uFE0F",wind:"\uD83D\uDCA8"};var td=timeline[0]&&timeline[0].date;return(<div style={Object.assign({},cs,{padding:"12px"})}>
-<div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>TODAY'S ACTIONS</div>
-{todayR&&<div style={{padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",marginBottom:6}}>{"\uD83E\uDEA3"} Collect rainwater — {timeline[0].rain.toFixed(1)}" expected</div>}
-{pr.filter(function(t){return ba[t];}).map(function(type){var a=acts[type],res=getAA(td,type);if(res){var label=res==="inside"?"\uD83C\uDFE0 inside":res==="covered"?"\uD83D\uDEE1\uFE0F covered":"ignored";return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,fontSize:11,color:dk.mutedLight,opacity:0.6,marginBottom:4}}>{icons[type]} {ba[type].join(", ")} — {a.action} <span style={{color:dk.teal,fontWeight:600,marginLeft:6}}>{"\u2713"} {label}</span></div>);}
-return(<div key={type} style={{marginBottom:6}}><div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {ba[type].join(", ")} — {a.action}</div>
-<div style={{display:"flex",gap:6,marginTop:4}}>
-<button onClick={function(){resolveAlert(td,type,ba[type],"covered");}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:"1px solid "+dk.border,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>{"\uD83D\uDEE1\uFE0F"} covered</button>
-<button onClick={function(){resolveAlert(td,type,ba[type],"inside");}} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:"1px solid "+dk.border,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>{"\uD83C\uDFE0"} brought inside</button>
-</div></div>);})}
-</div>);}()}
+  useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r&&r.value){const d=validateStoredData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[] );
+  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate]);
+  useEffect(()=>{if(!loc)return;const today=new Date(),dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}setWx({daily:{time:dates,temperature_2m_max:[86,85,85,87,88,88,75],temperature_2m_min:[59,60,63,62,65,55,55],wind_speed_10m_max:[15,10,12,18,15,25,20],precipitation_sum:[0,0,0,0.3,0.8,1.2,0],weathercode:[1,2,2,3,61,63,2]}});},[loc]);
+  useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
 
-{timeline.slice(1).some(function(d){return d.issues.filter(function(i){return i.type!=="rain";}).length>0;})&&<div style={Object.assign({},cs,{padding:"12px"})}>
-<div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>UPCOMING</div>
-{timeline.slice(1).filter(function(d){return d.issues.filter(function(i){return i.type!=="rain";}).length>0;}).map(function(day){var di=day.issues.filter(function(i){return i.type!=="rain";});var ic={heat:"\uD83C\uDF21\uFE0F",cold:"\u2744\uFE0F",wind:"\uD83D\uDCA8"};var ps=new Set(di.map(function(i){return i.plant;}));var ts=new Set(di.map(function(i){return i.type;}));return(<div key={day.date} style={{padding:"6px 0",borderTop:"1px solid "+dk.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><span style={{fontSize:12,fontWeight:600,color:dk.white}}>{day.dayName}</span><span style={{fontSize:11,color:dk.muted,marginLeft:6}}>{day.dateLabel}</span></div><div style={{fontSize:11,color:dk.mutedLight,textAlign:"right",maxWidth:"55%"}}>{Array.from(ts).map(function(t){return ic[t];}).join("")} {Array.from(ps).join(", ")}</div></div>);})}
-</div>}
+  useEffect(()=>{
+    if(!ready||!groups.length||!timeline.length)return;
+    const today=new Date().toISOString().split("T")[0];
+    if(alertAckedDate===today)return;
+    const lastW=wateringLog[wateringLog.length-1];
+    const lastWDate=lastW?new Date(lastW.date+"T12:00:00"):new Date(Date.now()-6*86400000);
+    const ch=timeline.filter((d,i)=>{let n=0;for(let j=0;j<=i;j++){if(timeline[j].issues.some(x=>x.type==="heat"))n++;else if(j<i)n=0;}return false;});
+    let consecH=0;for(const d of timeline){if(d.issues.some(i=>i.type==="heat"))consecH++;else break;}
+    const interval=consecH>=4?6:7;
+    const nextW=new Date(lastWDate);nextW.setDate(lastWDate.getDate()+interval);
+    const daysLeft=Math.ceil((nextW-new Date())/86400000);
+    const wi={daysLeft,earlyTrigger:consecH>=4};
+    const todayHeat=timeline[0].issues.filter(i=>i.type!=="rain");
+    const msgs=[];
+    if(wi.daysLeft===0){msgs.push({icon:"💧",text:wi.earlyTrigger?`Heat alert for ${getConsecHeatDays(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});}
+    if(todayHeat.length>0){const types=[...new Set(todayHeat.map(i=>i.type))];const plants=[...new Set(todayHeat.map(i=>i.plant))];const icons={heat:"🌡️",cold:"❄️",wind:"💨"};msgs.push({icon:types.map(t=>icons[t]).join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
+    if(msgs.length>0)setAlertModal(msgs);
+  },[ready,timeline]);
 
-<div style={Object.assign({},cs,{padding:"10px 12px"})}>
-<div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>7-DAY OUTLOOK</div>
-<div style={{display:"flex",gap:4,overflowX:"auto"}}>{timeline.map(function(day,i){var di2=day.issues.filter(function(x){return x.type!=="rain";});var ha=di2.length>0,it=i===0;return(<div key={day.date} style={{flex:"1 0 0",minWidth:48,textAlign:"center",padding:"6px 4px",borderRadius:8,background:it?dk.cardAlt:"transparent",border:ha?"1px solid "+dk.red+"40":it?"1px solid "+dk.teal+"30":"1px solid transparent"}}><div style={{fontSize:10,fontWeight:600,color:it?dk.teal:dk.muted}}>{day.dayName}</div><div style={{fontSize:16,margin:"2px 0"}}>{wI(day.wc)}</div><div style={{fontSize:12,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°</div><div style={{fontSize:10,color:dk.muted}}>{Math.round(day.low)}°</div>{ha&&<div style={{fontSize:8,color:dk.red,marginTop:2}}>●{di2.length}</div>}{day.rainCollect&&!ha&&<div style={{fontSize:8,color:"#6EE7B7",marginTop:2}}>{"\uD83E\uDEA3"}</div>}</div>);})}</div>
-</div>
+  const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);if(action==="inside"&&plants){setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>plants.includes(pl.common_name)?{...pl,indoors:true}:pl)})));}};
+  const markBack=(name)=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
+  const getAA=(date,type)=>dismissed[`${date}-${type}`]||null;
+  const toggleP=p=>{const exists=selP.find(x=>x.common_name===p.n);setSelP(prev=>exists?prev.filter(x=>x.common_name!==p.n):[...prev,toP(p)]);if(!exists)setSq("");};
+  const saveGroup=()=>{if(!selP.length||saving)return;setSaving(true);const safeName=sanitize(gName,60)||`Patio Group ${groups.length+1}`;if(editingGroup){setGroups(p=>p.map(g=>g.id===editingGroup?{...g,name:safeName,plants:selP,heatAdj,coldAdj,windAdj}:g));}else{setGroups(p=>[...p,{id:String(Date.now()),name:safeName,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}]);}setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);};
 
-<div style={Object.assign({},cs,{padding:"12px"})}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>PLANT STATUS</div><div style={{display:"flex",gap:8}}>{groups.map(function(g){return(<button key={g.id} onClick={function(){setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}} style={{fontSize:10,color:dk.teal,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>edit</button>);})}</div></div>
-<div style={{display:"flex",padding:"4px 0",borderBottom:"1px solid "+dk.border,marginBottom:2}}><div style={{flex:2,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1}}>Plant</div><div style={{flex:2,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1,textAlign:"center"}}>Range</div><div style={{flex:1,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1,textAlign:"right"}}>Alerts</div></div>
-{outP.map(function(p,i){var st=gPS(p.common_name,timeline,dismissed);var cl=sCl[st]||dk.teal;var ac=actionLog.filter(function(l){return l.plants.indexOf(p.common_name)>=0&&l.action!=="back-outside";}).length;return(<div key={i} onClick={function(){setDetailPlant(p);}} style={{display:"flex",alignItems:"center",padding:"7px 0",borderBottom:"1px solid "+dk.border+"20",cursor:"pointer"}}><div style={{flex:2,display:"flex",alignItems:"center",gap:6,minWidth:0}}><div style={{width:6,height:6,borderRadius:3,background:cl,flexShrink:0}}/><div style={{fontSize:12,fontWeight:600,color:dk.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.common_name}</div></div><div style={{flex:2,fontSize:10,color:dk.mutedLight,textAlign:"center"}}>{"\uD83C\uDF21\uFE0F"}{p.min_temp_f}-{p.max_temp_f}° {"\uD83D\uDCA8"}{p.max_wind_mph}</div><div style={{flex:1,fontSize:12,fontWeight:700,color:ac>0?dk.gold:dk.muted,textAlign:"right"}}>{ac||"—"}</div></div>);})}
-{inP.length>0&&<div style={{marginTop:10}}><div style={{fontSize:10,color:dk.gold,fontWeight:600,marginBottom:4}}>{"\uD83C\uDFE0"} INDOORS</div>{inP.map(function(p,i){var ac=actionLog.filter(function(l){return l.plants.indexOf(p.common_name)>=0&&l.action!=="back-outside";}).length;return(<div key={i} onClick={function(){markBack(p.common_name);}} style={{display:"flex",alignItems:"center",padding:"7px 0",borderBottom:"1px solid "+dk.border+"20",cursor:"pointer"}}><div style={{flex:2,display:"flex",alignItems:"center",gap:6,minWidth:0}}><div style={{fontSize:10}}>{"\u21A9"}</div><div style={{fontSize:12,fontWeight:600,color:dk.gold,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.common_name}</div></div><div style={{flex:2,fontSize:10,color:dk.mutedLight,textAlign:"center"}}>{"\uD83C\uDF21\uFE0F"}{p.min_temp_f}-{p.max_temp_f}° {"\uD83D\uDCA8"}{p.max_wind_mph}</div><div style={{flex:1,fontSize:12,fontWeight:700,color:ac>0?dk.gold:dk.muted,textAlign:"right"}}>{ac||"—"}</div></div>);})}</div>}
-</div>
-</div>}
+  const logWatering = () => {
+    const entry = { date: new Date().toISOString().split("T")[0], notes: sanitize(waterNotes, 500), timestamp: new Date().toISOString() };
+    setWateringLog(p=>[...p, entry]);
+    setShowWaterModal(false);
+    setWaterNotes("");
+  };
 
-<button onClick={function(){setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:"linear-gradient(135deg,"+dk.gold+","+dk.goldDim+")",color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:"0 4px 16px "+dk.gold+"44",zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
-</div>}
+  const openWaterModal = () => {
+    const allP = groups.flatMap(g=>g.plants);
+    const droughtOwned = allP.filter(p => p.drought_tolerant || DROUGHT_NAMES.has(p.common_name)).map(p=>p.common_name);
+    const suggestion = droughtOwned.length > 0 ? `Consider skipping: ${droughtOwned.join(", ")}` : "";
+    setWaterNotes(suggestion);
+    setShowWaterModal(true);
+  };
 
-{scr==="add"&&<div>
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><button onClick={function(){setScr("home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>{"\u2190"}</button><div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>{editingGroup?"EDIT GROUP":"ADD PLANTS"}</div></div>
-{selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>{selP.map(function(p,i){return(<div key={i} onClick={function(){setSelP(function(prev){return prev.filter(function(_,j){return j!==i;});});}} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer"}}><div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} {"\u2715"}</div><div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>{"\uD83C\uDF21\uFE0F"}{p.min_temp_f}-{p.max_temp_f}°F · {"\uD83D\uDCA8"}{"\u2264"}{p.max_wind_mph}mph{p.rain_sensitive?" · "+"\uD83C\uDF27\uFE0F":""}</div></div>);})}</div>}
-<div style={cs}><input type="text" value={sq} onChange={function(e){setSq(e.target.value);}} placeholder="Search plants..." style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"1.5px solid "+dk.border,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:filtered.length>0||sq.length>0?12:0}}/>
-{sq.length>0&&filtered.length===0&&<div style={{fontSize:13,color:dk.muted,padding:"8px 0",textAlign:"center"}}>No matches.</div>}
-<div style={{maxHeight:340,overflowY:"auto"}}>{filtered.map(function(p,i){var sel=selP.some(function(x){return x.common_name===p.n;});return(<div key={i} onClick={function(){toggleP(p);}} style={{padding:"10px 0",borderTop:i>0?"1px solid "+dk.border:"none",cursor:"pointer",opacity:sel?0.45:1}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontWeight:600,fontSize:14,color:dk.white}}>{p.n}</div><div style={{fontSize:11,color:dk.muted,fontStyle:"italic"}}>{p.s}</div></div><div style={{width:22,height:22,borderRadius:11,border:sel?"none":"2px solid "+dk.border,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"\u2713":""}</div></div><div style={{marginTop:6}}><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>{"\uD83C\uDF21\uFE0F"} {p.mn}-{p.mx}°F</span><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>{"\uD83D\uDCA8"} {"\u2264"}{p.w} mph</span>{p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC"}}>{"\uD83C\uDF27\uFE0F"} sensitive</span>:null}</div><div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div></div>);})}</div></div>
-{selP.length>0&&<div><div style={cs}><div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:6}}>GROUP NAME</div><input type="text" value={gName} onChange={function(e){setGName(e.target.value);}} placeholder={"Patio Group "+(groups.length+1)} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"1.5px solid "+dk.border,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/></div>
-<div style={cs}><div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div><div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
-{[{label:"\uD83C\uDF21\uFE0F Heat tolerance",value:heatAdj,set:setHeatAdj,unit:"°F",color:"#F87171"},{label:"\u2744\uFE0F Cold tolerance",value:coldAdj,set:setColdAdj,unit:"°F",color:"#7AB8F5"},{label:"\uD83D\uDCA8 Wind tolerance",value:windAdj,set:setWindAdj,unit:" mph",color:"#BFA0E8"}].map(function(item){return(<div key={item.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:12,color:dk.mutedLight}}>{item.label}</div><div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={function(){item.set(function(v){return Math.max(0,v-5);});}} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:"1px solid "+dk.border,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{"\u2212"}</button><div style={{fontSize:14,fontWeight:700,color:item.value>0?item.color:dk.muted,minWidth:50,textAlign:"center"}}>{item.value>0?"+"+item.value+item.unit:"—"}</div><button onClick={function(){item.set(function(v){return v+5;});}} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:"1px solid "+dk.border,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button></div></div>);})}</div>
-<button onClick={saveGroup} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,"+dk.gold+","+dk.goldDim+")",color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>{editingGroup?"Update "+selP.length+" Plant"+(selP.length!==1?"s":""):"Save & Watch "+selP.length+" Plant"+(selP.length!==1?"s":"")}</button></div>}
-<div style={{marginTop:16,background:dk.cardAlt,border:"1px dashed "+dk.border,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>{"\uD83D\uDCF8"} <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I will identify it.</div>
-</div>}
+  const getWateringInfo = () => {
+    const last = wateringLog[wateringLog.length - 1];
+    const lastDate = last ? new Date(last.date + "T12:00:00") : new Date(Date.now() - 6*86400000);
+    const consecHeat = getConsecHeatDays(timeline);
+    const interval = consecHeat >= 4 ? 6 : 7;
+    const nextDate = new Date(lastDate);
+    nextDate.setDate(lastDate.getDate() + interval);
+    const now = new Date();
+    const daysLeft = Math.ceil((nextDate - now) / 86400000);
+    const earlyTrigger = consecHeat >= 4;
+    if (daysLeft <= 0) return { label:"Today", sub: earlyTrigger?"heat trigger":"weekly", color:dk.teal, earlyTrigger, daysLeft:0, nextDate, interval };
+    return { label:String(daysLeft), sub:DN[nextDate.getDay()], color: daysLeft<=2?dk.gold:dk.mutedLight, earlyTrigger, daysLeft, nextDate, interval };
+  };
 
-{scr==="set"&&<div>
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><button onClick={function(){setScr("home");setErr(null);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>{"\u2190"}</button><div style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold}}>SETTINGS</div></div>
-<div style={cs}><div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>{notifEnabled?<div style={{fontSize:13,color:dk.teal}}>{"\u2713"} Notifications enabled</div>:<div><div style={{fontSize:13,color:dk.muted,marginBottom:10}}>Get alerted when plants need attention.</div><button onClick={enableNotif} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,"+dk.gold+","+dk.goldDim+")",color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer"}}>Enable Notifications</button></div>}</div>
-<div style={cs}><div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div><div style={{fontSize:13,color:dk.muted,marginBottom:10}}>{savedZip?"Zip: "+savedZip:loc?loc.lat.toFixed(2)+", "+loc.lon.toFixed(2):"Not set"}</div><div style={{display:"flex",gap:8}}><input type="text" inputMode="numeric" value={zip} onChange={function(e){setZip(e.target.value.replace(/\D/g,"").slice(0,5));}} onKeyDown={function(e){if(e.key==="Enter")lookupZip(zip);}} placeholder="Change zip..." style={{flex:1,padding:"10px 12px",borderRadius:8,border:"1.5px solid "+dk.border,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit"}}/><button onClick={function(){lookupZip(zip);}} disabled={zip.length<5} style={{padding:"10px 16px",borderRadius:10,border:"none",background:"linear-gradient(135deg,"+dk.gold+","+dk.goldDim+")",color:dk.bg,fontSize:14,fontWeight:700,cursor:"pointer",opacity:zip.length<5?0.5:1}}>Update</button></div></div>
-<div style={cs}><div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>DATA</div><button onClick={function(){if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);}}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:dk.red,border:"1.5px solid "+dk.red,fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button></div>
-</div>}
-</div>
+  const allP=groups.flatMap(g=>g.plants);
+  const outP=allP.filter(p=>!p.indoors);
+  const inP=allP.filter(p=>p.indoors);
+  const todayI=timeline.length>0?timeline[0].issues.filter(i=>i.type!=="rain"):[];
+  const todayAC=todayI.length;
+  const todayR=timeline.length>0&&timeline[0].rainCollect;
+  const filtered=sq.length>0?PL.filter(p=>p.n.toLowerCase().includes(sq.trim().toLowerCase())||p.s.toLowerCase().includes(sq.trim().toLowerCase())):[];
+  const waterInfo = groups.length > 0 ? getWateringInfo() : null;
 
-{detailPlant&&<div onClick={function(){setDetailPlant(null);}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",zIndex:20,display:"flex",alignItems:"flex-end",justifyContent:"center"}}><div onClick={function(e){e.stopPropagation();}} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:"1px solid "+dk.border,borderBottom:"none"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}><div><div style={{fontSize:18,fontWeight:700,color:dk.white}}>{detailPlant.common_name}</div><div style={{fontSize:13,color:dk.muted,fontStyle:"italic"}}>{detailPlant.scientific_name}</div></div><button onClick={function(){setDetailPlant(null);}} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>{"\u2715"}</button></div><div style={{display:"flex",flexDirection:"column",gap:12}}><div style={{display:"flex",gap:10}}><div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:"1px solid "+dk.border}}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div><div style={{fontSize:14,fontWeight:700,color:"#F87171"}}>{"\uD83C\uDF21\uFE0F"} {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div></div><div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:"1px solid "+dk.border}}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div><div style={{fontSize:14,fontWeight:700,color:"#BFA0E8"}}>{"\uD83D\uDCA8"} {"\u2264"} {detailPlant.max_wind_mph} mph</div></div></div><div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:"1px solid "+dk.border}}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div><div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?"#7AB8F5":dk.teal}}>{detailPlant.rain_sensitive?"\uD83C\uDF27\uFE0F Sensitive — cover or shelter in rain":"\u2713 Handles rain fine"}</div></div>{detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:"1px solid "+dk.border}}><div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div><div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>{detailPlant.notes}</div></div>}</div></div></div>}
-</div>);}
+  const getTA = () => {
+    if (!timeline.length) return {};
+    const day=timeline[0],pr=["cold","heat","wind"],bp={};
+    for (const iss of day.issues) {if(iss.type==="rain")continue;if(!bp[iss.plant])bp[iss.plant]=new Set();bp[iss.plant].add(iss.type);}
+    const ba={};for(const[plant,types]of Object.entries(bp)){const top=pr.find(t=>types.has(t))||[...types][0];if(!ba[top])ba[top]=[];ba[top].push(plant);}return ba;
+  };
 
-if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(e){console.log("SW failed:",e);});}
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
+  const dismissAlertModal = () => {
+    const today = new Date().toISOString().split("T")[0];
+    setAlertAckedDate(today);
+    setAlertModal(null);
+  };
+
+  const urlB64ToUint8Array = (base64String) => {
+    const padding = "=".repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  };
+
+  const registerPush = async () => {
+    if (pushPending) return;
+    setPushPending(true);
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        alert("Push notifications aren't supported in this browser. Try adding the app to your home screen first.");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") { setPushPending(false); return; }
+
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      }
+      const res = await fetch(`${WORKER_URL}/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub.toJSON()),
+      });
+      if (res.ok) {
+        setPushEnabled(true);
+        window.storage.set("pg-push", "enabled").catch(()=>{});
+      }
+    } catch (e) {
+      console.error("Push registration failed:", e);
+    } finally {
+      setPushPending(false);
+    }
+  };
+
+  const unregisterPush = async () => {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        await fetch(`${WORKER_URL}/subscribe`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        });
+        await sub.unsubscribe();
+      }
+      setPushEnabled(false);
+      window.storage.delete("pg-push").catch(()=>{});
+    } catch (e) {
+      console.error("Unsubscribe failed:", e);
+    }
+  };
+
+  const getPlantGroup = (plantName) => {
+    for (const g of groups) { if (g.plants.find(p=>p.common_name===plantName)) return g; }
+    return null;
+  };
+
+  return (
+    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white}}>
+
+      <div style={{padding:"14px 18px 12px",borderBottom:`1px solid ${dk.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <img src={`data:image/png;base64,${LOGO}`} alt="logo" style={{width:36,height:36,objectFit:"contain"}}/>
+          <div style={{fontSize:18,fontWeight:800,letterSpacing:2,color:dk.white,textTransform:"uppercase"}}>Plant Guardian</div>
+        </div>
+        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"4px 8px",cursor:"pointer",fontSize:13,color:dk.muted}}>⚙️</button>}
+      </div>
+
+      <div style={{padding:"12px 14px 100px"}}>
+        {err&&<div style={{...cs,background:"#7F1D1D",borderColor:dk.red}}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
+
+        {scr==="home"&&<>
+          {groups.length===0?(
+            <div style={{textAlign:"center",padding:"56px 24px"}}>
+              <div style={{fontSize:48,marginBottom:14}}>🌿</div>
+              <div style={{fontSize:18,fontWeight:700,color:dk.gold,marginBottom:8}}>No plants yet</div>
+              <div style={{fontSize:13,color:dk.muted,lineHeight:1.6}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
+            </div>
+          ):(
+            <>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6,marginBottom:10}}>
+                <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
+                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>ALERTS</div>
+                  <div style={{fontSize:20,fontWeight:700,color:todayAC>0?dk.red:dk.teal}}>{todayAC>0?todayAC:"✓"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{todayAC>0?"today":"all clear"}</div>
+                </div>
+                <div onClick={openWaterModal} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${waterInfo&&waterInfo.daysLeft===0?dk.teal:waterInfo&&waterInfo.earlyTrigger?dk.gold:dk.border}`}}>
+                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>WATER</div>
+                  <div style={{fontSize:20,fontWeight:700,color:waterInfo?(waterInfo.daysLeft===0?dk.teal:waterInfo.earlyTrigger?dk.gold:waterInfo.daysLeft<=2?dk.gold:dk.mutedLight):dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"Today":waterInfo.label):"—"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"due now":waterInfo.earlyTrigger?"heat 🌡️":`days`):"—"}</div>
+                </div>
+                <div onClick={()=>scrollTo(refPlants)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
+                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>OUTSIDE</div>
+                  <div style={{fontSize:20,fontWeight:700,color:dk.teal}}>{outP.length}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{inP.length>0?`${inP.length} inside`:"plants"}</div>
+                </div>
+                <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
+                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>TODAY</div>
+                  <div style={{fontSize:20,fontWeight:700,color:dk.white}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_min[0])}° low`:""}</div>
+                </div>
+              </div>
+
+              {(()=>{
+                const ba=getTA(),pr=["cold","heat","wind"];
+                const acts={heat:{action:"above typical range",bg:"#2A2018",color:"#F87171"},cold:{action:"below typical range overnight",bg:"#1A3050",color:"#7AB8F5"},wind:{action:"above typical wind range",bg:"#2A1E45",color:"#F87171"}};
+                const icons={heat:"🌡️",cold:"❄️",wind:"💨"};
+                const td=timeline[0]?.date;
+                const hasContent=todayAC>0||todayR;
+                return (
+                  <div ref={refToday} style={{...cs,padding:"12px"}}>
+                    <div style={hd}>Today</div>
+                    {!hasContent&&<div style={{fontSize:12,color:dk.muted,padding:"4px 0"}}>No alerts for today</div>}
+                    {todayR&&<div style={{padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",marginBottom:6}}>🪣 Collect rainwater — {timeline[0].rain.toFixed(1)}" expected</div>}
+                    {pr.filter(t=>ba[t]).map(type=>{
+                      const a=acts[type],res=getAA(td,type);
+                      if(res){const label=res==="inside"?"🏠 inside":res==="covered"?"🛡️ covered":"ignored";
+                        return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,fontSize:11,color:dk.mutedLight,opacity:0.6,marginBottom:4}}>{icons[type]} {ba[type].join(", ")} — {a.action} <span style={{color:dk.teal,fontWeight:600,marginLeft:6}}>✓ {label}</span></div>);}
+                      return(<div key={type} style={{marginBottom:6}}>
+                        <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {ba[type].join(", ")} — {a.action}</div>
+                        <div style={{display:"flex",gap:6,marginTop:4}}>
+                          <button onClick={()=>resolveAlert(td,type,ba[type],"covered")} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.border}`,fontSize:10,color:dk.teal,fontWeight:600,cursor:"pointer"}}>🛡️ covered</button>
+                          <button onClick={()=>resolveAlert(td,type,ba[type],"inside")} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.border}`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>🏠 brought inside</button>
+                        </div>
+                      </div>);
+                    })}
+                  </div>
+                );
+              })()}
+
+              {timeline.slice(1).some(d=>d.issues.filter(i=>i.type!=="rain").length>0)&&(
+                <div style={{...cs,padding:"12px"}}>
+                  <div style={hd}>Upcoming</div>
+                  {timeline.slice(1).filter(d=>d.issues.filter(i=>i.type!=="rain").length>0).map(day=>{
+                    const di=day.issues.filter(i=>i.type!=="rain");
+                    const ic={heat:"🌡️",cold:"❄️",wind:"💨"};
+                    const typeSet=[...new Set(di.map(i=>i.type))];
+                    const plantList=[...new Set(di.map(i=>i.plant))].join(", ");
+                    return(
+                      <div key={day.date} style={tr}>
+                        <div style={{width:70,flexShrink:0}}><span style={{...tc,fontWeight:600,color:dk.white}}>{day.dayName}</span> <span style={{...tc,fontSize:10}}>{day.dateLabel}</span></div>
+                        <div style={{width:56,flexShrink:0,textAlign:"right",paddingRight:6}}>{typeSet.map(t=>ic[t]).join(" ")}</div>
+                        <div style={{...tc,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{plantList}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div ref={refOutlook} style={{...cs,padding:"10px 12px"}}>
+                <div style={hd}>7-Day Outlook</div>
+                <div style={{display:"flex",gap:4,overflowX:"auto"}}>
+                  {timeline.map((day,i)=>{
+                    const di=day.issues.filter(x=>x.type!=="rain"),ha=di.length>0,it=i===0;
+                    return(
+                      <div key={day.date} style={{flex:"1 0 0",minWidth:48,textAlign:"center",padding:"6px 4px",borderRadius:8,background:it?dk.cardAlt:"transparent",border:ha?`1px solid ${dk.red}40`:it?`1px solid ${dk.teal}30`:"1px solid transparent"}}>
+                        <div style={{fontSize:10,fontWeight:600,color:it?dk.teal:dk.muted}}>{day.dayName}</div>
+                        <div style={{fontSize:16,margin:"2px 0"}}>{wI(day.wc)}</div>
+                        <div style={{fontSize:12,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°</div>
+                        <div style={{fontSize:10,color:dk.muted}}>{Math.round(day.low)}°</div>
+                        {ha&&<div style={{fontSize:8,color:dk.red,marginTop:2}}>●{di.length}</div>}
+                        {day.rainCollect&&!ha&&<div style={{fontSize:8,color:"#6EE7B7",marginTop:2}}>🪣</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div ref={refPlants} style={{...cs,padding:"12px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <div style={hd}>Your Plants</div>
+                  <div style={{display:"flex",gap:8}}>
+                    {groups.map(g=>(
+                      <button key={g.id} onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}}
+                        style={{fontSize:10,color:dk.teal,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>edit group</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{display:"flex",padding:"4px 0",borderBottom:`1px solid ${dk.border}`,marginBottom:2}}>
+                  <div style={{flex:3,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1}}>Plant</div>
+                  <div style={{flex:2,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1}}>Group</div>
+                  <div style={{flex:3,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1,textAlign:"center"}}>Range</div>
+                  <div style={{flex:1,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1,textAlign:"right"}}>Alerts</div>
+                </div>
+
+                {outP.map((p,i)=>{
+                  const st=gPS(p.common_name,timeline,dismissed);
+                  const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;
+                  const g=getPlantGroup(p.common_name);
+                  const hasAdj=g&&(g.heatAdj||g.coldAdj||g.windAdj);
+                  const effMax=p.max_temp_f+(g?.heatAdj||0);
+                  const effMin=p.min_temp_f-(g?.coldAdj||0);
+                  const effWind=p.max_wind_mph+(g?.windAdj||0);
+                  return(
+                    <div key={i} onClick={()=>setDetailPlant(p)} style={tr}>
+                      <div style={{flex:3,display:"flex",alignItems:"center",gap:5,minWidth:0}}>
+                        <div style={{...tc,color:dk.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",cursor:"pointer"}}>{p.common_name}</div>
+                      </div>
+                      <div style={{flex:2,...tc,fontSize:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g?.name||"—"}</div>
+                      <div style={{flex:3,fontSize:10,color:hasAdj?dk.gold:dk.mutedLight,textAlign:"center"}}>
+                        {effMin}–{effMax}° 💨{effWind}{hasAdj?" ✎":""}
+                      </div>
+                      <div style={{flex:1,fontSize:11,fontWeight:700,color:ac>0?dk.gold:dk.muted,textAlign:"right"}}>{ac||"—"}</div>
+                    </div>
+                  );
+                })}
+
+                {inP.length>0&&(
+                  <div style={{marginTop:10}}>
+                    <div style={{fontSize:10,color:dk.gold,fontWeight:600,marginBottom:4}}>🏠 INDOORS</div>
+                    {inP.map((p,i)=>{
+                      const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;
+                      const g=getPlantGroup(p.common_name);
+                      return(
+                        <div key={i} onClick={()=>markBack(p.common_name)} style={{...tr,cursor:"pointer"}}>
+                          <div style={{flex:3,display:"flex",alignItems:"center",gap:5,minWidth:0}}>
+                            <div style={{fontSize:10}}>↩</div>
+                            <div style={{...tc,color:dk.gold,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.common_name}</div>
+                          </div>
+                          <div style={{flex:2,...tc,fontSize:10}}>{g?.name||"—"}</div>
+                          <div style={{flex:3,fontSize:10,color:dk.mutedLight,textAlign:"center"}}>{p.min_temp_f}–{p.max_temp_f}° 💨{p.max_wind_mph}</div>
+                          <div style={{flex:1,fontSize:11,fontWeight:700,color:ac>0?dk.gold:dk.muted,textAlign:"right"}}>{ac||"—"}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}}
+            style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+        </>}
+
+        {scr==="add"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <div style={hd}>{editingGroup?"Edit Group":"Add Plants"}</div>
+          </div>
+
+          {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
+            {selP.map((p,i)=>(<div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer"}}>
+              <div style={{fontSize:11,fontWeight:600,color:dk.white}}>{p.common_name} ✕</div>
+              <div style={{fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:2}}>🌡️{p.min_temp_f}–{p.max_temp_f}°F · 💨≤{p.max_wind_mph}mph{p.rain_sensitive?" · 🌧️":""}</div>
+            </div>))}
+          </div>}
+
+          <div style={cs}>
+            <input type="text" value={sq} onChange={e=>setSq(e.target.value.slice(0,100))} placeholder="Search plants..." maxLength={100}
+              style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:15,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:filtered.length>0||sq.length>0?12:0}}/>
+            {sq.length>0&&filtered.length===0&&<div style={{fontSize:13,color:dk.muted,padding:"8px 0",textAlign:"center"}}>No matches. Send me a photo in chat.</div>}
+            <div style={{maxHeight:340,overflowY:"auto"}}>
+              {filtered.map((p,i)=>{const sel=selP.some(x=>x.common_name===p.n);return(
+                <div key={i} onClick={()=>toggleP(p)} style={{padding:"10px 0",borderTop:i>0?`1px solid ${dk.border}`:"none",cursor:"pointer",opacity:sel?0.45:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div><div style={{fontWeight:600,fontSize:14,color:dk.white}}>{p.n}</div><div style={{fontSize:11,color:dk.muted,fontStyle:"italic"}}>{p.s}</div></div>
+                    <div style={{width:22,height:22,borderRadius:11,border:sel?"none":`2px solid ${dk.border}`,background:sel?dk.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:dk.bg,fontSize:13,flexShrink:0}}>{sel?"✓":""}</div>
+                  </div>
+                  <div style={{marginTop:6}}>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#78350F",color:"#FCD34D",marginRight:4}}>🌡️ {p.mn}–{p.mx}°F</span>
+                    <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1E3A5F",color:"#93C5FD",marginRight:4}}>💨 ≤{p.w} mph</span>
+                    {p.r?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#312E81",color:"#A5B4FC",marginRight:4}}>🌧️ sensitive</span>:null}
+                    {p.d?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1A2E1A",color:"#86EFAC"}}>💧 drought tolerant</span>:null}
+                  </div>
+                  <div style={{fontSize:11,color:dk.muted,marginTop:4}}>{p.t}</div>
+                </div>);})}
+            </div>
+          </div>
+
+          {selP.length>0&&<>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:6}}>GROUP NAME</div>
+              <input type="text" value={gName} onChange={e=>setGName(e.target.value.slice(0,60))} placeholder={`Patio Group ${groups.length+1}`} maxLength={60}
+                style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:14,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+            <div style={cs}>
+              <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:12}}>TOLERANCE ADJUSTMENTS</div>
+              <div style={{fontSize:11,color:dk.muted,marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
+              {[{label:"🌡️ Heat",value:heatAdj,set:setHeatAdj,unit:"°F",color:"#F87171"},{label:"❄️ Cold",value:coldAdj,set:setColdAdj,unit:"°F",color:"#7AB8F5"},{label:"💨 Wind",value:windAdj,set:setWindAdj,unit:" mph",color:"#BFA0E8"}].map(({label,value,set,unit,color})=>(
+                <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <div style={{fontSize:12,color:dk.mutedLight}}>{label}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <button onClick={()=>set(v=>Math.max(0,v-5))} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+                    <div style={{fontSize:14,fontWeight:700,color:value>0?color:dk.muted,minWidth:50,textAlign:"center"}}>{value>0?`+${value}${unit}`:"—"}</div>
+                    <button onClick={()=>set(v=>v+5)} style={{width:28,height:28,borderRadius:6,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={saveGroup} style={{width:"100%",padding:"12px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
+              {editingGroup?`Update ${selP.length} Plant${selP.length!==1?"s":""}`:`Save & Watch ${selP.length} Plant${selP.length!==1?"s":""}`}
+            </button>
+          </>}
+
+          <div style={{marginTop:16,background:dk.cardAlt,border:`1px dashed ${dk.border}`,borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:dk.muted,lineHeight:1.5}}>
+            📸 <strong style={{color:dk.mutedLight}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.
+          </div>
+        </>}
+
+        {scr==="set"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <button onClick={()=>{setScr("home");setErr(null);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <div style={hd}>Settings</div>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div>
+            <div style={{fontSize:13,color:dk.muted}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
+            <div style={{fontSize:12,color:dk.muted,marginBottom:12,lineHeight:1.6}}>Daily weather alerts sent to your device even when the app is closed. Requires adding the app to your home screen on iOS.</div>
+            {pushEnabled?(
+              <button onClick={unregisterPush} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:dk.muted,border:`1.5px solid ${dk.border}`,fontSize:14,fontWeight:600,cursor:"pointer"}}>
+                🔔 Notifications on — tap to disable
+              </button>
+            ):(
+              <button onClick={registerPush} disabled={pushPending} style={{width:"100%",padding:"12px",borderRadius:10,background:`linear-gradient(135deg,${dk.teal},${dk.tealDim})`,color:dk.bg,border:"none",fontSize:14,fontWeight:700,cursor:"pointer",opacity:pushPending?0.6:1}}>
+                {pushPending?"Setting up…":"Enable notifications"}
+              </button>
+            )}
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>DATA</div>
+            <button onClick={()=>{if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);setWateringLog([]);}}}
+              style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:dk.red,border:`1.5px solid ${dk.red}`,fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button>
+          </div>
+        </>}
+      </div>
+
+      {detailPlant&&(
+        <div onClick={()=>setDetailPlant(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:20,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:`1px solid ${dk.border}`,borderBottom:"none"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+              <div><div style={{fontSize:18,fontWeight:700,color:dk.white}}>{detailPlant.common_name}</div><div style={{fontSize:13,color:dk.muted,fontStyle:"italic"}}>{detailPlant.scientific_name}</div></div>
+              <button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>✕</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div style={{display:"flex",gap:10}}>
+                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                  <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"#F87171"}}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div>
+                </div>
+                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                  <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"#BFA0E8"}}>💨 ≤ {detailPlant.max_wind_mph} mph</div>
+                </div>
+              </div>
+              <div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain Sensitivity</div>
+                <div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?"#7AB8F5":dk.teal}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter":"✓ Handles rain fine"}</div>
+              </div>
+              {(detailPlant.drought_tolerant||DROUGHT_NAMES.has(detailPlant.common_name))&&(
+                <div style={{padding:"10px 12px",borderRadius:10,background:"#0F1F0F",border:`1px solid #1A3A1A`}}>
+                  <div style={{fontSize:14,fontWeight:700,color:"#86EFAC"}}>💧 Drought tolerant — skip early watering</div>
+                </div>
+              )}
+              {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                <div style={{fontSize:10,color:dk.muted,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div>
+                <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>{detailPlant.notes}</div>
+              </div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {alertModal&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:30,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 24px"}}>
+          <div style={{background:dk.card,borderRadius:16,padding:"24px 20px",width:"100%",maxWidth:400,border:`1px solid ${dk.border}`}}>
+            <div style={{fontSize:16,fontWeight:700,color:dk.white,marginBottom:16}}>Heads up 🌿</div>
+            {alertModal.map((m,i)=>(
+              <div key={i} style={{display:"flex",gap:10,marginBottom:12,padding:"10px 12px",borderRadius:10,background:dk.bg,border:`1px solid ${dk.border}`}}>
+                <div style={{fontSize:18,flexShrink:0}}>{m.icon}</div>
+                <div style={{fontSize:13,color:dk.mutedLight,lineHeight:1.5}}>{m.text}</div>
+              </div>
+            ))}
+            <button onClick={dismissAlertModal}
+              style={{width:"100%",marginTop:4,padding:"12px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showWaterModal&&(
+        <div onClick={()=>setShowWaterModal(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:20,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:dk.card,borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:`1px solid ${dk.border}`,borderBottom:"none"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontSize:18,fontWeight:700,color:dk.white}}>💧 Log Watering</div>
+              <button onClick={()=>setShowWaterModal(false)} style={{background:"none",border:"none",fontSize:18,color:dk.muted,cursor:"pointer",padding:4}}>✕</button>
+            </div>
+            {waterInfo?.earlyTrigger&&(
+              <div style={{padding:"8px 12px",borderRadius:8,background:"#2A1A08",border:`1px solid ${dk.gold}44`,fontSize:12,color:dk.gold,marginBottom:14}}>
+                🌡️ {getConsecHeatDays(timeline)} consecutive heat alert days — watering early (day {waterInfo.interval} of 7). Next reminder will be 7 days from today.
+              </div>
+            )}
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:6}}>NOTES</div>
+            <textarea
+              value={waterNotes}
+              onChange={e=>setWaterNotes(e.target.value.slice(0,500))}
+              rows={3}
+              placeholder="Which plants did you skip? Any observations..."
+              style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:13,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"none",lineHeight:1.5}}
+            />
+            <button onClick={logWatering}
+              style={{width:"100%",marginTop:12,padding:"13px 24px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${dk.teal},${dk.tealDim})`,color:dk.bg,fontSize:15,fontWeight:700,cursor:"pointer"}}>
+              Mark as watered today
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  </script>
 </body>
 </html>
