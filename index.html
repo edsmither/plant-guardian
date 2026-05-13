@@ -26,7 +26,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <script>
-    // Polyfill window.storage using localStorage
     window.storage = {
       get: (key) => Promise.resolve(localStorage.getItem(key) ? { key, value: localStorage.getItem(key) } : null),
       set: (key, value) => { localStorage.setItem(key, value); return Promise.resolve({ key, value }); },
@@ -217,6 +216,7 @@ function App() {
   const refToday=useRef(null);
   const refOutlook=useRef(null);
   const refPlants=useRef(null);
+  const prevPlantsRef=useRef([]);
   const scrollTo=(ref)=>ref.current?.scrollIntoView({behavior:"smooth",block:"start"});
 
   useEffect(()=>{
@@ -231,30 +231,46 @@ function App() {
   useEffect(()=>{if(!loc)return;const today=new Date(),dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}setWx({daily:{time:dates,temperature_2m_max:[86,85,85,87,88,88,75],temperature_2m_min:[59,60,63,62,65,55,55],wind_speed_10m_max:[15,10,12,18,15,25,20],precipitation_sum:[0,0,0,0.3,0.8,1.2,0],weathercode:[1,2,2,3,61,63,2]}});},[loc]);
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
 
+  // On load — fire once per day
   useEffect(()=>{
     if(!ready||!groups.length||!timeline.length)return;
     const today=new Date().toISOString().split("T")[0];
     if(alertAckedDate===today)return;
     const lastW=wateringLog[wateringLog.length-1];
     const lastWDate=lastW?new Date(lastW.date+"T12:00:00"):new Date(Date.now()-6*86400000);
-    const ch=timeline.filter((d,i)=>{let n=0;for(let j=0;j<=i;j++){if(timeline[j].issues.some(x=>x.type==="heat"))n++;else if(j<i)n=0;}return false;});
     let consecH=0;for(const d of timeline){if(d.issues.some(i=>i.type==="heat"))consecH++;else break;}
     const interval=consecH>=4?6:7;
     const nextW=new Date(lastWDate);nextW.setDate(lastWDate.getDate()+interval);
     const daysLeft=Math.ceil((nextW-new Date())/86400000);
     const wi={daysLeft,earlyTrigger:consecH>=4};
-    const todayHeat=timeline[0].issues.filter(i=>i.type!=="rain");
+    const todayIssues=timeline[0].issues.filter(i=>i.type!=="rain");
     const msgs=[];
     if(wi.daysLeft===0){msgs.push({icon:"💧",text:wi.earlyTrigger?`Heat alert for ${getConsecHeatDays(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});}
-    if(todayHeat.length>0){const types=[...new Set(todayHeat.map(i=>i.type))];const plants=[...new Set(todayHeat.map(i=>i.plant))];const icons={heat:"🌡️",cold:"❄️",wind:"💨"};msgs.push({icon:types.map(t=>icons[t]).join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
+    if(todayIssues.length>0){const types=[...new Set(todayIssues.map(i=>i.type))];const plants=[...new Set(todayIssues.map(i=>i.plant))];const icons={heat:"🌡️",cold:"❄️",wind:"💨"};msgs.push({icon:types.map(t=>icons[t]).join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
     if(msgs.length>0)setAlertModal(msgs);
   },[ready,timeline]);
+
+  // On plant add — always alert for newly added plants regardless of alertAckedDate
+  useEffect(()=>{
+    if(!ready||!timeline.length)return;
+    const allNames=groups.flatMap(g=>g.plants.map(p=>p.common_name));
+    const prevNames=prevPlantsRef.current;
+    const newNames=allNames.filter(n=>!prevNames.includes(n));
+    prevPlantsRef.current=allNames;
+    if(!newNames.length)return;
+    const todayIssues=timeline[0].issues.filter(i=>i.type!=="rain"&&newNames.includes(i.plant));
+    if(!todayIssues.length)return;
+    const types=[...new Set(todayIssues.map(i=>i.type))];
+    const plants=[...new Set(todayIssues.map(i=>i.plant))];
+    const icons={heat:"🌡️",cold:"❄️",wind:"💨"};
+    setAlertModal([{icon:types.map(t=>icons[t]).join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`}]);
+  },[groups,timeline,ready]);
 
   const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);if(action==="inside"&&plants){setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>plants.includes(pl.common_name)?{...pl,indoors:true}:pl)})));}};
   const markBack=(name)=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
   const getAA=(date,type)=>dismissed[`${date}-${type}`]||null;
   const toggleP=p=>{const exists=selP.find(x=>x.common_name===p.n);setSelP(prev=>exists?prev.filter(x=>x.common_name!==p.n):[...prev,toP(p)]);if(!exists)setSq("");};
-  const saveGroup=()=>{if(!selP.length||saving)return;setSaving(true);const safeName=sanitize(gName,60)||`Patio Group ${groups.length+1}`;if(editingGroup){setGroups(p=>p.map(g=>g.id===editingGroup?{...g,name:safeName,plants:selP,heatAdj,coldAdj,windAdj}:g));}else{setGroups(p=>[...p,{id:String(Date.now()),name:safeName,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}]);}setScr("home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);};
+  const saveGroup=()=>{if(!selP.length||saving)return;setSaving(true);const safeName=sanitize(gName,60)||`Patio Group ${groups.length+1}`;if(editingGroup){setGroups(p=>p.map(g=>g.id===editingGroup?{...g,name:safeName,plants:selP,heatAdj,coldAdj,windAdj}:g));}else{setGroups(p=>[...p,{id:String(Date.now()),name:safeName,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}]);}setScr(editingGroup?"groups":"home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);};
 
   const logWatering = () => {
     const entry = { date: new Date().toISOString().split("T")[0], notes: sanitize(waterNotes, 500), timestamp: new Date().toISOString() };
@@ -487,12 +503,8 @@ function App() {
               <div ref={refPlants} style={{...cs,padding:"12px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={hd}>Your Plants</div>
-                  <div style={{display:"flex",gap:8}}>
-                    {groups.map(g=>(
-                      <button key={g.id} onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}}
-                        style={{fontSize:10,color:dk.teal,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>edit group</button>
-                    ))}
-                  </div>
+                  <button onClick={()=>setScr("groups")}
+                    style={{fontSize:10,color:dk.teal,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>manage groups</button>
                 </div>
 
                 <div style={{display:"flex",padding:"4px 0",borderBottom:`1px solid ${dk.border}`,marginBottom:2}}>
@@ -552,9 +564,40 @@ function App() {
             style={{position:"fixed",bottom:24,right:24,width:56,height:56,borderRadius:28,background:`linear-gradient(135deg,${dk.gold},${dk.goldDim})`,color:dk.bg,border:"none",fontSize:28,fontWeight:300,cursor:"pointer",boxShadow:`0 4px 16px ${dk.gold}44`,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
         </>}
 
+        {scr==="groups"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <button onClick={()=>setScr("home")} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <div style={hd}>Manage Groups</div>
+          </div>
+          {groups.length===0&&<div style={{...cs,textAlign:"center",color:dk.muted,fontSize:13,padding:24}}>No groups yet. Tap + to add plants.</div>}
+          {groups.map(g=>(
+            <div key={g.id} style={{...cs,cursor:"pointer"}} onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:600,color:dk.white,marginBottom:3}}>{g.name}</div>
+                  <div style={{fontSize:11,color:dk.muted}}>{g.plants.length} plant{g.plants.length!==1?"s":""}{g.plants.filter(p=>p.indoors).length>0?` · ${g.plants.filter(p=>p.indoors).length} indoors`:""}
+                    {(g.heatAdj||g.coldAdj||g.windAdj)?<span style={{color:dk.gold}}> · adjusted ✎</span>:null}
+                  </div>
+                </div>
+                <div style={{fontSize:12,color:dk.teal}}>edit →</div>
+              </div>
+              <div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>
+                {g.plants.slice(0,6).map(p=>(
+                  <span key={p.common_name} style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:dk.bg,color:p.indoors?dk.gold:dk.mutedLight,border:`1px solid ${dk.border}`}}>{p.common_name}</span>
+                ))}
+                {g.plants.length>6&&<span style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:dk.bg,color:dk.muted,border:`1px solid ${dk.border}`}}>+{g.plants.length-6} more</span>}
+              </div>
+            </div>
+          ))}
+          <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}}
+            style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:dk.gold,border:`1.5px dashed ${dk.goldDim}`,fontSize:14,cursor:"pointer",marginTop:4}}>
+            + New Group
+          </button>
+        </>}
+
         {scr==="add"&&<>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-            <button onClick={()=>{setScr("home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
+            <button onClick={()=>{setScr(editingGroup?"groups":"home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
             <div style={hd}>{editingGroup?"Edit Group":"Add Plants"}</div>
           </div>
 
