@@ -181,9 +181,9 @@ const WORKER_URL = "https://plant-guardian-push.sericah007.workers.dev";
 const dk = {bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
 const cs = {background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
 const sCl = {ok:dk.teal,heat:"#F87171",cold:"#7AB8F5",wind:"#BFA0E8",resolved:dk.muted};
-const hd = {fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10};
+const hd = {fontSize:14,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10};
 const tr = {display:"flex",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${dk.border}30`};
-const tc = {fontSize:11,color:dk.mutedLight};
+const tc = {fontSize:13,color:dk.mutedLight};
 
 function App() {
   const [scr,setScr]=useState("home");
@@ -213,6 +213,7 @@ function App() {
   const [alertModal,setAlertModal]=useState(null);
   const [alertAckedDate,setAlertAckedDate]=useState("");
   const [pushEnabled,setPushEnabled]=useState(false);
+  const [testMode,setTestMode]=useState(false);
   const [pushPending,setPushPending]=useState(false);
   const refToday=useRef(null);
   const refOutlook=useRef(null);
@@ -231,17 +232,21 @@ function App() {
   useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate]);
   useEffect(()=>{
     if(!loc)return;
+    const today=new Date(),dates=[];
+    for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}
+    if(testMode){
+      setWx({daily:{time:dates,temperature_2m_max:[97,98,96,99,97,95,98],temperature_2m_min:[42,44,41,43,42,40,44],wind_speed_10m_max:[22,18,24,20,26,22,19],precipitation_sum:[0,0,0.5,0.8,0,1.2,0],weathercode:[1,2,61,63,2,61,2]}});
+      return;
+    }
     const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&forecast_days=7&timezone=America%2FChicago`;
     fetch(url)
       .then(r=>r.ok?r.json():Promise.reject(r.status))
       .then(data=>setWx(data))
       .catch(e=>{
         console.warn("Weather fetch failed, using fallback:",e);
-        const today=new Date(),dates=[];
-        for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}
         setWx({daily:{time:dates,temperature_2m_max:[88,90,92,89,87,91,88],temperature_2m_min:[68,70,71,69,67,70,69],wind_speed_10m_max:[12,10,14,11,13,15,10],precipitation_sum:[0,0,0,0.2,0,0,0],weathercode:[1,2,2,3,2,1,2]}});
       });
-  },[loc]);
+  },[loc,testMode]);
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
 
   // On load — fire once per day
@@ -295,10 +300,7 @@ function App() {
   };
 
   const openWaterModal = () => {
-    const allP = groups.flatMap(g=>g.plants);
-    const droughtOwned = allP.filter(p => p.drought_tolerant || DROUGHT_NAMES.has(p.common_name)).map(p=>p.common_name);
-    const suggestion = droughtOwned.length > 0 ? `Consider skipping: ${droughtOwned.join(", ")}` : "";
-    setWaterNotes(suggestion);
+    setWaterNotes("");
     setShowWaterModal(true);
   };
 
@@ -415,6 +417,7 @@ function App() {
         {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"4px 8px",cursor:"pointer",fontSize:13,color:dk.muted}}>⚙️</button>}
       </div>
 
+      {testMode&&<div style={{background:"#7F1D1D",padding:"6px 18px",fontSize:11,fontWeight:700,color:"#FCA5A5",textAlign:"center",letterSpacing:1}}>⚠️ TEST MODE — extreme weather active</div>}
       <div style={{padding:"12px 14px 100px"}}>
         {err&&<div style={{...cs,background:"#7F1D1D",borderColor:dk.red}}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
 
@@ -428,25 +431,25 @@ function App() {
           ):(
             <>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6,marginBottom:10}}>
-                <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
+                <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${dk.teal}44`}}>
+                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>CURRENT</div>
+                  <div style={{fontSize:22,fontWeight:800,color:dk.white}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_min[0])}° low`:""}</div>
+                </div>
+                <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${todayAC>0?dk.red+"88":dk.teal+"44"}`}}>
                   <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>ALERTS</div>
-                  <div style={{fontSize:20,fontWeight:700,color:todayAC>0?dk.red:dk.teal}}>{todayAC>0?todayAC:"✓"}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:todayAC>0?dk.red:dk.teal}}>{todayAC>0?todayAC:"✓"}</div>
                   <div style={{fontSize:9,color:dk.muted}}>{todayAC>0?"today":"all clear"}</div>
                 </div>
-                <div onClick={openWaterModal} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${waterInfo&&waterInfo.daysLeft===0?dk.teal:waterInfo&&waterInfo.earlyTrigger?dk.gold:dk.border}`}}>
+                <div onClick={openWaterModal} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${waterInfo&&waterInfo.daysLeft===0?dk.teal:waterInfo&&waterInfo.earlyTrigger?dk.gold+"88":dk.teal+"44"}`}}>
                   <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>WATER</div>
-                  <div style={{fontSize:20,fontWeight:700,color:waterInfo?(waterInfo.daysLeft===0?dk.teal:waterInfo.earlyTrigger?dk.gold:waterInfo.daysLeft<=2?dk.gold:dk.mutedLight):dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"Today":waterInfo.label):"—"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"due now":waterInfo.earlyTrigger?"heat 🌡️":`days`):"—"}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:waterInfo?(waterInfo.daysLeft===0?dk.teal:waterInfo.earlyTrigger?dk.gold:waterInfo.daysLeft<=2?dk.gold:dk.mutedLight):dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"Today":waterInfo.label):"—"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"due now":waterInfo.earlyTrigger?"heat 🌡️":"days"):"—"}</div>
                 </div>
-                <div onClick={()=>scrollTo(refPlants)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
+                <div onClick={()=>scrollTo(refPlants)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${dk.teal+"44"}`}}>
                   <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>OUTSIDE</div>
-                  <div style={{fontSize:20,fontWeight:700,color:dk.teal}}>{outP.length}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:dk.teal}}>{outP.length}</div>
                   <div style={{fontSize:9,color:dk.muted}}>{inP.length>0?`${inP.length} inside`:"plants"}</div>
-                </div>
-                <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer"}}>
-                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>TODAY</div>
-                  <div style={{fontSize:20,fontWeight:700,color:dk.white}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_min[0])}° low`:""}</div>
                 </div>
               </div>
 
@@ -463,9 +466,9 @@ function App() {
                     {todayR&&<div style={{padding:"5px 10px",borderRadius:8,background:"#03221A",fontSize:11,color:"#6EE7B7",marginBottom:6}}>🪣 Collect rainwater — {timeline[0].rain.toFixed(1)}" expected</div>}
                     {pr.filter(t=>ba[t]).map(type=>{
                       const a=acts[type],res=getAA(td,type);
-                      if(res){return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,fontSize:11,color:dk.white,fontStyle:"italic",marginBottom:4}}>{icons[type]} {ba[type].join(", ")} — {a.action} <span style={{color:dk.teal,marginLeft:6}}>✓ snoozed</span></div>);}
+                      if(res){return(<div key={type} style={{padding:"5px 10px",borderRadius:8,background:dk.card,fontSize:11,color:dk.white,fontStyle:"italic",marginBottom:4,fontSize:13}}>{icons[type]} {ba[type].join(", ")} — {a.action} <span style={{color:dk.teal,marginLeft:6}}>✓ snoozed</span></div>);}
                       return(<div key={type} style={{marginBottom:6}}>
-                        <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:11,color:a.color,lineHeight:1.5}}>{icons[type]} {ba[type].join(", ")} — {a.action}</div>
+                        <div style={{padding:"5px 10px",borderRadius:8,background:a.bg,fontSize:13,color:a.color,lineHeight:1.6,fontWeight:600}}>{icons[type]} {ba[type].join(", ")} — {a.action}</div>
                         <div style={{display:"flex",gap:6,marginTop:4}}>
                           <button onClick={()=>resolveAlert(td,type,ba[type],"snoozed")} style={{flex:1,padding:"5px 8px",borderRadius:6,background:dk.cardAlt,border:`1px solid ${dk.border}`,fontSize:10,color:dk.gold,fontWeight:600,cursor:"pointer"}}>💤 snooze — remind tomorrow</button>
                         </div>
@@ -538,7 +541,7 @@ function App() {
                   return(
                     <div key={i} onClick={()=>setDetailPlant(p)} style={tr}>
                       <div style={{flex:3,display:"flex",alignItems:"center",gap:5,minWidth:0}}>
-                        <div style={{...tc,color:dk.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",cursor:"pointer"}}>{p.common_name}</div>
+                        <div style={{...tc,color:dk.white,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",cursor:"pointer",fontSize:13}}>{p.common_name}</div>
                       </div>
                       <div style={{flex:2,...tc,fontSize:10,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g?.name||"—"}</div>
                       <div style={{flex:3,fontSize:10,color:hasAdj?dk.gold:dk.mutedLight,textAlign:"center"}}>
@@ -688,6 +691,14 @@ function App() {
             <div style={{fontSize:13,color:dk.muted}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div>
           </div>
           <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>TESTING</div>
+            <div style={{fontSize:12,color:dk.muted,marginBottom:12,lineHeight:1.6}}>Forces extreme weather conditions so all alerts fire. Turn off when done testing.</div>
+            <button onClick={()=>{setTestMode(t=>!t);setDismissed({});setAlertAckedDate("");}}
+              style={{width:"100%",padding:"12px",borderRadius:10,border:`1.5px solid ${testMode?"#F87171":dk.border}`,background:testMode?"#7F1D1D":"transparent",color:testMode?"#FCA5A5":dk.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>
+              {testMode?"⚠️ Test mode ON — tap to disable":"Test mode off"}
+            </button>
+          </div>
+          <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
             <div style={{fontSize:12,color:dk.muted,marginBottom:12,lineHeight:1.6}}>Daily weather alerts sent to your device even when the app is closed. Requires adding the app to your home screen on iOS.</div>
             {pushEnabled?(
@@ -779,7 +790,7 @@ function App() {
               value={waterNotes}
               onChange={e=>setWaterNotes(e.target.value.slice(0,500))}
               rows={3}
-              placeholder="Which plants did you skip? Any observations..."
+              placeholder="e.g. skipped snake plant and pothos"
               style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${dk.border}`,fontSize:13,background:dk.bg,color:dk.white,outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"none",lineHeight:1.5}}
             />
             <button onClick={logWatering}
