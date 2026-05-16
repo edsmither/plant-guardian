@@ -619,7 +619,7 @@ function App() {
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
             <button onClick={()=>{setScr(editingGroup?"groups":"home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setGroupNameError("");}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
             <div style={hd}>{editingGroup?"Edit Group":"Add Plants"}</div>
-          </div>
+          </div>  
 
           {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
             {selP.map((p,i)=>(<div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer"}}>
