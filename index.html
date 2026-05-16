@@ -235,16 +235,16 @@ function App() {
     const today=new Date(),dates=[];
     for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}
     if(testMode){
-      setWx({daily:{time:dates,temperature_2m_max:[97,98,96,99,97,95,98],temperature_2m_min:[42,44,41,43,42,40,44],wind_speed_10m_max:[22,18,24,20,26,22,19],precipitation_sum:[0,0,0.5,0.8,0,1.2,0],weathercode:[1,2,61,63,2,61,2]}});
+      setWx({current:{temperature_2m:95},daily:{time:dates,temperature_2m_max:[97,98,96,99,97,95,98],temperature_2m_min:[42,44,41,43,42,40,44],wind_speed_10m_max:[22,18,24,20,26,22,19],precipitation_sum:[0,0,0.5,0.8,0,1.2,0],weathercode:[1,2,61,63,2,61,2]}});
       return;
     }
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&forecast_days=7&timezone=America%2FChicago`;
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&forecast_days=7&timezone=America%2FChicago`;
     fetch(url)
       .then(r=>r.ok?r.json():Promise.reject(r.status))
       .then(data=>setWx(data))
       .catch(e=>{
         console.warn("Weather fetch failed, using fallback:",e);
-        setWx({daily:{time:dates,temperature_2m_max:[88,90,92,89,87,91,88],temperature_2m_min:[68,70,71,69,67,70,69],wind_speed_10m_max:[12,10,14,11,13,15,10],precipitation_sum:[0,0,0,0.2,0,0,0],weathercode:[1,2,2,3,2,1,2]}});
+        setWx({current:null,daily:{time:dates,temperature_2m_max:[88,90,92,89,87,91,88],temperature_2m_min:[68,70,71,69,67,70,69],wind_speed_10m_max:[12,10,14,11,13,15,10],precipitation_sum:[0,0,0,0.2,0,0,0],weathercode:[1,2,2,3,2,1,2]}});
       });
   },[loc,testMode]);
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
@@ -433,8 +433,8 @@ function App() {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6,marginBottom:10}}>
                 <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${dk.teal}44`}}>
                   <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>CURRENT</div>
-                  <div style={{fontSize:22,fontWeight:800,color:dk.white}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_min[0])}° low`:""}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:dk.white}}>{wx&&wx.current?`${Math.round(wx.current.temperature_2m)}°`:wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
+                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}° high`:""}</div>
                 </div>
                 <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${todayAC>0?dk.red+"88":dk.teal+"44"}`}}>
                   <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>ALERTS</div>
