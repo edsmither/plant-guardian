@@ -234,6 +234,7 @@ function App() {
   const [testMode,setTestMode]=useState(false);
   const [heatThreshold,setHeatThreshold]=useState(95);
   const [climate,setClimate]=useState(null);
+  const [yearTally,setYearTally]=useState({});
   const [pushPending,setPushPending]=useState(false);
   const refToday=useRef(null);
   const refOutlook=useRef(null);
@@ -249,7 +250,7 @@ function App() {
   },[]);
 
   useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r&&r.value){const d=validateStoredData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[] );
-  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate]);
+  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally]);
   useEffect(()=>{
     if(!loc)return;
     const today=new Date(),dates=[];
@@ -268,6 +269,26 @@ function App() {
       });
   },[loc,testMode]);
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
+
+  // Daily tally — record today's heat/rain once per day into a year-keyed log
+  useEffect(()=>{
+    if(!ready||!wx||testMode)return;
+    const today=new Date().toISOString().split("T")[0];
+    const year=today.slice(0,4);
+    const todayHigh=wx.daily.temperature_2m_max[0];
+    const todayRain=wx.daily.precipitation_sum[0];
+    setYearTally(prev=>{
+      const yearData=prev[year]||{heatDays:[],rainDays:[]};
+      let changed=false;
+      const heatDays=[...yearData.heatDays];
+      const rainDays=[...yearData.rainDays];
+      if(todayHigh>=heatThreshold&&!heatDays.includes(today)){heatDays.push(today);changed=true;}
+      if(todayRain>=0.1&&!rainDays.includes(today)){rainDays.push(today);changed=true;}
+      if(!changed)return prev;
+      return {...prev,[year]:{heatDays,rainDays}};
+    });
+  },[ready,wx,heatThreshold,testMode]);
+
 
   // Fetch historical climate baselines once per season, per location
   useEffect(()=>{
@@ -301,36 +322,32 @@ function App() {
       .catch(e=>console.warn("Climate fetch failed:",e));
   },[ready,loc,heatThreshold,testMode]);
 
-  // Count this year's heat days + rain recency from current-year forecast/history we have
-  const getSeasonProgress=()=>{
-    // Count heat days elapsed this year from the timeline window we can see,
-    // plus any logged. For now, derive from timeline (7-day) is too short —
-    // use day-of-year against climate average as the elapsed estimate.
+  // Heat progress — real counted days this year vs historical average
+  const getHeatProgress=()=>{
     if(!climate)return null;
-    const now=new Date();
-    const start=new Date(now.getFullYear(),0,0);
-    const dayOfYear=Math.floor((now-start)/86400000);
-    // Leander-style hot season ~ June 1 (day 152) to Sep 30 (day 273)
-    const seasonStart=152, seasonEnd=273;
-    let seasonPct=0;
-    if(dayOfYear<seasonStart)seasonPct=0;
-    else if(dayOfYear>seasonEnd)seasonPct=1;
-    else seasonPct=(dayOfYear-seasonStart)/(seasonEnd-seasonStart);
+    const year=String(new Date().getFullYear());
+    const counted=(yearTally[year]&&yearTally[year].heatDays.length)||0;
+    const avg=climate.avgHeatDays||1;
     return {
-      seasonPct,
-      heatDaysElapsed:Math.round(climate.avgHeatDays*seasonPct),
-      heatDaysTotal:climate.avgHeatDays,
-      inSeason:dayOfYear>=seasonStart&&dayOfYear<=seasonEnd,
+      counted,
+      avg,
+      pct:Math.min(1,counted/avg),
+      remaining:Math.max(0,avg-counted),
     };
   };
 
-  const getRainRecency=()=>{
-    if(!timeline.length)return null;
-    // days since last rain looking backward isn't in our 7-day forward window,
-    // so use: did it rain in last logged days + is rain in next 3 days
-    const rainSoon=timeline.slice(0,3).some(d=>d.rain>0.1);
-    const rainToday=timeline[0]&&timeline[0].rain>0.1;
-    return {rainSoon,rainToday};
+  // Rain progress — real counted rain days this year vs historical average
+  const getRainProgress=()=>{
+    if(!climate)return null;
+    const year=String(new Date().getFullYear());
+    const counted=(yearTally[year]&&yearTally[year].rainDays.length)||0;
+    const avg=climate.avgRainDays||1;
+    return {
+      counted,
+      avg,
+      pct:Math.min(1,counted/avg),
+      remaining:Math.max(0,avg-counted),
+    };
   };
 
 
@@ -611,36 +628,42 @@ function App() {
               </div>
 
               {(()=>{
-                const sp=getSeasonProgress();
-                const rr=getRainRecency();
-                if(!sp&&!rr)return null;
+                const hp=getHeatProgress();
+                const rp=getRainProgress();
+                if(!climate)return (
+                  <div style={{...cs,padding:"14px 12px"}}>
+                    <div style={hd}>Season Tracker</div>
+                    <div style={{fontSize:12,color:dk.muted,textAlign:"center",padding:"12px 0"}}>Loading local climate history…</div>
+                  </div>
+                );
                 return (
                   <div style={{...cs,padding:"14px 12px"}}>
                     <div style={hd}>Season Tracker</div>
                     <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-                      {sp&&(
+                      {hp&&(
                         <Donut
-                          pct={sp.seasonPct}
+                          pct={hp.pct}
                           color={"#F87171"}
-                          centerText={`${sp.heatDaysElapsed}/${sp.heatDaysTotal}`}
+                          centerText={`${hp.counted}/${hp.avg}`}
                           sub={`days ≥${heatThreshold}°`}
-                          label={sp.inSeason?"heat season":"season not started"}
+                          label={"hot days this year"}
                         />
                       )}
-                      {rr&&climate&&(
+                      {rp&&(
                         <Donut
-                          pct={rr.rainToday?1:rr.rainSoon?0.5:0.1}
+                          pct={rp.pct}
                           color={"#7AB8F5"}
-                          centerText={rr.rainToday?"Now":rr.rainSoon?"Soon":"Dry"}
-                          sub={rr.rainToday?"raining":rr.rainSoon?"within 3d":"no rain"}
-                          label={"rain status"}
+                          centerText={`${rp.counted}/${rp.avg}`}
+                          sub={"rain days"}
+                          label={"rain days this year"}
                         />
                       )}
                     </div>
                     <div style={{fontSize:11,color:dk.muted,marginTop:10,lineHeight:1.5,textAlign:"center"}}>
-                      {climate
-                        ? `Based on ${climate.yearsSampled}-year local average. ${getSeasonProgress()?.inSeason?"You're in the vigilant stretch.":"Hot season hasn't started yet."}`
-                        : "Loading local climate history…"}
+                      {`Based on a ${climate.yearsSampled}-year local average. ${hp&&hp.remaining>0?`~${hp.remaining} hot days likely still ahead.`:"Hot days are tracking past the yearly norm."}`}
+                    </div>
+                    <div style={{fontSize:10,color:dk.muted,marginTop:6,lineHeight:1.5,textAlign:"center",fontStyle:"italic"}}>
+                      Counts build as the app runs each day.
                     </div>
                   </div>
                 );
