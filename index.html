@@ -290,64 +290,86 @@ function App() {
   },[ready,wx,heatThreshold,testMode]);
 
 
-  // Fetch historical climate baselines once per season, per location
+  // Fetch climate baselines + this year's retroactive count.
+  // Outdoor season window = Mar 21 -> Dec 21.
   useEffect(()=>{
     if(!ready||!loc||testMode)return;
-    const seasonKey=`${loc.lat.toFixed(2)},${loc.lon.toFixed(2)}-${new Date().getFullYear()}-${heatThreshold}`;
-    if(climate&&climate.key===seasonKey)return; // already have it
     const thisYear=new Date().getFullYear();
-    const years=[thisYear-1,thisYear-2,thisYear-3];
-    const fetchYear=(y)=>{
-      const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${y}-01-01&end_date=${y}-12-31&daily=temperature_2m_max,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=America%2FChicago`;
+    const seasonKey=`${loc.lat.toFixed(2)},${loc.lon.toFixed(2)}-${thisYear}-${heatThreshold}`;
+    // Refetch if key changed OR if we don't have today's count yet
+    const todayStr=new Date().toISOString().split("T")[0];
+    if(climate&&climate.key===seasonKey&&climate.countedThrough===todayStr)return;
+
+    const seasonStart=(y)=>`${y}-03-21`;
+    const seasonEnd=(y)=>`${y}-12-21`;
+    const countWindow=(daily)=>{
+      const highs=daily.temperature_2m_max||[];
+      const precip=daily.precipitation_sum||[];
+      let heat=0,rain=0;
+      for(let i=0;i<highs.length;i++){
+        if(highs[i]!=null&&highs[i]>=heatThreshold)heat++;
+        if(precip[i]!=null&&precip[i]>=0.1)rain++;
+      }
+      return {heat,rain};
+    };
+    const fetchRange=(start,end)=>{
+      const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${start}&end_date=${end}&daily=temperature_2m_max,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=America%2FChicago`;
       return fetch(url).then(r=>r.ok?r.json():Promise.reject(r.status));
     };
-    Promise.all(years.map(y=>fetchYear(y).catch(()=>null)))
-      .then(datasets=>{
-        const valid=datasets.filter(Boolean);
-        if(!valid.length)return;
-        let totHeat=0,totRainDays=0;
-        for(const d of valid){
-          const highs=d.daily.temperature_2m_max||[];
-          const precip=d.daily.precipitation_sum||[];
-          totHeat+=highs.filter(t=>t!=null&&t>=heatThreshold).length;
-          totRainDays+=precip.filter(p=>p!=null&&p>=0.1).length;
-        }
-        setClimate({
-          key:seasonKey,
-          avgHeatDays:Math.round(totHeat/valid.length),
-          avgRainDays:Math.round(totRainDays/valid.length),
-          yearsSampled:valid.length,
-        });
-      })
-      .catch(e=>console.warn("Climate fetch failed:",e));
+
+    // Historical: 3 prior years, full Mar21-Dec21 window for the average
+    const histYears=[thisYear-1,thisYear-2,thisYear-3];
+    // This year: Mar 21 -> yesterday (archive lags ~1-2 days; today comes from daily tally)
+    const yesterday=new Date(Date.now()-86400000).toISOString().split("T")[0];
+
+    Promise.all([
+      ...histYears.map(y=>fetchRange(seasonStart(y),seasonEnd(y)).catch(()=>null)),
+      fetchRange(seasonStart(thisYear),yesterday).catch(()=>null),
+    ]).then(results=>{
+      const histData=results.slice(0,3).filter(Boolean);
+      const thisYearData=results[3];
+      if(!histData.length){console.warn("Climate history unavailable");return;}
+      let totHeat=0,totRain=0;
+      for(const d of histData){
+        const c=countWindow(d.daily);
+        totHeat+=c.heat;totRain+=c.rain;
+      }
+      const ty=thisYearData?countWindow(thisYearData.daily):{heat:0,rain:0};
+      setClimate({
+        key:seasonKey,
+        avgHeatDays:Math.round(totHeat/histData.length),
+        avgRainDays:Math.round(totRain/histData.length),
+        yearsSampled:histData.length,
+        baseHeatCount:ty.heat,
+        baseRainCount:ty.rain,
+        countedThrough:thisYearData?todayStr:null,
+      });
+    }).catch(e=>console.warn("Climate fetch failed:",e));
   },[ready,loc,heatThreshold,testMode]);
 
-  // Heat progress — real counted days this year vs historical average
+  // Heat progress — archive retroactive count + live daily tally, vs historical avg
   const getHeatProgress=()=>{
     if(!climate)return null;
     const year=String(new Date().getFullYear());
-    const counted=(yearTally[year]&&yearTally[year].heatDays.length)||0;
+    const tallyDays=(yearTally[year]&&yearTally[year].heatDays)||[];
+    // tally days after the archive cutoff add to the archive base count
+    const cutoff=climate.countedThrough;
+    const tallyExtra=cutoff?tallyDays.filter(d=>d>=cutoff).length:tallyDays.length;
+    const counted=(climate.baseHeatCount||0)+tallyExtra;
     const avg=climate.avgHeatDays||1;
-    return {
-      counted,
-      avg,
-      pct:Math.min(1,counted/avg),
-      remaining:Math.max(0,avg-counted),
-    };
+    return {counted,avg,pct:Math.min(1,counted/avg),remaining:Math.max(0,avg-counted)};
   };
 
-  // Rain progress — real counted rain days this year vs historical average
+  // Rain progress — archive retroactive count + live daily tally, vs historical avg
   const getRainProgress=()=>{
     if(!climate)return null;
     const year=String(new Date().getFullYear());
-    const counted=(yearTally[year]&&yearTally[year].rainDays.length)||0;
+    const tallyDays=(yearTally[year]&&yearTally[year].rainDays)||[];
+    const cutoff=climate.countedThrough;
+    const tallyExtra=cutoff?tallyDays.filter(d=>d>=cutoff).length:tallyDays.length;
+    const counted=(climate.baseRainCount||0)+tallyExtra;
     const avg=climate.avgRainDays||1;
-    return {
-      counted,
-      avg,
-      pct:Math.min(1,counted/avg),
-      remaining:Math.max(0,avg-counted),
-    };
+    return {counted,avg,pct:Math.min(1,counted/avg),remaining:Math.max(0,avg-counted)};
   };
 
 
@@ -646,7 +668,7 @@ function App() {
                           color={"#F87171"}
                           centerText={`${hp.counted}/${hp.avg}`}
                           sub={`days ≥${heatThreshold}°`}
-                          label={"hot days this year"}
+                          label={"hot days this season"}
                         />
                       )}
                       {rp&&(
@@ -655,7 +677,7 @@ function App() {
                           color={"#7AB8F5"}
                           centerText={`${rp.counted}/${rp.avg}`}
                           sub={"rain days"}
-                          label={"rain days this year"}
+                          label={"rain days this season"}
                         />
                       )}
                     </div>
@@ -663,7 +685,7 @@ function App() {
                       {`Based on a ${climate.yearsSampled}-year local average. ${hp&&hp.remaining>0?`~${hp.remaining} hot days likely still ahead.`:"Hot days are tracking past the yearly norm."}`}
                     </div>
                     <div style={{fontSize:10,color:dk.muted,marginTop:6,lineHeight:1.5,textAlign:"center",fontStyle:"italic"}}>
-                      Counts build as the app runs each day.
+                      Outdoor season: Mar 21 – Dec 21
                     </div>
                   </div>
                 );
