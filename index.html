@@ -3,21 +3,45 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="theme-color" content="#0B1120"/>
+  <meta name="theme-color" content="#060a13"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Plant Guardian"/>
   <title>Plant Guardian</title>
   <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: #0B1120; }
-    body { -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+
+:root, [data-theme="dark"] {
+  --bg:#060a13; --panel:#0d1626; --panel-2:#111c30;
+  --line:#1f2e48; --line-2:#2a3c5c;
+  --ink:#e6edf7; --ink-2:#a8b4c8; --ink-3:#6b7894;
+  --amber:#e89043; --mint:#5be3a8; --warn:#f0c43a; --alert:#ff6a4d; --steel:#6fa8d6;
+}
+[data-theme="notebook"] {
+  --bg:#ece4cf; --panel:#f5efdb; --panel-2:#faf5e3;
+  --line:#c9be9d; --line-2:#b2a685;
+  --ink:#1a2438; --ink-2:#4a5a78; --ink-3:#8a8268;
+  --amber:#b3651f; --mint:#1f8a5b; --warn:#a87a0e; --alert:#c43b1f; --steel:#3a6b9a;
+}
+[data-theme="cotton-candy"] {
+  --bg:#ecdfe6; --panel:#f5ebef; --panel-2:#faf2f6;
+  --line:#ccb6c1; --line-2:#ad8e9d;
+  --ink:#2a1c2c; --ink-2:#5d4a59; --ink-3:#8c7984;
+  --amber:#c4327a; --mint:#5a8770; --warn:#b08410; --alert:#a01a47; --steel:#6373a6;
+}
+@keyframes pgpulse { 0%,100%{opacity:0.35} 50%{opacity:1} }
+
+    html, body { height: 100%; background: var(--bg); }
+    body { -webkit-tap-highlight-color: transparent; overflow-x: hidden; font-family: 'Inter', system-ui, sans-serif; }
     #root { min-height: 100vh; }
-    textarea, input { font-family: inherit; }
-    ::-webkit-scrollbar { width: 4px; }
+    textarea, input, button { font-family: inherit; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #1E2D4A; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -178,30 +202,84 @@ const validateStoredData = (raw) => {
 const VAPID_PUBLIC_KEY = "BDPbVR8bQY5KMT0ignaMjWYO0XM6nVv7ArPNwuHicCsrAFwqgXv5rWLFweLV25rNCzOEcLxZim_tvpvejM4qjfQ";
 const WORKER_URL = "https://plant-guardian-push.sericah007.workers.dev";
 
-const dk = {bg:"#0B1120",card:"#111B2E",cardAlt:"#162035",border:"#1E2D4A",gold:"#E8B931",goldDim:"#C49A1C",teal:"#2DD4BF",tealDim:"#0D9488",white:"#F1F5F9",muted:"#64748B",mutedLight:"#94A3B8",red:"#F87171"};
+const dk = {
+  bg:"var(--bg)", card:"var(--panel)", cardAlt:"var(--panel-2)",
+  border:"var(--line)", borderHeavy:"var(--line-2)",
+  gold:"var(--amber)", goldDim:"var(--amber)",
+  teal:"var(--mint)", tealDim:"var(--mint)",
+  white:"var(--ink)", muted:"var(--ink-3)", mutedLight:"var(--ink-2)",
+  red:"var(--alert)", warn:"var(--warn)", steel:"var(--steel)",
+};
 const cs = {background:dk.card,borderRadius:12,padding:14,marginBottom:10,border:`1px solid ${dk.border}`};
-const sCl = {ok:dk.teal,heat:"#F87171",cold:"#7AB8F5",wind:"#BFA0E8",resolved:dk.muted};
-const hd = {fontSize:14,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:dk.gold,marginBottom:10};
+const sCl = {ok:"var(--mint)",heat:"var(--alert)",cold:"var(--steel)",wind:"var(--amber)",resolved:"var(--ink-3)"};
+const hd = {fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:700,letterSpacing:"0.22em",textTransform:"uppercase",color:dk.gold,marginBottom:10};
+const eyebrow = {fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:500,letterSpacing:"0.28em",textTransform:"uppercase",color:dk.muted,marginBottom:3};
+const mono = {fontFamily:"'JetBrains Mono',monospace"};
 const tr = {display:"flex",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${dk.border}30`};
 const tc = {fontSize:13,color:dk.mutedLight};
+
+
+function StencilDisc({size=36}){
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="86" stroke="var(--amber)" strokeWidth="6" fill="none"/>
+      <circle cx="100" cy="100" r="64" fill="var(--panel-2)" stroke="var(--amber)" strokeWidth="1.5"/>
+      <g transform="translate(100 100) rotate(-20) translate(-36 -50)">
+        <path d="M36 0 C 64 18, 72 56, 50 100 C 22 78, 6 48, 36 0 Z"
+          fill="var(--mint)" stroke="var(--mint)" strokeWidth="2" strokeLinejoin="round"/>
+        <path d="M36 0 L 36 100" stroke="var(--bg)" strokeWidth="3" strokeLinecap="round"/>
+        <g stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" opacity="0.85">
+          <line x1="36" y1="22" x2="52" y2="26"/>
+          <line x1="36" y1="42" x2="56" y2="46"/>
+          <line x1="36" y1="62" x2="54" y2="66"/>
+          <line x1="36" y1="22" x2="22" y2="28"/>
+          <line x1="36" y1="42" x2="20" y2="48"/>
+          <line x1="36" y1="62" x2="24" y2="68"/>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+function Section({sKey,num,label,meta,title,collapsed,onToggle,children}){
+  const isCollapsed=!!collapsed[sKey];
+  return (
+    <div style={{background:"var(--panel)",borderRadius:8,border:"1px solid var(--line)",marginBottom:12,overflow:"hidden"}}>
+      <div onClick={()=>onToggle(sKey)} style={{padding:"14px 16px 12px",cursor:"pointer",userSelect:"none"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:500,letterSpacing:"0.28em",textTransform:"uppercase",color:"var(--ink-3)"}}>
+            <span style={{color:"var(--mint)"}}>{num}</span> · {label}{meta?` · ${meta}`:""}
+          </div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"var(--ink-3)"}}>{isCollapsed?"+":"–"}</div>
+        </div>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:700,letterSpacing:"0.22em",textTransform:"uppercase",color:"var(--amber)",marginTop:3}}>{title}</div>
+      </div>
+      {!isCollapsed&&<div style={{padding:"0 16px 16px"}}>{children}</div>}
+    </div>
+  );
+}
+
 
 function Donut({pct,label,sub,color,centerText}){
   const r=32, circ=2*Math.PI*r;
   const dash=Math.max(0,Math.min(1,pct))*circ;
   return (
     <div style={{textAlign:"center",flex:1}}>
-      <svg width="86" height="86" viewBox="0 0 86 86">
-        <circle cx="43" cy="43" r="32" fill="none" stroke="#1E2D4A" strokeWidth="8"/>
-        <circle cx="43" cy="43" r="32" fill="none" stroke={color} strokeWidth="8"
+      <svg width="92" height="92" viewBox="0 0 92 92">
+        <circle cx="46" cy="46" r="32" fill="none" stroke="var(--line)" strokeWidth="6"/>
+        <circle cx="46" cy="46" r="32" fill="none" stroke={color} strokeWidth="6"
           strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-          transform="rotate(-90 43 43)"/>
-        <text x="43" y="40" textAnchor="middle" fontSize="17" fontWeight="800" fill="#F1F5F9">{centerText}</text>
-        <text x="43" y="55" textAnchor="middle" fontSize="9" fill="#64748B">{sub}</text>
+          transform="rotate(-90 46 46)"/>
+        <text x="46" y="44" textAnchor="middle" fontSize="20" fontWeight="800" fill="var(--ink)"
+          fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text>
+        <text x="46" y="58" textAnchor="middle" fontSize="8" fill="var(--ink-3)"
+          fontFamily="'JetBrains Mono',monospace" letterSpacing="0.1em">{sub}</text>
       </svg>
-      <div style={{fontSize:11,color:"#94A3B8",marginTop:2,fontWeight:600}}>{label}</div>
+      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:"0.22em",textTransform:"uppercase",color:"var(--ink-3)",marginTop:2}}>{label}</div>
     </div>
   );
 }
+
 
 function App() {
   const [scr,setScr]=useState("home");
@@ -233,6 +311,8 @@ function App() {
   const [pushEnabled,setPushEnabled]=useState(false);
   const [testMode,setTestMode]=useState(false);
   const [heatThreshold,setHeatThreshold]=useState(95);
+  const [theme,setTheme]=useState("dark");
+  const [collapsed,setCollapsed]=useState({});
   const [climate,setClimate]=useState(null);
   const [yearTally,setYearTally]=useState({});
   const [pushPending,setPushPending]=useState(false);
@@ -249,8 +329,12 @@ function App() {
     window.storage.get("pg-push").then(r=>{ if(r?.value==="enabled") setPushEnabled(true); }).catch(()=>{});
   },[]);
 
-  useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r&&r.value){const d=validateStoredData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[] );
-  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally]);
+  useEffect(()=>{ document.documentElement.setAttribute("data-theme",theme); },[theme]);
+
+  const toggleSection=(key)=>setCollapsed(c=>({...c,[key]:!c[key]}));
+
+  useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r&&r.value){const d=validateStoredData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);if(d.heatThreshold)setHeatThreshold(d.heatThreshold);if(d.climate)setClimate(d.climate);if(d.yearTally)setYearTally(d.yearTally);if(d.theme)setTheme(d.theme);if(d.collapsed)setCollapsed(d.collapsed);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[] );
+  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed]);
   useEffect(()=>{
     if(!loc)return;
     const today=new Date(),dates=[];
@@ -531,7 +615,7 @@ function App() {
   };
 
   return (
-    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white,position:"relative",overflow:"hidden"}}>
+    <div style={{fontFamily:"'Inter',system-ui,sans-serif",background:"var(--bg)",minHeight:"100vh",maxWidth:480,margin:"0 auto",color:"var(--ink)",position:"relative",overflow:"hidden"}}>
       {/* Aurora borealis background */}
       <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,maxWidth:480,margin:"0 auto",pointerEvents:"none",zIndex:0,
         background:`
@@ -542,15 +626,25 @@ function App() {
         `}}/>
       <div style={{position:"relative",zIndex:1}}>
 
-      <div style={{padding:"14px 18px 12px",borderBottom:`1px solid ${dk.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <img src={`data:image/png;base64,${LOGO}`} alt="logo" style={{width:36,height:36,objectFit:"contain"}}/>
-          <div style={{fontSize:18,fontWeight:800,letterSpacing:2,color:dk.white,textTransform:"uppercase"}}>Plant Guardian</div>
+      <div style={{padding:"10px 16px 14px",borderBottom:"1px solid var(--line)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:11}}>
+          <StencilDisc size={36}/>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:22,fontWeight:800,letterSpacing:"0.18em",color:"var(--ink)",textTransform:"uppercase"}}>Plant Guardian</div>
         </div>
-        {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:dk.cardAlt,border:`1px solid ${dk.border}`,borderRadius:8,padding:"4px 8px",cursor:"pointer",fontSize:13,color:dk.muted}}>⚙️</button>}
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {scr==="home"&&wx&&(
+            <div style={{display:"flex",alignItems:"center",gap:5}}>
+              <div style={{width:6,height:6,borderRadius:3,background:"var(--mint)",boxShadow:"0 0 8px var(--mint)",animation:"pgpulse 2s ease-in-out infinite"}}/>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:"0.12em",color:"var(--ink-3)"}}>
+                <span style={{color:"var(--mint)"}}>LIVE</span>
+              </span>
+            </div>
+          )}
+          {scr==="home"&&<button onClick={()=>setScr("set")} style={{background:"var(--panel)",border:"1px solid var(--line-2)",borderRadius:8,padding:"5px 9px",cursor:"pointer",fontSize:13,color:"var(--ink-3)"}}>⚙</button>}
+        </div>
       </div>
 
-      {testMode&&<div style={{background:"#7F1D1D",padding:"6px 18px",fontSize:11,fontWeight:700,color:"#FCA5A5",textAlign:"center",letterSpacing:1}}>⚠️ TEST MODE — extreme weather active</div>}
+      {testMode&&<div style={{background:"var(--alert)",padding:"6px 18px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,color:"var(--bg)",textAlign:"center",letterSpacing:"0.15em"}}>TEST MODE — EXTREME WEATHER ACTIVE</div>}
       <div style={{padding:"12px 14px 100px"}}>
         {err&&<div style={{...cs,background:"#7F1D1D",borderColor:dk.red}}><div style={{fontSize:13,color:"#FCA5A5"}}>{err}</div></div>}
 
@@ -564,25 +658,29 @@ function App() {
           ):(
             <>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6,marginBottom:10}}>
-                <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${dk.teal}44`}}>
-                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>CURRENT</div>
-                  <div style={{fontSize:22,fontWeight:800,color:dk.white}}>{wx&&wx.current?`${Math.round(wx.current.temperature_2m)}°`:wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}° high`:""}</div>
+                <div onClick={()=>scrollTo(refOutlook)} style={{...cs,marginBottom:0,textAlign:"center",padding:"12px 6px 10px",cursor:"pointer",border:"1px solid var(--line)",position:"relative"}}>
+                  <><span style={{position:"absolute",top:-1,left:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",top:-1,right:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,left:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,right:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/></>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:"0.22em",marginBottom:4}}>CURRENT</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:34,fontWeight:800,color:"var(--ink)",fontVariantNumeric:"tabular-nums",lineHeight:1}}>{wx&&wx.current?`${Math.round(wx.current.temperature_2m)}°`:wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—"}</div>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",letterSpacing:"0.1em",marginTop:3}}>{wx?`${Math.round(wx.daily.temperature_2m_max[0])}° HIGH`:""}</div>
                 </div>
-                <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${todayAC>0?dk.red+"88":dk.teal+"44"}`}}>
-                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>ALERTS</div>
-                  <div style={{fontSize:22,fontWeight:800,color:todayAC>0?dk.red:dk.teal}}>{todayAC>0?todayAC:"✓"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{todayAC>0?"today":"all clear"}</div>
+                <div onClick={()=>scrollTo(refToday)} style={{...cs,marginBottom:0,textAlign:"center",padding:"12px 6px 10px",cursor:"pointer",border:`1px solid ${todayAC>0?"var(--alert)":"var(--line)"}`,position:"relative"}}>
+                  <><span style={{position:"absolute",top:-1,left:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",top:-1,right:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,left:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,right:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/></>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:"0.22em",marginBottom:4}}>ALERTS</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:34,fontWeight:800,color:todayAC>0?"var(--alert)":"var(--mint)",fontVariantNumeric:"tabular-nums",lineHeight:1}}>{todayAC>0?todayAC:"✓"}</div>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",letterSpacing:"0.1em",marginTop:3}}>{todayAC>0?"TODAY":"ALL CLEAR"}</div>
                 </div>
-                <div onClick={openWaterModal} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${waterInfo&&waterInfo.daysLeft===0?dk.teal:waterInfo&&waterInfo.earlyTrigger?dk.gold+"88":dk.teal+"44"}`}}>
-                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>WATER</div>
-                  <div style={{fontSize:22,fontWeight:800,color:waterInfo?(waterInfo.daysLeft===0?dk.teal:waterInfo.earlyTrigger?dk.gold:waterInfo.daysLeft<=2?dk.gold:dk.mutedLight):dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"Today":waterInfo.label):"—"}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{waterInfo?(waterInfo.daysLeft===0?"due now":waterInfo.earlyTrigger?"heat 🌡️":"days"):"—"}</div>
+                <div onClick={openWaterModal} style={{...cs,marginBottom:0,textAlign:"center",padding:"12px 6px 10px",cursor:"pointer",border:"1px solid var(--line)",position:"relative"}}>
+                  <><span style={{position:"absolute",top:-1,left:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",top:-1,right:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,left:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,right:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/></>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:"0.22em",marginBottom:4}}>WATER</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:34,fontWeight:800,color:waterInfo?(waterInfo.daysLeft===0?"var(--mint)":waterInfo.earlyTrigger?"var(--warn)":waterInfo.daysLeft<=2?"var(--warn)":"var(--ink)"):"var(--ink-3)",fontVariantNumeric:"tabular-nums",lineHeight:1}}>{waterInfo?(waterInfo.daysLeft===0?"Today":waterInfo.label):"—"}</div>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",letterSpacing:"0.1em",marginTop:3}}>{waterInfo?(waterInfo.daysLeft===0?"DUE NOW":waterInfo.earlyTrigger?"HEAT":"DAYS"):"—"}</div>
                 </div>
-                <div onClick={()=>scrollTo(refPlants)} style={{...cs,marginBottom:0,textAlign:"center",padding:"10px 4px",cursor:"pointer",border:`1px solid ${dk.teal+"44"}`}}>
-                  <div style={{fontSize:8,color:dk.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:3}}>OUTSIDE</div>
-                  <div style={{fontSize:22,fontWeight:800,color:dk.teal}}>{outP.length}</div>
-                  <div style={{fontSize:9,color:dk.muted}}>{inP.length>0?`${inP.length} inside`:"plants"}</div>
+                <div onClick={()=>scrollTo(refPlants)} style={{...cs,marginBottom:0,textAlign:"center",padding:"12px 6px 10px",cursor:"pointer",border:"1px solid var(--line)",position:"relative"}}>
+                  <><span style={{position:"absolute",top:-1,left:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",top:-1,right:-1,width:7,height:7,borderTop:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,left:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderLeft:"1px solid var(--amber)"}}/><span style={{position:"absolute",bottom:-1,right:-1,width:7,height:7,borderBottom:"1px solid var(--amber)",borderRight:"1px solid var(--amber)"}}/></>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:"0.22em",marginBottom:4}}>OUTSIDE</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:34,fontWeight:800,color:"var(--mint)",fontVariantNumeric:"tabular-nums",lineHeight:1}}>{outP.length}</div>
+                  <div style={{...mono,fontSize:8.5,color:"var(--ink-3)",letterSpacing:"0.1em",marginTop:3}}>{inP.length>0?`${inP.length} INSIDE`:"PLANTS"}</div>
                 </div>
               </div>
 
@@ -613,8 +711,8 @@ function App() {
 
               {timeline.slice(1).some(d=>d.issues.filter(i=>i.type!=="rain").length>0)&&(
                 <div style={{...cs,padding:"12px"}}>
-                  <div style={hd}>Upcoming</div>
-                  {timeline.slice(1).filter(d=>d.issues.filter(i=>i.type!=="rain").length>0).map(day=>{
+                  <div onClick={()=>toggleSection("upcoming")} style={{cursor:"pointer",userSelect:"none",marginBottom:collapsed["upcoming"]?0:10}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><div style={{...eyebrow}}><span style={{color:"var(--mint)"}}>02</span> · UPCOMING</div><span style={{...mono,fontSize:12,color:"var(--ink-3)"}}>{collapsed["upcoming"]?"+":"–"}</span></div><div style={{...hd,marginBottom:0,marginTop:2}}>Plants to watch</div></div>
+                  {!collapsed["upcoming"]&&timeline.slice(1).filter(d=>d.issues.filter(i=>i.type!=="rain").length>0).map(day=>{
                     const di=day.issues.filter(i=>i.type!=="rain");
                     const ic={heat:"🌡️",cold:"❄️",wind:"💨"};
                     const typeSet=[...new Set(di.map(i=>i.type))];
@@ -630,9 +728,9 @@ function App() {
                 </div>
               )}
 
-              <div ref={refOutlook} style={{...cs,padding:"10px 12px"}}>
-                <div style={hd}>7-Day Outlook</div>
-                <div style={{display:"flex",gap:4,overflowX:"auto"}}>
+              <div ref={refOutlook} style={{...cs,padding:"12px"}}>
+                <div onClick={()=>toggleSection("outlook")} style={{cursor:"pointer",userSelect:"none",marginBottom:collapsed["outlook"]?0:10}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><div style={{...eyebrow}}><span style={{color:"var(--mint)"}}>03</span> · OUTLOOK</div><span style={{...mono,fontSize:12,color:"var(--ink-3)"}}>{collapsed["outlook"]?"+":"–"}</span></div><div style={{...hd,marginBottom:0,marginTop:2}}>7-Day Forecast</div></div>
+                {!collapsed["outlook"]&&<div style={{display:"flex",gap:4,overflowX:"auto"}}>
                   {timeline.map((day,i)=>{
                     const di=day.issues.filter(x=>x.type!=="rain"),ha=di.length>0,it=i===0;
                     return(
@@ -642,26 +740,26 @@ function App() {
                         <div style={{fontSize:12,fontWeight:700,color:dk.white}}>{Math.round(day.high)}°</div>
                         <div style={{fontSize:10,color:dk.muted}}>{Math.round(day.low)}°</div>
                         {ha&&<div style={{fontSize:8,color:dk.red,marginTop:2}}>●{di.length}</div>}
-                        {day.rainCollect&&!ha&&<div style={{fontSize:8,color:"#6EE7B7",marginTop:2}}>🪣</div>}
+                        {day.rainCollect&&!ha&&<div style={{fontSize:8,color:"var(--mint)",marginTop:2}}>🪣</div>}
                       </div>
                     );
                   })}
-                </div>
+                </div>}
               </div>
 
               {(()=>{
                 const hp=getHeatProgress();
                 const rp=getRainProgress();
                 if(!climate)return (
-                  <div style={{...cs,padding:"14px 12px"}}>
-                    <div style={hd}>Season Tracker</div>
-                    <div style={{fontSize:12,color:dk.muted,textAlign:"center",padding:"12px 0"}}>Loading local climate history…</div>
+                  <div style={{...cs,padding:"12px"}}>
+                    <div onClick={()=>toggleSection("season")} style={{cursor:"pointer",userSelect:"none",marginBottom:collapsed["season"]?0:10}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><div style={{...eyebrow}}><span style={{color:"var(--mint)"}}>04</span> · SEASON</div><span style={{...mono,fontSize:12,color:"var(--ink-3)"}}>{collapsed["season"]?"+":"–"}</span></div><div style={{...hd,marginBottom:0,marginTop:2}}>Season Tracker</div></div>
+                    {!collapsed["season"]&&<div style={{...mono,fontSize:11,color:"var(--ink-3)",textAlign:"center",padding:"12px 0"}}>Loading local climate history…</div>}
                   </div>
                 );
                 return (
-                  <div style={{...cs,padding:"14px 12px"}}>
-                    <div style={hd}>Season Tracker</div>
-                    <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                  <div style={{...cs,padding:"12px"}}>
+                    <div onClick={()=>toggleSection("season")} style={{cursor:"pointer",userSelect:"none",marginBottom:collapsed["season"]?0:10}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><div style={{...eyebrow}}><span style={{color:"var(--mint)"}}>04</span> · SEASON</div><span style={{...mono,fontSize:12,color:"var(--ink-3)"}}>{collapsed["season"]?"+":"–"}</span></div><div style={{...hd,marginBottom:0,marginTop:2}}>Season Tracker</div></div>
+                    {!collapsed["season"]&&<><div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
                       {hp&&(
                         <Donut
                           pct={hp.pct}
@@ -684,19 +782,24 @@ function App() {
                     <div style={{fontSize:11,color:dk.muted,marginTop:10,lineHeight:1.5,textAlign:"center"}}>
                       {`Based on a ${climate.yearsSampled}-year local average. ${hp&&hp.remaining>0?`~${hp.remaining} hot days likely still ahead.`:"Hot days are tracking past the yearly norm."}`}
                     </div>
-                    <div style={{fontSize:10,color:dk.muted,marginTop:6,lineHeight:1.5,textAlign:"center",fontStyle:"italic"}}>
-                      Outdoor season: Mar 21 – Dec 21
-                    </div>
+                    <div style={{...mono,fontSize:9,color:"var(--ink-3)",marginTop:6,letterSpacing:"0.1em",textAlign:"center"}}>
+                      OUTDOOR · MAR 21 → DEC 21
+                    </div></>}
                   </div>
                 );
               })()}
 
               <div ref={refPlants} style={{...cs,padding:"12px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                  <div style={hd}>Your Plants</div>
-                  <button onClick={()=>setScr("groups")}
-                    style={{fontSize:10,color:dk.teal,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>manage groups</button>
+                <div onClick={()=>toggleSection("plants")} style={{cursor:"pointer",userSelect:"none",marginBottom:collapsed["plants"]?0:10}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                    <div style={{...eyebrow}}><span style={{color:"var(--mint)"}}>05</span> · INVENTORY</div>
+                    <span style={{...mono,fontSize:12,color:"var(--ink-3)"}}>{collapsed["plants"]?"+":"–"}</span>
+                  </div>
+                  <div style={{...hd,marginBottom:0,marginTop:2}}>Your Plants</div>
                 </div>
+                {!collapsed["plants"]&&<>
+                <button onClick={(e)=>{e.stopPropagation();setScr("groups");}}
+                  style={{...mono,width:"100%",padding:"9px 14px",marginBottom:12,borderRadius:4,fontSize:10,letterSpacing:"0.08em",color:"var(--ink-2)",background:"none",border:"1px dashed var(--line-2)",cursor:"pointer"}}>MANAGE GROUPS →</button>
 
                 <div style={{display:"flex",padding:"4px 0",borderBottom:`1px solid ${dk.border}`,marginBottom:2}}>
                   <div style={{flex:3,fontSize:9,fontWeight:700,color:dk.muted,textTransform:"uppercase",letterSpacing:1}}>Plant</div>
@@ -747,6 +850,7 @@ function App() {
                     })}
                   </div>
                 )}
+                </>}
               </div>
             </>
           )}
@@ -862,8 +966,23 @@ function App() {
             <div style={hd}>Settings</div>
           </div>
           <div style={cs}>
-            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>LOCATION</div>
-            <div style={{fontSize:13,color:dk.muted}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div>
+            <div style={{...eyebrow,marginBottom:8}}>LOCATION</div>
+            <div style={{fontSize:13,color:"var(--ink-2)"}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div>
+          </div>
+          <div style={cs}>
+            <div style={{...eyebrow,marginBottom:10}}>THEME</div>
+            <div style={{display:"flex",gap:8}}>
+              {[{k:"dark",label:"Dark"},{k:"notebook",label:"Notebook"},{k:"cotton-candy",label:"Cotton Candy"}].map(t=>(
+                <button key={t.k} onClick={()=>setTheme(t.k)}
+                  style={{flex:1,padding:"10px 6px",borderRadius:6,cursor:"pointer",
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:"0.08em",
+                    border:`1px solid ${theme===t.k?"var(--amber)":"var(--line)"}`,
+                    background:theme===t.k?"var(--panel-2)":"transparent",
+                    color:theme===t.k?"var(--amber)":"var(--ink-3)",fontWeight:theme===t.k?700:500}}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>TESTING</div>
