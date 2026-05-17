@@ -185,6 +185,24 @@ const hd = {fontSize:14,fontWeight:700,letterSpacing:1.5,textTransform:"uppercas
 const tr = {display:"flex",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${dk.border}30`};
 const tc = {fontSize:13,color:dk.mutedLight};
 
+function Donut({pct,label,sub,color,centerText}){
+  const r=32, circ=2*Math.PI*r;
+  const dash=Math.max(0,Math.min(1,pct))*circ;
+  return (
+    <div style={{textAlign:"center",flex:1}}>
+      <svg width="86" height="86" viewBox="0 0 86 86">
+        <circle cx="43" cy="43" r="32" fill="none" stroke="#1E2D4A" strokeWidth="8"/>
+        <circle cx="43" cy="43" r="32" fill="none" stroke={color} strokeWidth="8"
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          transform="rotate(-90 43 43)"/>
+        <text x="43" y="40" textAnchor="middle" fontSize="17" fontWeight="800" fill="#F1F5F9">{centerText}</text>
+        <text x="43" y="55" textAnchor="middle" fontSize="9" fill="#64748B">{sub}</text>
+      </svg>
+      <div style={{fontSize:11,color:"#94A3B8",marginTop:2,fontWeight:600}}>{label}</div>
+    </div>
+  );
+}
+
 function App() {
   const [scr,setScr]=useState("home");
   const [loc,setLoc]=useState({lat:30.5788,lon:-97.853});
@@ -214,6 +232,8 @@ function App() {
   const [alertAckedDate,setAlertAckedDate]=useState("");
   const [pushEnabled,setPushEnabled]=useState(false);
   const [testMode,setTestMode]=useState(false);
+  const [heatThreshold,setHeatThreshold]=useState(95);
+  const [climate,setClimate]=useState(null);
   const [pushPending,setPushPending]=useState(false);
   const refToday=useRef(null);
   const refOutlook=useRef(null);
@@ -229,7 +249,7 @@ function App() {
   },[]);
 
   useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r&&r.value){const d=validateStoredData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[] );
-  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate]);
+  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate]);
   useEffect(()=>{
     if(!loc)return;
     const today=new Date(),dates=[];
@@ -248,6 +268,71 @@ function App() {
       });
   },[loc,testMode]);
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
+
+  // Fetch historical climate baselines once per season, per location
+  useEffect(()=>{
+    if(!ready||!loc||testMode)return;
+    const seasonKey=`${loc.lat.toFixed(2)},${loc.lon.toFixed(2)}-${new Date().getFullYear()}-${heatThreshold}`;
+    if(climate&&climate.key===seasonKey)return; // already have it
+    const thisYear=new Date().getFullYear();
+    const years=[thisYear-1,thisYear-2,thisYear-3];
+    const fetchYear=(y)=>{
+      const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat}&longitude=${loc.lon}&start_date=${y}-01-01&end_date=${y}-12-31&daily=temperature_2m_max,precipitation_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=America%2FChicago`;
+      return fetch(url).then(r=>r.ok?r.json():Promise.reject(r.status));
+    };
+    Promise.all(years.map(y=>fetchYear(y).catch(()=>null)))
+      .then(datasets=>{
+        const valid=datasets.filter(Boolean);
+        if(!valid.length)return;
+        let totHeat=0,totRainDays=0;
+        for(const d of valid){
+          const highs=d.daily.temperature_2m_max||[];
+          const precip=d.daily.precipitation_sum||[];
+          totHeat+=highs.filter(t=>t!=null&&t>=heatThreshold).length;
+          totRainDays+=precip.filter(p=>p!=null&&p>=0.1).length;
+        }
+        setClimate({
+          key:seasonKey,
+          avgHeatDays:Math.round(totHeat/valid.length),
+          avgRainDays:Math.round(totRainDays/valid.length),
+          yearsSampled:valid.length,
+        });
+      })
+      .catch(e=>console.warn("Climate fetch failed:",e));
+  },[ready,loc,heatThreshold,testMode]);
+
+  // Count this year's heat days + rain recency from current-year forecast/history we have
+  const getSeasonProgress=()=>{
+    // Count heat days elapsed this year from the timeline window we can see,
+    // plus any logged. For now, derive from timeline (7-day) is too short —
+    // use day-of-year against climate average as the elapsed estimate.
+    if(!climate)return null;
+    const now=new Date();
+    const start=new Date(now.getFullYear(),0,0);
+    const dayOfYear=Math.floor((now-start)/86400000);
+    // Leander-style hot season ~ June 1 (day 152) to Sep 30 (day 273)
+    const seasonStart=152, seasonEnd=273;
+    let seasonPct=0;
+    if(dayOfYear<seasonStart)seasonPct=0;
+    else if(dayOfYear>seasonEnd)seasonPct=1;
+    else seasonPct=(dayOfYear-seasonStart)/(seasonEnd-seasonStart);
+    return {
+      seasonPct,
+      heatDaysElapsed:Math.round(climate.avgHeatDays*seasonPct),
+      heatDaysTotal:climate.avgHeatDays,
+      inSeason:dayOfYear>=seasonStart&&dayOfYear<=seasonEnd,
+    };
+  };
+
+  const getRainRecency=()=>{
+    if(!timeline.length)return null;
+    // days since last rain looking backward isn't in our 7-day forward window,
+    // so use: did it rain in last logged days + is rain in next 3 days
+    const rainSoon=timeline.slice(0,3).some(d=>d.rain>0.1);
+    const rainToday=timeline[0]&&timeline[0].rain>0.1;
+    return {rainSoon,rainToday};
+  };
+
 
   // On load — fire once per day
   useEffect(()=>{
@@ -407,7 +492,16 @@ function App() {
   };
 
   return (
-    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white}}>
+    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:dk.bg,minHeight:"100vh",maxWidth:480,margin:"0 auto",color:dk.white,position:"relative",overflow:"hidden"}}>
+      {/* Aurora borealis background */}
+      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,maxWidth:480,margin:"0 auto",pointerEvents:"none",zIndex:0,
+        background:`
+          radial-gradient(ellipse 80% 50% at 20% 0%, rgba(45,212,191,0.13), transparent 60%),
+          radial-gradient(ellipse 70% 45% at 85% 8%, rgba(56,189,170,0.10), transparent 55%),
+          radial-gradient(ellipse 90% 40% at 50% 100%, rgba(192,132,252,0.08), transparent 60%),
+          radial-gradient(ellipse 60% 35% at 80% 92%, rgba(232,185,49,0.06), transparent 55%)
+        `}}/>
+      <div style={{position:"relative",zIndex:1}}>
 
       <div style={{padding:"14px 18px 12px",borderBottom:`1px solid ${dk.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -516,6 +610,42 @@ function App() {
                 </div>
               </div>
 
+              {(()=>{
+                const sp=getSeasonProgress();
+                const rr=getRainRecency();
+                if(!sp&&!rr)return null;
+                return (
+                  <div style={{...cs,padding:"14px 12px"}}>
+                    <div style={hd}>Season Tracker</div>
+                    <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                      {sp&&(
+                        <Donut
+                          pct={sp.seasonPct}
+                          color={"#F87171"}
+                          centerText={`${sp.heatDaysElapsed}/${sp.heatDaysTotal}`}
+                          sub={`days ≥${heatThreshold}°`}
+                          label={sp.inSeason?"heat season":"season not started"}
+                        />
+                      )}
+                      {rr&&climate&&(
+                        <Donut
+                          pct={rr.rainToday?1:rr.rainSoon?0.5:0.1}
+                          color={"#7AB8F5"}
+                          centerText={rr.rainToday?"Now":rr.rainSoon?"Soon":"Dry"}
+                          sub={rr.rainToday?"raining":rr.rainSoon?"within 3d":"no rain"}
+                          label={"rain status"}
+                        />
+                      )}
+                    </div>
+                    <div style={{fontSize:11,color:dk.muted,marginTop:10,lineHeight:1.5,textAlign:"center"}}>
+                      {climate
+                        ? `Based on ${climate.yearsSampled}-year local average. ${getSeasonProgress()?.inSeason?"You're in the vigilant stretch.":"Hot season hasn't started yet."}`
+                        : "Loading local climate history…"}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div ref={refPlants} style={{...cs,padding:"12px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                   <div style={hd}>Your Plants</div>
@@ -619,7 +749,7 @@ function App() {
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
             <button onClick={()=>{setScr(editingGroup?"groups":"home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setGroupNameError("");}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:dk.gold,padding:4}}>←</button>
             <div style={hd}>{editingGroup?"Edit Group":"Add Plants"}</div>
-          </div>  
+          </div>
 
           {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>
             {selP.map((p,i)=>(<div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:dk.tealDim,cursor:"pointer"}}>
@@ -697,6 +827,20 @@ function App() {
               style={{width:"100%",padding:"12px",borderRadius:10,border:`1.5px solid ${testMode?"#F87171":dk.border}`,background:testMode?"#7F1D1D":"transparent",color:testMode?"#FCA5A5":dk.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>
               {testMode?"⚠️ Test mode ON — tap to disable":"Test mode off"}
             </button>
+          </div>
+          <div style={cs}>
+            <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>HEAT THRESHOLD</div>
+            <div style={{fontSize:12,color:dk.muted,marginBottom:12,lineHeight:1.6}}>The temperature that counts as an extreme-heat day for your area. The season tracker counts days at or above this.</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <span style={{fontSize:13,color:dk.mutedLight}}>🌡️ Extreme heat at</span>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <button onClick={()=>setHeatThreshold(t=>Math.max(80,t-5))}
+                  style={{width:32,height:32,borderRadius:8,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:18,cursor:"pointer"}}>−</button>
+                <span style={{fontSize:16,fontWeight:800,color:dk.red,minWidth:54,textAlign:"center"}}>{heatThreshold}°F</span>
+                <button onClick={()=>setHeatThreshold(t=>Math.min(120,t+5))}
+                  style={{width:32,height:32,borderRadius:8,background:dk.bg,border:`1px solid ${dk.border}`,color:dk.white,fontSize:18,cursor:"pointer"}}>+</button>
+              </div>
+            </div>
           </div>
           <div style={cs}>
             <div style={{fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",color:dk.gold,marginBottom:8}}>NOTIFICATIONS</div>
@@ -800,6 +944,7 @@ function App() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
