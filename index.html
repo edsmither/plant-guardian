@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root,[data-theme="dark"]{--bg:#060a13;--panel:#0d1626;--panel-2:#111c30;--line:#1f2e48;--line-2:#2a3c5c;--ink:#e6edf7;--ink-2:#a8b4c8;--ink-3:#6b7894;--amber:#e89043;--mint:#5be3a8;--warn:#f0c43a;--alert:#ff6a4d;--steel:#6fa8d6;}
 [data-theme="notebook"]{--bg:#ece4cf;--panel:#f5efdb;--panel-2:#faf5e3;--line:#c9be9d;--line-2:#b2a685;--ink:#1a2438;--ink-2:#4a5a78;--ink-3:#8a8268;--amber:#b3651f;--mint:#1f8a5b;--warn:#a87a0e;--alert:#c43b1f;--steel:#3a6b9a;}
 [data-theme="cotton-candy"]{--bg:#ecdfe6;--panel:#f5ebef;--panel-2:#faf2f6;--line:#ccb6c1;--line-2:#ad8e9d;--ink:#2a1c2c;--ink-2:#5d4a59;--ink-3:#8c7984;--amber:#c4327a;--mint:#5a8770;--warn:#b08410;--alert:#a01a47;--steel:#6373a6;}
@@ -26,29 +26,33 @@ textarea,input,button{font-family:inherit;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px;}
 
-/* ── Core type classes ────────────────────────────────────────── */
-/* Eyebrow: mono 10px 500 0.22em ALL-CAPS ink-3 */
+/* ── Type classes ───────────────────────────────────────────── */
+/* Eyebrow */
 .eb{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);line-height:1.4;}
-/* Section title: Barlow 28px 800 0.1em ALL-CAPS amber */
-.st{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:14px;}
-/* Plant name in alert row: Barlow 16px 700 0.08em ALL-CAPS */
+/* Section title — 13px, tight tracking, Barlow Condensed 700 */
+.st{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
+/* Alert plant name */
 .pn{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
-/* Alert description: Inter 12px 400 sentence case ink-2 */
+/* Alert description */
 .ad{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--ink-2);margin-top:2px;}
-/* Upcoming day abbr: Barlow 18px 800 0.08em ALL-CAPS ink */
+/* Upcoming day abbr */
 .da{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);line-height:1;}
-/* Upcoming date sub: mono 9px 400 0.14em ALL-CAPS ink-3 */
-.ds{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;}
-/* Outlook day header: mono 9px 700 0.12em ALL-CAPS */
+/* Upcoming date sub */
+.ds{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;}
+/* Outlook day header */
 .oh{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
-/* Stat label: mono 9px 500 0.2em ALL-CAPS ink-3 */
+/* Stat label */
 .sl{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);}
-/* Stat value: Barlow 36px 800 tabular */
+/* Stat value */
 .sv{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
-/* Mono tiny: mono 8px */
+/* Mono tiny */
 .mt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;}
-/* Section card */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:14px 14px 16px;}
+/* Card */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+/* Inventory plant name — Barlow 18px 700 ALL-CAPS, matches Upcoming sizing */
+.inv-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Inventory secondary */
+.inv-sec{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3);}
   </style>
 </head>
 <body>
@@ -57,14 +61,18 @@ textarea,input,button{font-family:inherit;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script>
-window.storage={get:(k)=>Promise.resolve(localStorage.getItem(k)?{key:k,value:localStorage.getItem(k)}:null),set:(k,v)=>{localStorage.setItem(k,v);return Promise.resolve({key:k,value:v});},delete:(k)=>{localStorage.removeItem(k);return Promise.resolve({key:k,deleted:true});},list:(p)=>{const keys=Object.keys(localStorage).filter(k=>!p||k.startsWith(p));return Promise.resolve({keys:keys.map(k=>({name:k}))});}};
+window.storage={
+  get:(k)=>Promise.resolve(localStorage.getItem(k)?{key:k,value:localStorage.getItem(k)}:null),
+  set:(k,v)=>{localStorage.setItem(k,v);return Promise.resolve({key:k,value:v});},
+  delete:(k)=>{localStorage.removeItem(k);return Promise.resolve({key:k,deleted:true});},
+  list:(p)=>{const keys=Object.keys(localStorage).filter(k=>!p||k.startsWith(p));return Promise.resolve({keys:keys.map(k=>({name:k}))});}
+};
 </script>
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
 const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DROUGHT_NAMES=new Set(["Aloe Vera","Cast Iron Plant","Dracaena","Hoya","Jade Plant","Ponytail Palm","Pothos","Rosemary","Snake Plant","String of Pearls","Succulents (mixed)","ZZ Plant"]);
-
 const PL=[
   {n:"African Violet",s:"Saintpaulia",mn:60,mx:80,w:10,r:1,t:"Narrow comfort zone."},
   {n:"Alocasia",s:"Alocasia spp.",mn:60,mx:90,w:15,r:0,t:"Dormant in cold. Leaves shred in wind."},
@@ -110,43 +118,39 @@ const PL=[
 ];
 const toP=p=>({common_name:p.n,scientific_name:p.s,min_temp_f:p.mn,max_temp_f:p.mx,max_wind_mph:p.w,rain_sensitive:!!p.r,drought_tolerant:!!p.d,notes:p.t});
 
-// ── Weather SVG icons ──────────────────────────────────────────
 function WxIcon({code,size=18}){
-  const p={width:size,height:size,viewBox:"0 0 24 24",fill:"none",strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round"};
+  const sv={width:size,height:size,viewBox:"0 0 24 24",fill:"none",strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round"};
   const c=code;
-  if(c<=1)return<svg {...p} stroke="var(--warn)"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>;
-  if(c<=3)return<svg {...p}><path d="M10 8a4 4 0 0 1 7.3 2.2A3 3 0 1 1 9.5 16H7a3 3 0 0 1 0-6h.5" stroke="var(--ink-2)"/><circle cx="17" cy="6" r="2.5" stroke="var(--warn)" strokeWidth="1.4"/></svg>;
-  if(c<=48)return<svg {...p} stroke="var(--ink-3)"><path d="M3 10h1a5 5 0 0 1 10 0h1a3 3 0 0 1 0 6H3a3 3 0 0 1 0-6z"/><line x1="4" y1="19" x2="20" y2="19" opacity=".4"/></svg>;
-  if(c<=67)return<svg {...p} stroke="var(--steel)"><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z"/><line x1="8" y1="19" x2="7" y2="22"/><line x1="12" y1="19" x2="11" y2="22"/><line x1="16" y1="19" x2="15" y2="22"/></svg>;
-  if(c<=77)return<svg {...p} stroke="var(--ink-2)"><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z"/><line x1="8" y1="19" x2="8" y2="22"/><line x1="12" y1="19" x2="12" y2="22"/></svg>;
-  if(c<=82)return<svg {...p}><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z" stroke="var(--ink-2)"/><line x1="9" y1="19" x2="7" y2="22" stroke="var(--steel)"/><line x1="13" y1="19" x2="11" y2="22" stroke="var(--steel)"/></svg>;
-  return<svg {...p}><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z" stroke="var(--ink-2)"/><polyline points="13,12 10,17 14,17 11,22" stroke="var(--warn)" strokeWidth="1.8"/></svg>;
+  if(c<=1)return<svg {...sv} stroke="var(--warn)"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>;
+  if(c<=3)return<svg {...sv}><path d="M10 8a4 4 0 0 1 7.3 2.2A3 3 0 1 1 9.5 16H7a3 3 0 0 1 0-6h.5" stroke="var(--ink-2)"/><circle cx="17" cy="6" r="2.5" stroke="var(--warn)" strokeWidth="1.4"/></svg>;
+  if(c<=48)return<svg {...sv} stroke="var(--ink-3)"><path d="M3 10h1a5 5 0 0 1 10 0h1a3 3 0 0 1 0 6H3a3 3 0 0 1 0-6z"/><line x1="4" y1="19" x2="20" y2="19" opacity=".4"/></svg>;
+  if(c<=67)return<svg {...sv} stroke="var(--steel)"><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z"/><line x1="8" y1="19" x2="7" y2="22"/><line x1="12" y1="19" x2="11" y2="22"/><line x1="16" y1="19" x2="15" y2="22"/></svg>;
+  if(c<=77)return<svg {...sv} stroke="var(--ink-2)"><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z"/><line x1="8" y1="19" x2="8" y2="22"/><line x1="12" y1="19" x2="12" y2="22"/></svg>;
+  if(c<=82)return<svg {...sv}><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z" stroke="var(--ink-2)"/><line x1="9" y1="19" x2="7" y2="22" stroke="var(--steel)"/><line x1="13" y1="19" x2="11" y2="22" stroke="var(--steel)"/></svg>;
+  return<svg {...sv}><path d="M4 12a5 5 0 0 1 9.5-2H14a4 4 0 0 1 0 8H5a4 4 0 0 1-1-8z" stroke="var(--ink-2)"/><polyline points="13,12 10,17 14,17 11,22" stroke="var(--warn)" strokeWidth="1.8"/></svg>;
 }
 
-// ── Alert type SVG icons ────────────────────────────────────────
 function AIcon({type,size=15}){
-  const p={width:size,height:size,viewBox:"0 0 24 24",fill:"none",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round"};
-  if(type==="heat")return<svg {...p} stroke="var(--alert)"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>;
-  if(type==="cold")return<svg {...p} stroke="var(--steel)"><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 10-4 4-4-4"/><path d="m4 10 4 4 4-4"/><path d="m20 14-4-4-4 4"/><path d="m4 14 4-4 4 4"/></svg>;
-  if(type==="wind")return<svg {...p} stroke="var(--amber)"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>;
+  const sv={width:size,height:size,viewBox:"0 0 24 24",fill:"none",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round"};
+  if(type==="heat")return<svg {...sv} stroke="var(--alert)"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>;
+  if(type==="cold")return<svg {...sv} stroke="var(--steel)"><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 10-4 4-4-4"/><path d="m4 10 4 4 4-4"/><path d="m20 14-4-4-4 4"/><path d="m4 14 4-4 4 4"/></svg>;
+  if(type==="wind")return<svg {...sv} stroke="var(--amber)"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>;
   return null;
 }
 
-// ── Timeline builder ────────────────────────────────────────────
 function bTL(groups,wx){
   if(!wx||!groups.length)return[];
   const d=wx.daily,days=[];
   for(let i=0;i<d.time.length;i++){
     const dt=new Date(d.time[i]+"T12:00:00"),hi=d.temperature_2m_max[i],lo=d.temperature_2m_min[i],wi=d.wind_speed_10m_max[i],ra=d.precipitation_sum[i],iss=[];
     for(const g of groups){const ha=g.heatAdj||0,ca=g.coldAdj||0,wa=g.windAdj||0;
-      for(const p of g.plants){if(p.indoors)continue;const emx=p.max_temp_f+ha,emn=p.min_temp_f-ca,ew=p.max_wind_mph+wa;
-        if(hi>emx)iss.push({plant:p.common_name,type:"heat"});
-        if(lo<emn)iss.push({plant:p.common_name,type:"cold"});
-        if(wi>ew)iss.push({plant:p.common_name,type:"wind"});
+      for(const p of g.plants){if(p.indoors)continue;
+        if(hi>p.max_temp_f+ha)iss.push({plant:p.common_name,type:"heat"});
+        if(lo<p.min_temp_f-ca)iss.push({plant:p.common_name,type:"cold"});
+        if(wi>p.max_wind_mph+wa)iss.push({plant:p.common_name,type:"wind"});
         if(p.rain_sensitive&&ra>0.1)iss.push({plant:p.common_name,type:"rain"});
       }
     }
-    // dayAbbr: 3-char ALL-CAPS for display in all sections
     const abbr=i===0?"TODAY":i===1?"TMRW":DN[dt.getDay()].toUpperCase().slice(0,3);
     days.push({date:d.time[i],dayAbbr:abbr,dateLabel:`${MN[dt.getMonth()].toUpperCase()} ${dt.getDate()}`,high:hi,low:lo,wind:wi,rain:ra,wc:d.weathercode[i],issues:iss,rainCollect:ra>0.1});
   }
@@ -158,34 +162,62 @@ const sanitize=(s,max=200)=>{if(typeof s!=="string")return"";return s.replace(/[
 const safeInt=(v,fb=0,mn=-50,mx=200)=>{const n=Number(v);return isFinite(n)?Math.min(mx,Math.max(mn,n)):fb;};
 const vGroup=g=>{if(!g||typeof g!=="object")return null;if(typeof g.id!=="string"&&typeof g.id!=="number")return null;return{id:String(g.id).slice(0,40),name:sanitize(g.name||"My Plants",60),plants:Array.isArray(g.plants)?g.plants.slice(0,200).map(vPlant).filter(Boolean):[],heatAdj:safeInt(g.heatAdj,0,0,30),coldAdj:safeInt(g.coldAdj,0,0,30),windAdj:safeInt(g.windAdj,0,0,20),addedAt:typeof g.addedAt==="string"?g.addedAt.slice(0,30):new Date().toISOString()};};
 const vPlant=p=>{if(!p||typeof p!=="object")return null;if(typeof p.common_name!=="string"||!p.common_name.trim())return null;return{common_name:sanitize(p.common_name,80),scientific_name:sanitize(p.scientific_name||"",80),min_temp_f:safeInt(p.min_temp_f,50,-20,100),max_temp_f:safeInt(p.max_temp_f,95,40,130),max_wind_mph:safeInt(p.max_wind_mph,20,0,80),rain_sensitive:!!p.rain_sensitive,drought_tolerant:!!p.drought_tolerant,notes:sanitize(p.notes||"",300),indoors:!!p.indoors};};
-const vData=raw=>{try{const d=typeof raw==="string"?JSON.parse(raw):raw;if(!d||typeof d!=="object")return null;return{groups:Array.isArray(d.groups)?d.groups.slice(0,20).map(vGroup).filter(Boolean):[],zip:typeof d.zip==="string"?d.zip.replace(/\D/g,"").slice(0,5):"78641",loc:(d.loc&&isFinite(d.loc.lat)&&isFinite(d.loc.lon))?{lat:Number(d.loc.lat),lon:Number(d.loc.lon)}:null,dismissed:(d.dismissed&&typeof d.dismissed==="object")?d.dismissed:{},actionLog:Array.isArray(d.actionLog)?d.actionLog.slice(-500):[],wateringLog:Array.isArray(d.wateringLog)?d.wateringLog.slice(-200):[],alertAckedDate:typeof d.alertAckedDate==="string"?d.alertAckedDate.slice(0,10):""};}catch{return null;}};
+const vData=raw=>{try{const d=typeof raw==="string"?JSON.parse(raw):raw;if(!d||typeof d!=="object")return null;return{groups:Array.isArray(d.groups)?d.groups.slice(0,20).map(vGroup).filter(Boolean):[],zip:typeof d.zip==="string"?d.zip.replace(/\D/g,"").slice(0,5):"78641",loc:(d.loc&&isFinite(d.loc.lat)&&isFinite(d.loc.lon))?{lat:Number(d.loc.lat),lon:Number(d.loc.lon)}:null,dismissed:(d.dismissed&&typeof d.dismissed==="object")?d.dismissed:{},actionLog:Array.isArray(d.actionLog)?d.actionLog.slice(-500):[],wateringLog:Array.isArray(d.wateringLog)?d.wateringLog.slice(-200):[],alertAckedDate:typeof d.alertAckedDate==="string"?d.alertAckedDate.slice(0,10):"",collapsed:(d.collapsed&&typeof d.collapsed==="object")?d.collapsed:{}};}catch{return null;}};
 
 const VAPID_PUBLIC_KEY="BDPbVR8bQY5KMT0ignaMjWYO0XM6nVv7ArPNwuHicCsrAFwqgXv5rWLFweLV25rNCzOEcLxZim_tvpvejM4qjfQ";
 const WORKER_URL="https://plant-guardian-push.sericah007.workers.dev";
 
-// Alert type config — description is sentence case (first letter cap, rest lower)
 const ACFG={
   heat:{desc:"Above typical heat range",bg:"rgba(255,106,77,0.1)",border:"rgba(255,106,77,0.35)",color:"var(--alert)"},
   cold:{desc:"Below typical range overnight",bg:"rgba(111,168,214,0.1)",border:"rgba(111,168,214,0.35)",color:"var(--steel)"},
   wind:{desc:"Above typical wind range",bg:"rgba(232,144,67,0.1)",border:"rgba(232,144,67,0.35)",color:"var(--amber)"},
 };
 
-// ── Horizontal twin tick-chart ──────────────────────────────────
-// HEAT row (amber) + RAIN row (mint/steel)
-// Each segment = one day, uniform height, opacity = presence
+// ── Section header: eyebrow row + title + collapse toggle ───────
+function SectionHead({num,label,extra,extraColor,right,rightColor,title,isCollapsed,onToggle}){
+  return(
+    <div style={{padding:"12px 14px 10px",cursor:"pointer",userSelect:"none"}} onClick={onToggle}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+        <div style={{display:"flex",gap:5,alignItems:"baseline",flexWrap:"wrap"}}>
+          <span className="eb" style={{color:"var(--mint)"}}>{num}</span>
+          <span className="eb">·</span>
+          <span className="eb">{label}</span>
+          {extra&&<><span className="eb">·</span><span className="eb" style={{color:extraColor||"var(--ink-3)"}}>{extra}</span></>}
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"baseline"}}>
+          {right&&<span className="eb" style={{fontSize:9,letterSpacing:".12em",color:rightColor||"var(--ink-3)"}}>{right}</span>}
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"var(--ink-3)",lineHeight:1,minWidth:12,textAlign:"center"}}>{isCollapsed?"＋":"－"}</span>
+        </div>
+      </div>
+      <div className="st" style={{marginTop:4,marginBottom:0}}>{title}</div>
+    </div>
+  );
+}
+
+// ── Twin tick-chart: two horizontal segment rows ────────────────
+// CRITICAL ALIGNMENT: the segment strip must use the SAME flex
+// layout as the 7-day cells row above it (display:flex, gap:CELL_GAP,
+// every child flex:"1 0 0"). The HEAT/RAIN labels sit ABOVE their
+// strips, NOT beside them, so they steal zero horizontal space —
+// segment N then sits exactly under day cell N.
+const CELL_GAP=4; // gap between day cells AND tick segments — must match
+
 function TickChart({timeline}){
   if(!timeline||!timeline.length)return null;
+  const rows=[
+    {label:"HEAT",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,hasData:d.high>0}))},
+    {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({on:d.rainCollect,hasData:d.rain>0}))},
+  ];
   return(
-    <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--line)"}}>
-      {[
-        {label:"HEAT",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,present:d.high>60}))},
-        {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({on:d.rainCollect,present:d.rain>0}))},
-      ].map(row=>(
-        <div key={row.label} style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
-          <span className="mt" style={{color:"var(--ink-3)",width:32,flexShrink:0,fontSize:8}}>{row.label}</span>
-          <div style={{flex:1,display:"flex",gap:3,height:8}}>
+    <div style={{marginTop:10,paddingTop:8,borderTop:"1px solid var(--line)"}}>
+      {rows.map(row=>(
+        <div key={row.label} style={{marginBottom:7}}>
+          {/* Label on its own line above — zero effect on strip width */}
+          <div className="mt" style={{color:"var(--ink-3)",fontSize:8,letterSpacing:".2em",marginBottom:4}}>{row.label}</div>
+          {/* Strip: identical flex layout to the day-cells row */}
+          <div style={{display:"flex",gap:CELL_GAP}}>
             {row.segs.map((seg,i)=>(
-              <div key={i} style={{flex:1,borderRadius:2,background:row.color,opacity:!seg.present?0:seg.on?0.9:0.22}}/>
+              <div key={i} style={{flex:"1 0 0",minWidth:0,height:8,borderRadius:2,background:row.color,opacity:!seg.hasData?0:seg.on?0.88:0.2}}/>
             ))}
           </div>
         </div>
@@ -196,7 +228,10 @@ function TickChart({timeline}){
 
 function StencilDisc({size=34}){return<svg width={size} height={size} viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="86" stroke="var(--amber)" strokeWidth="6" fill="none"/><circle cx="100" cy="100" r="64" fill="var(--panel-2)" stroke="var(--amber)" strokeWidth="1.5"/><g transform="translate(100 100) rotate(-20) translate(-36 -50)"><path d="M36 0 C 64 18, 72 56, 50 100 C 22 78, 6 48, 36 0 Z" fill="var(--mint)" stroke="var(--mint)" strokeWidth="2" strokeLinejoin="round"/><path d="M36 0 L 36 100" stroke="var(--bg)" strokeWidth="3" strokeLinecap="round"/><g stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" opacity="0.85"><line x1="36" y1="22" x2="52" y2="26"/><line x1="36" y1="42" x2="56" y2="46"/><line x1="36" y1="62" x2="54" y2="66"/><line x1="36" y1="22" x2="22" y2="28"/><line x1="36" y1="42" x2="20" y2="48"/><line x1="36" y1="62" x2="24" y2="68"/></g></g></svg>;}
 
-function Donut({pct,color,centerText,sub,label}){const r=38,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;return<div style={{textAlign:"center",flex:1}}><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="38" fill="none" stroke="var(--line)" strokeWidth="7"/><circle cx="54" cy="54" r="38" fill="none" stroke={color} strokeWidth="7" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 54 54)"/><text x="54" y="51" textAnchor="middle" fontSize="22" fontWeight="800" fill="var(--ink)" fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text><text x="54" y="66" textAnchor="middle" fontSize="8" fill="var(--ink-3)" fontFamily="'JetBrains Mono',monospace" letterSpacing="0.12em">{sub}</text></svg><div className="mt" style={{color:"var(--ink-3)",marginTop:2,letterSpacing:".18em"}}>{label}</div></div>;}
+function Donut({pct,color,centerText,sub,label}){
+  const r=38,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
+  return<div style={{textAlign:"center",flex:1}}><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="38" fill="none" stroke="var(--line)" strokeWidth="7"/><circle cx="54" cy="54" r="38" fill="none" stroke={color} strokeWidth="7" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 54 54)"/><text x="54" y="51" textAnchor="middle" fontSize="22" fontWeight="800" fill="var(--ink)" fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text><text x="54" y="66" textAnchor="middle" fontSize="8" fill="var(--ink-3)" fontFamily="'JetBrains Mono',monospace" letterSpacing="0.12em">{sub}</text></svg><div className="mt" style={{color:"var(--ink-3)",marginTop:2,letterSpacing:".18em"}}>{label}</div></div>;
+}
 
 function App(){
   const [scr,setScr]=useState("home");
@@ -230,7 +265,7 @@ function App(){
   const [testMode,setTestMode]=useState(false);
   const [heatThreshold,setHeatThreshold]=useState(95);
   const [theme,setTheme]=useState("dark");
-  const [collapsed,setCollapsed]=useState({});
+  const [collapsed,setCollapsed]=useState({today:false,upcoming:false,outlook:false,season:false,plants:false});
   const [climate,setClimate]=useState(null);
   const [yearTally,setYearTally]=useState({});
   const [pushPending,setPushPending]=useState(false);
@@ -239,17 +274,53 @@ function App(){
   const refPlants=useRef(null);
   const prevPlantsRef=useRef([]);
   const scrollTo=r=>r.current?.scrollIntoView({behavior:"smooth",block:"start"});
+  const toggleSection=k=>setCollapsed(c=>({...c,[k]:!c[k]}));
 
   useEffect(()=>{if("serviceWorker"in navigator)navigator.serviceWorker.register("/plant-guardian/sw.js").catch(()=>{});window.storage.get("pg-push").then(r=>{if(r?.value==="enabled")setPushEnabled(true);}).catch(()=>{});},[]);
   useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);},[theme]);
-  useEffect(()=>{let c=false;(async()=>{try{const r=await window.storage.get("pg-data");if(!c&&r?.value){const d=vData(r.value);if(d){if(d.groups.length>0)setGroups(d.groups);if(d.zip){setSavedZip(d.zip);setZip(d.zip);}if(d.loc)setLoc(d.loc);setDismissed(d.dismissed);setActionLog(d.actionLog);setWateringLog(d.wateringLog);setAlertAckedDate(d.alertAckedDate);if(d.heatThreshold)setHeatThreshold(d.heatThreshold);if(d.climate)setClimate(d.climate);if(d.yearTally)setYearTally(d.yearTally);if(d.theme)setTheme(d.theme);if(d.collapsed)setCollapsed(d.collapsed);}}}catch(e){}if(!c)setReady(true);})();return()=>{c=true;};},[]);
-  useEffect(()=>{if(!ready)return;const t=setTimeout(()=>{(async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed}));}catch(e){}})();},300);return()=>clearTimeout(t);},[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed]);
+  useEffect(()=>{
+    let c=false;
+    (async()=>{
+      try{
+        const r=await window.storage.get("pg-data");
+        if(!c&&r?.value){
+          const d=vData(r.value);
+          if(d){
+            if(d.groups.length>0)setGroups(d.groups);
+            if(d.zip){setSavedZip(d.zip);setZip(d.zip);}
+            if(d.loc)setLoc(d.loc);
+            setDismissed(d.dismissed);
+            setActionLog(d.actionLog);
+            setWateringLog(d.wateringLog);
+            setAlertAckedDate(d.alertAckedDate);
+            if(d.heatThreshold)setHeatThreshold(d.heatThreshold);
+            if(d.climate)setClimate(d.climate);
+            if(d.yearTally)setYearTally(d.yearTally);
+            if(d.theme)setTheme(d.theme);
+            if(d.collapsed)setCollapsed(prev=>({...prev,...d.collapsed}));
+          }
+        }
+      }catch(e){}
+      if(!c)setReady(true);
+    })();
+    return()=>{c=true;};
+  },[]);
+  useEffect(()=>{
+    if(!ready)return;
+    const t=setTimeout(()=>{
+      (async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed}));}catch(e){}})();
+    },300);
+    return()=>clearTimeout(t);
+  },[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed]);
 
   useEffect(()=>{
     if(!loc)return;
     const today=new Date(),dates=[];
     for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(d.toISOString().split("T")[0]);}
-    if(testMode){setWx({current:{temperature_2m:95},daily:{time:dates,temperature_2m_max:[97,98,96,99,97,95,98],temperature_2m_min:[42,44,41,43,42,40,44],wind_speed_10m_max:[22,18,24,20,26,22,19],precipitation_sum:[0,0,0.5,0.8,0,1.2,0],weathercode:[1,2,61,63,2,61,2]}});setWxTime(new Date());return;}
+    if(testMode){
+      setWx({current:{temperature_2m:95},daily:{time:dates,temperature_2m_max:[97,98,96,99,97,95,98],temperature_2m_min:[42,44,41,43,42,40,44],wind_speed_10m_max:[22,18,24,20,26,22,19],precipitation_sum:[0,0,0.5,0.8,0,1.2,0],weathercode:[1,2,61,63,2,61,2]}});
+      setWxTime(new Date());return;
+    }
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,weathercode&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&forecast_days=7&timezone=America%2FChicago`)
       .then(r=>r.ok?r.json():Promise.reject(r.status))
       .then(data=>{setWx(data);setWxTime(new Date());})
@@ -257,7 +328,19 @@ function App(){
   },[loc,testMode]);
 
   useEffect(()=>{setTimeline(bTL(groups,wx));},[groups,wx]);
-  useEffect(()=>{if(!ready||!wx||testMode)return;const today=new Date().toISOString().split("T")[0],year=today.slice(0,4);const tH=wx.daily.temperature_2m_max[0],tR=wx.daily.precipitation_sum[0];setYearTally(prev=>{const yd=prev[year]||{heatDays:[],rainDays:[]};let ch=false;const hd=[...yd.heatDays],rd=[...yd.rainDays];if(tH>=heatThreshold&&!hd.includes(today)){hd.push(today);ch=true;}if(tR>=0.1&&!rd.includes(today)){rd.push(today);ch=true;}if(!ch)return prev;return{...prev,[year]:{heatDays:hd,rainDays:rd}};});},[ready,wx,heatThreshold,testMode]);
+  useEffect(()=>{
+    if(!ready||!wx||testMode)return;
+    const today=new Date().toISOString().split("T")[0],year=today.slice(0,4);
+    const tH=wx.daily.temperature_2m_max[0],tR=wx.daily.precipitation_sum[0];
+    setYearTally(prev=>{
+      const yd=prev[year]||{heatDays:[],rainDays:[]};
+      let ch=false;const hd=[...yd.heatDays],rd=[...yd.rainDays];
+      if(tH>=heatThreshold&&!hd.includes(today)){hd.push(today);ch=true;}
+      if(tR>=0.1&&!rd.includes(today)){rd.push(today);ch=true;}
+      if(!ch)return prev;
+      return{...prev,[year]:{heatDays:hd,rainDays:rd}};
+    });
+  },[ready,wx,heatThreshold,testMode]);
 
   useEffect(()=>{
     if(!ready||!loc||testMode)return;
@@ -304,39 +387,58 @@ function App(){
   const markBack=name=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
   const getAA=(date,type)=>dismissed[`${date}-${type}`]||null;
   const toggleP=p=>{const ex=selP.find(x=>x.common_name===p.n);setSelP(prev=>ex?prev.filter(x=>x.common_name!==p.n):[...prev,toP(p)]);if(!ex)setSq("");};
-  const saveGroup=()=>{if(!selP.length||saving)return;setSaving(true);const sn=sanitize(gName,60)||`Patio Group ${groups.length+1}`;const nc=groups.some(g=>g.name.trim().toLowerCase()===sn.trim().toLowerCase()&&g.id!==editingGroup);if(nc){setGroupNameError("Name already taken.");setSaving(false);return;}if(editingGroup){setGroups(p=>p.map(g=>g.id===editingGroup?{...g,name:sn,plants:selP,heatAdj,coldAdj,windAdj}:g));}else{setGroups(p=>[...p,{id:String(Date.now()),name:sn,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}]);}setScr(editingGroup?"groups":"home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);};
+  const saveGroup=()=>{
+    if(!selP.length||saving)return;setSaving(true);
+    const sn=sanitize(gName,60)||`Patio Group ${groups.length+1}`;
+    const nc=groups.some(g=>g.name.trim().toLowerCase()===sn.trim().toLowerCase()&&g.id!==editingGroup);
+    if(nc){setGroupNameError("Name already taken.");setSaving(false);return;}
+    if(editingGroup){setGroups(p=>p.map(g=>g.id===editingGroup?{...g,name:sn,plants:selP,heatAdj,coldAdj,windAdj}:g));}
+    else{setGroups(p=>[...p,{id:String(Date.now()),name:sn,plants:selP,addedAt:new Date().toISOString(),heatAdj,coldAdj,windAdj}]);}
+    setScr(editingGroup?"groups":"home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);
+  };
   const logWatering=()=>{setWateringLog(p=>[...p,{date:new Date().toISOString().split("T")[0],notes:sanitize(waterNotes,500),timestamp:new Date().toISOString()}]);setShowWaterModal(false);setWaterNotes("");};
   const dismissAlertModal=()=>{setAlertAckedDate(new Date().toISOString().split("T")[0]);setAlertModal(null);};
   const urlB64=b=>{const pad="=".repeat((4-b.length%4)%4);const b64=(b+pad).replace(/-/g,"+").replace(/_/g,"/");return Uint8Array.from([...atob(b64)].map(c=>c.charCodeAt(0)));};
-  const registerPush=async()=>{if(pushPending)return;setPushPending(true);try{if(!("serviceWorker"in navigator)||!("PushManager"in window)){alert("Push not supported.");return;}const perm=await Notification.requestPermission();if(perm!=="granted"){setPushPending(false);return;}const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(VAPID_PUBLIC_KEY)});const res=await fetch(`${WORKER_URL}/subscribe`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(sub.toJSON())});if(res.ok){setPushEnabled(true);window.storage.set("pg-push","enabled").catch(()=>{}); }}catch(e){console.error(e);}finally{setPushPending(false);}};
-  const unregisterPush=async()=>{try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(sub){await fetch(`${WORKER_URL}/subscribe`,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}setPushEnabled(false);window.storage.delete("pg-push").catch(()=>{});}catch(e){console.error(e);}};
+  const registerPush=async()=>{
+    if(pushPending)return;setPushPending(true);
+    try{
+      if(!("serviceWorker"in navigator)||!("PushManager"in window)){alert("Push not supported.");return;}
+      const perm=await Notification.requestPermission();if(perm!=="granted"){setPushPending(false);return;}
+      const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+      if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(VAPID_PUBLIC_KEY)});
+      const res=await fetch(`${WORKER_URL}/subscribe`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(sub.toJSON())});
+      if(res.ok){setPushEnabled(true);window.storage.set("pg-push","enabled").catch(()=>{});}
+    }catch(e){console.error(e);}finally{setPushPending(false);}
+  };
+  const unregisterPush=async()=>{
+    try{
+      const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();
+      if(sub){await fetch(`${WORKER_URL}/subscribe`,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();}
+      setPushEnabled(false);window.storage.delete("pg-push").catch(()=>{});
+    }catch(e){console.error(e);}
+  };
   const getPlantGroup=name=>{for(const g of groups){if(g.plants.find(p=>p.common_name===name))return g;}return null;};
 
   const allP=groups.flatMap(g=>g.plants),outP=allP.filter(p=>!p.indoors),inP=allP.filter(p=>p.indoors);
   const todayI=timeline.length>0?timeline[0].issues.filter(i=>i.type!=="rain"):[];
   const todayAC=todayI.length,todayR=timeline.length>0&&timeline[0].rainCollect;
   const filtered=sq.length>0?PL.filter(p=>p.n.toLowerCase().includes(sq.trim().toLowerCase())||p.s.toLowerCase().includes(sq.trim().toLowerCase())):[];
-
   const getWI=()=>{const last=wateringLog[wateringLog.length-1],lastD=last?new Date(last.date+"T12:00:00"):new Date(Date.now()-6*86400000);const cH=getConsecHeat(timeline),interval=cH>=4?6:7,nextD=new Date(lastD);nextD.setDate(lastD.getDate()+interval);const dL=Math.ceil((nextD-new Date())/86400000),eT=cH>=4;if(dL<=0)return{label:"Now",sub:"DUE",color:"var(--mint)",earlyTrigger:eT,daysLeft:0};return{label:String(dL),sub:"DAYS",color:dL<=2?"var(--warn)":"var(--ink)",earlyTrigger:eT,daysLeft:dL};};
   const waterInfo=groups.length>0?getWI():null;
-
-  // Group today's alerts by type → plant list
   const getTA=()=>{if(!timeline.length)return{};const day=timeline[0],pr=["cold","heat","wind"],bp={};for(const iss of day.issues){if(iss.type==="rain")continue;if(!bp[iss.plant])bp[iss.plant]=new Set();bp[iss.plant].add(iss.type);}const ba={};for(const[plant,types]of Object.entries(bp)){const top=pr.find(t=>types.has(t))||[...types][0];if(!ba[top])ba[top]=[];ba[top].push(plant);}return ba;};
 
   const fmtTime=d=>d?`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`:"";
   const now=new Date();
-  // "17 MAY" format — day number + month ALL-CAPS
   const todayDateStr=`${now.getDate()} ${MN[now.getMonth()].toUpperCase()}`;
-
   const upcomingAlertDays=timeline.slice(1).filter(d=>d.issues.filter(i=>i.type!=="rain").length>0);
   const upcomingRainCount=timeline.slice(1).filter(d=>d.rainCollect).length;
 
   return(
     <div style={{fontFamily:"'Inter',system-ui,sans-serif",background:"var(--bg)",minHeight:"100vh",maxWidth:480,margin:"0 auto",color:"var(--ink)",position:"relative"}}>
-      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,maxWidth:480,margin:"0 auto",pointerEvents:"none",zIndex:0,background:"radial-gradient(ellipse 80% 50% at 20% 0%, rgba(45,212,191,0.1), transparent 60%),radial-gradient(ellipse 70% 45% at 85% 8%, rgba(56,189,170,0.07), transparent 55%)"}}/>
+      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,maxWidth:480,margin:"0 auto",pointerEvents:"none",zIndex:0,background:"radial-gradient(ellipse 80% 50% at 20% 0%,rgba(45,212,191,.1),transparent 60%),radial-gradient(ellipse 70% 45% at 85% 8%,rgba(56,189,170,.07),transparent 55%)"}}/>
       <div style={{position:"relative",zIndex:1}}>
 
-      {/* ── HEADER ───────────────────────────────────────────────── */}
+      {/* HEADER */}
       <div style={{padding:"10px 14px 12px",borderBottom:"1px solid var(--line)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <StencilDisc size={34}/>
@@ -346,7 +448,6 @@ function App(){
           {scr==="home"&&wx&&(
             <div style={{display:"flex",alignItems:"center",gap:5}}>
               <div style={{width:6,height:6,borderRadius:3,background:"var(--mint)",boxShadow:"0 0 6px var(--mint)",animation:"pgpulse 2s ease-in-out infinite"}}/>
-              {/* "LIVE · HH:MM" — mono, mint, ALL-CAPS naturally */}
               <span className="eb" style={{color:"var(--mint)",fontSize:10}}>LIVE{wxTime?` · ${fmtTime(wxTime)}`:""}</span>
             </div>
           )}
@@ -366,11 +467,11 @@ function App(){
           <div style={{textAlign:"center",padding:"60px 24px"}}>
             <div style={{fontSize:48,marginBottom:14}}>🌿</div>
             <div className="st" style={{textAlign:"center"}}>No plants yet</div>
-            <div style={{fontSize:13,color:"var(--ink-3)",lineHeight:1.6}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
+            <div style={{fontSize:13,color:"var(--ink-3)",lineHeight:1.6,marginTop:8}}>Tap + to add your patio plants.<br/>I'll watch the weather for them.</div>
           </div>
         ):(
           <>
-            {/* ── STAT CARDS ─────────────────────────────────── */}
+            {/* STAT CARDS */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
               {[
                 {lbl:"CURRENT",val:wx?.current?`${Math.round(wx.current.temperature_2m)}°`:wx?`${Math.round(wx.daily.temperature_2m_max[0])}°`:"—",sub:wx?`${Math.round(wx.daily.temperature_2m_max[0])}° HIGH`:"",color:"var(--ink)",bdr:"var(--line)",fn:()=>scrollTo(refOutlook)},
@@ -386,254 +487,217 @@ function App(){
               ))}
             </div>
 
-            {/* ── 01 TODAY / ACTIVE ALERTS ───────────────────── */}
+            {/* ── 01 TODAY ──────────────────────────────────── */}
             {(()=>{
               const ba=getTA(),td=timeline[0]?.date,pr=["cold","heat","wind"];
               const activeTypes=pr.filter(t=>ba[t]);
               const openCount=activeTypes.filter(t=>!getAA(td,t)).length;
               const snoozeCount=activeTypes.filter(t=>!!getAA(td,t)).length;
-
-              // Section title text: ALL-CAPS via CSS class .st
+              const extra=openCount>0?`${openCount} OPEN`:snoozeCount>0?"SNOOZED":!todayR?"ALL CLEAR":null;
+              const extraColor=openCount>0?"var(--alert)":snoozeCount>0?"var(--warn)":"var(--mint)";
               const titleText=openCount>0?"Active Alerts":snoozeCount>0?"Alerts Snoozed":todayR?"Rainwater Day":"No Alerts Today";
-
               return(
                 <div ref={refToday} className="card">
-                  {/* Eyebrow: "01 · TODAY · 1 OPEN" ALL-CAPS mono left, "17 MAY" right */}
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
-                    <div style={{display:"flex",gap:5,alignItems:"baseline",flexWrap:"wrap"}}>
-                      <span className="eb" style={{color:"var(--mint)"}}>01</span>
-                      <span className="eb" style={{color:"var(--ink-3)"}}>·</span>
-                      <span className="eb" style={{color:"var(--ink-3)"}}>TODAY</span>
-                      {openCount>0&&<><span className="eb" style={{color:"var(--ink-3)"}}>·</span><span className="eb" style={{color:"var(--alert)"}}>{openCount} OPEN</span></>}
-                      {openCount===0&&snoozeCount>0&&<><span className="eb" style={{color:"var(--ink-3)"}}>·</span><span className="eb" style={{color:"var(--warn)"}}>SNOOZED</span></>}
-                      {openCount===0&&snoozeCount===0&&!todayR&&<><span className="eb" style={{color:"var(--ink-3)"}}>·</span><span className="eb" style={{color:"var(--mint)"}}>ALL CLEAR</span></>}
-                    </div>
-                    <span className="eb" style={{color:"var(--ink-3)",fontSize:9,letterSpacing:".14em"}}>{todayDateStr}</span>
-                  </div>
-
-                  {/* Section title — ALL-CAPS via .st class */}
-                  <div className="st">{titleText}</div>
-
-                  {/* Rain collect */}
-                  {todayR&&(
-                    <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,background:"rgba(91,227,168,0.07)",border:"1px solid rgba(91,227,168,0.2)",marginBottom:10}}>
-                      <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="2.2" strokeLinecap="round"><path d="M12 2C6 12 6 16 12 22c6-6 6-10 0-20z"/></svg>
-                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:".08em",color:"var(--mint)"}}>Collect rainwater — {timeline[0].rain.toFixed(1)}" expected</span>
-                    </div>
-                  )}
-
-                  {/* Alert rows */}
-                  {pr.filter(t=>ba[t]).map(type=>{
-                    const cfg=ACFG[type],res=getAA(td,type),plants=ba[type];
-                    if(res){
-                      return(
-                        <div key={type} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,background:"rgba(255,255,255,0.02)",border:"1px solid var(--line)",marginBottom:6,opacity:0.65}}>
-                          <AIcon type={type} size={13}/>
-                          <div style={{flex:1}}>
-                            {/* Plant name: Barlow Condensed ALL-CAPS */}
-                            <div className="pn" style={{color:"var(--ink-3)"}}>{plants.join(", ")}</div>
-                            {/* Description: Inter sentence case */}
-                            <div className="ad" style={{color:"var(--ink-3)"}}>{cfg.desc}</div>
-                          </div>
-                          <span className="eb" style={{color:"var(--warn)",fontSize:8,letterSpacing:".1em"}}>SNOOZED</span>
+                  <SectionHead num="01" label="TODAY" extra={extra} extraColor={extraColor} right={todayDateStr} title={titleText} isCollapsed={collapsed.today} onToggle={()=>toggleSection("today")}/>
+                  {!collapsed.today&&(
+                    <div style={{padding:"0 14px 14px"}}>
+                      {todayR&&(
+                        <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,background:"rgba(91,227,168,0.07)",border:"1px solid rgba(91,227,168,0.2)",marginBottom:10}}>
+                          <svg width="12" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="2.2" strokeLinecap="round"><path d="M12 2C6 12 6 16 12 22c6-6 6-10 0-20z"/></svg>
+                          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:".08em",color:"var(--mint)"}}>Collect rainwater — {timeline[0].rain.toFixed(1)}" expected</span>
                         </div>
-                      );
-                    }
-                    return(
-                      <div key={type} style={{marginBottom:10}}>
-                        {/* Alert row: dark background, colored border */}
-                        <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,background:cfg.bg,border:`1px solid ${cfg.border}`}}>
-                          <AIcon type={type} size={16}/>
-                          <div style={{flex:1}}>
-                            {/* Plant name: Barlow Condensed 700 ALL-CAPS, alert color */}
-                            <div className="pn" style={{color:cfg.color}}>{plants.join(", ")}</div>
-                            {/* Description: Inter 12px sentence case, ink-2 */}
-                            <div className="ad">{cfg.desc}</div>
+                      )}
+                      {pr.filter(t=>ba[t]).map(type=>{
+                        const cfg=ACFG[type],res=getAA(td,type),plants=ba[type];
+                        if(res)return(
+                          <div key={type} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,background:"rgba(255,255,255,0.02)",border:"1px solid var(--line)",marginBottom:6,opacity:0.65}}>
+                            <AIcon type={type} size={13}/>
+                            <div style={{flex:1}}>
+                              <div className="pn" style={{color:"var(--ink-3)"}}>{plants.join(", ")}</div>
+                              <div className="ad" style={{color:"var(--ink-3)"}}>{cfg.desc}</div>
+                            </div>
+                            <span className="eb" style={{color:"var(--warn)",fontSize:8}}>SNOOZED</span>
                           </div>
-                          {/* Arrow right */}
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={cfg.color} strokeWidth="2.2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        );
+                        return(
+                          <div key={type} style={{marginBottom:10}}>
+                            <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,background:cfg.bg,border:`1px solid ${cfg.border}`}}>
+                              <AIcon type={type} size={16}/>
+                              <div style={{flex:1}}>
+                                <div className="pn" style={{color:cfg.color}}>{plants.join(", ")}</div>
+                                <div className="ad">{cfg.desc}</div>
+                              </div>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={cfg.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                            <button onClick={()=>resolveAlert(td,type,ba[type],"snoozed")}
+                              style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,background:"transparent",border:"1px dashed var(--line-2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none"}}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" strokeWidth="2" strokeLinecap="round"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></svg>
+                              <span className="eb" style={{color:"var(--ink-3)",fontSize:9,letterSpacing:".18em"}}>SNOOZE · REMIND TOMORROW</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                      {!todayR&&activeTypes.length===0&&<div style={{fontSize:13,color:"var(--ink-3)"}}>No weather alerts for today.</div>}
+                      {snoozeCount>0&&openCount===0&&(
+                        <div style={{marginTop:6,padding:"5px 10px",borderRadius:6,background:"rgba(240,196,58,0.07)",border:"1px solid rgba(240,196,58,0.15)"}}>
+                          <span className="eb" style={{color:"var(--warn)",fontSize:8}}>ALL ALERTS SNOOZED · RE-ALERTS TOMORROW</span>
                         </div>
-                        {/* Snooze button: dashed border, mono ALL-CAPS */}
-                        <button onClick={()=>resolveAlert(td,type,ba[type],"snoozed")}
-                          style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,background:"transparent",border:"1px dashed var(--line-2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none"}}>
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" strokeWidth="2" strokeLinecap="round"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></svg>
-                          <span className="eb" style={{color:"var(--ink-3)",fontSize:9,letterSpacing:".18em"}}>SNOOZE · REMIND TOMORROW</span>
-                        </button>
-                      </div>
-                    );
-                  })}
-                  {!todayR&&activeTypes.length===0&&<div style={{fontSize:13,color:"var(--ink-3)"}}>No weather alerts for today.</div>}
-                  {snoozeCount>0&&openCount===0&&(
-                    <div style={{marginTop:6,padding:"5px 10px",borderRadius:6,background:"rgba(240,196,58,0.07)",border:"1px solid rgba(240,196,58,0.15)"}}>
-                      <span className="eb" style={{color:"var(--warn)",fontSize:8,letterSpacing:".14em"}}>ALL ALERTS SNOOZED · RE-ALERTS TOMORROW</span>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })()}
 
-            {/* ── 02 UPCOMING / PLANTS TO WATCH ─────────────── */}
+            {/* ── 02 UPCOMING ───────────────────────────────── */}
             {upcomingAlertDays.length>0&&(
               <div className="card">
-                {/* Eyebrow: "02 · UPCOMING · 5 DAYS" left, "RAIN ×5" right */}
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
-                  <div style={{display:"flex",gap:5,alignItems:"baseline"}}>
-                    <span className="eb" style={{color:"var(--mint)"}}>02</span>
-                    <span className="eb">·</span>
-                    <span className="eb">UPCOMING</span>
-                    <span className="eb">·</span>
-                    <span className="eb">{upcomingAlertDays.length} DAYS</span>
+                <SectionHead num="02" label="UPCOMING" extra={`${upcomingAlertDays.length} DAYS`}
+                  right={upcomingRainCount>0?`RAIN ×${upcomingRainCount}`:undefined} rightColor="var(--steel)"
+                  title="Plants to Watch" isCollapsed={collapsed.upcoming} onToggle={()=>toggleSection("upcoming")}/>
+                {!collapsed.upcoming&&(
+                  <div style={{padding:"0 14px 14px"}}>
+                    {upcomingAlertDays.map((day,idx)=>{
+                      const di=day.issues.filter(i=>i.type!=="rain");
+                      const typeSet=[...new Set(di.map(i=>i.type))],plants=[...new Set(di.map(i=>i.plant))],n=di.length;
+                      const domType=["cold","heat","wind"].find(t=>typeSet.includes(t))||typeSet[0];
+                      const tColors={heat:"var(--alert)",cold:"var(--steel)",wind:"var(--amber)"};
+                      return(
+                        <div key={day.date} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderTop:idx>0?"1px dashed var(--line)":"none"}}>
+                          <div style={{width:56,flexShrink:0}}>
+                            <div className="da">{day.dayAbbr}</div>
+                            <div className="ds">{day.dateLabel}</div>
+                          </div>
+                          <div style={{width:26,flexShrink:0,display:"flex",justifyContent:"center"}}>
+                            <WxIcon code={day.wc} size={20}/>
+                          </div>
+                          <div style={{flex:1,fontSize:13,color:"var(--ink-2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>
+                            {plants.join(", ")}
+                          </div>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,color:tColors[domType]||"var(--ink-3)",flexShrink:0,letterSpacing:".04em"}}>×{n}</div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {upcomingRainCount>0&&<span className="eb" style={{color:"var(--steel)",fontSize:9}}>RAIN ×{upcomingRainCount}</span>}
-                </div>
-
-                {/* Section title: "PLANTS TO WATCH" ALL-CAPS */}
-                <div className="st">Plants to Watch</div>
-
-                {/* Rows */}
-                {upcomingAlertDays.map((day,idx)=>{
-                  const di=day.issues.filter(i=>i.type!=="rain");
-                  const typeSet=[...new Set(di.map(i=>i.type))],plants=[...new Set(di.map(i=>i.plant))],n=di.length;
-                  const domType=["cold","heat","wind"].find(t=>typeSet.includes(t))||typeSet[0];
-                  const tColors={heat:"var(--alert)",cold:"var(--steel)",wind:"var(--amber)"};
-                  return(
-                    <div key={day.date} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderTop:idx>0?"1px dashed var(--line)":"none"}}>
-                      {/* Day: Barlow 800 ALL-CAPS + date mono tiny below */}
-                      <div style={{width:56,flexShrink:0}}>
-                        <div className="da">{day.dayAbbr}</div>
-                        <div className="ds">{day.dateLabel}</div>
-                      </div>
-                      {/* Weather icon */}
-                      <div style={{width:26,flexShrink:0,display:"flex",justifyContent:"center"}}>
-                        <WxIcon code={day.wc} size={20}/>
-                      </div>
-                      {/* Plant list: Inter 13px sentence case, truncated */}
-                      <div style={{flex:1,fontSize:13,color:"var(--ink-2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>
-                        {plants.join(", ")}
-                      </div>
-                      {/* ×N count: mono 11px bold, type color */}
-                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,color:tColors[domType]||"var(--ink-3)",flexShrink:0,letterSpacing:".04em"}}>×{n}</div>
-                    </div>
-                  );
-                })}
+                )}
               </div>
             )}
 
-            {/* ── 03 OUTLOOK / 7-DAY FORECAST ───────────────── */}
+            {/* ── 03 OUTLOOK ────────────────────────────────── */}
             <div ref={refOutlook} className="card">
-              {/* Eyebrow: "03 · OUTLOOK · 7 DAYS" left, "UPDATED 14:32" right mint */}
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
-                <div style={{display:"flex",gap:5,alignItems:"baseline"}}>
-                  <span className="eb" style={{color:"var(--mint)"}}>03</span>
-                  <span className="eb">·</span>
-                  <span className="eb">OUTLOOK</span>
-                  <span className="eb">·</span>
-                  <span className="eb">7 DAYS</span>
-                </div>
-                {wxTime&&<span className="eb" style={{color:"var(--mint)",fontSize:9,letterSpacing:".1em"}}>UPDATED {fmtTime(wxTime)}</span>}
-              </div>
-
-              {/* Section title: "7-DAY FORECAST" ALL-CAPS */}
-              <div className="st">7-Day Forecast</div>
-
-              {/* Day cells */}
-              <div style={{display:"flex",gap:4}}>
-                {timeline.map((day,i)=>{
-                  const di=day.issues.filter(x=>x.type!=="rain"),ha=di.length>0,it=i===0;
-                  return(
-                    <div key={day.date} style={{flex:"1 0 0",minWidth:40,textAlign:"center",padding:"7px 3px 6px",borderRadius:7,background:it?"var(--panel-2)":"transparent",border:it?"1px solid var(--mint)":"1px solid var(--line)"}}>
-                      {/* Day name: mono ALL-CAPS small */}
-                      <div className="oh" style={{color:it?"var(--mint)":"var(--ink-3)",marginBottom:3}}>
-                        {/* TODAY = 5 chars, clip to 3 for non-today in small cells */}
-                        {it?"TODAY":day.dayAbbr}
-                      </div>
-                      <div style={{display:"flex",justifyContent:"center",margin:"3px 0"}}><WxIcon code={day.wc} size={17}/></div>
-                      {/* High temp: Barlow 800 */}
-                      <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:it?22:18,fontWeight:800,color:"var(--ink)",lineHeight:1.1}}>{Math.round(day.high)}°</div>
-                      {/* Low temp: mono tiny */}
-                      <div className="eb" style={{fontSize:9,color:"var(--ink-3)",marginTop:1}}>{Math.round(day.low)}°</div>
-                      {/* Alert count or rain drop */}
-                      {ha?(
-                        <div className="eb" style={{fontSize:8,color:"var(--alert)",marginTop:3,fontWeight:700}}>-{di.length}</div>
-                      ):day.rainCollect?(
-                        <div style={{marginTop:3,display:"flex",justifyContent:"center"}}>
-                          <svg width="7" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2C6 12 6 16 12 22c6-6 6-10 0-20z"/></svg>
+              <SectionHead num="03" label="OUTLOOK" extra="7 DAYS"
+                right={wxTime?`UPDATED ${fmtTime(wxTime)}`:undefined} rightColor="var(--mint)"
+                title="7-Day Forecast" isCollapsed={collapsed.outlook} onToggle={()=>toggleSection("outlook")}/>
+              {!collapsed.outlook&&(
+                <div style={{padding:"0 14px 14px"}}>
+                  {/* Day cells — identical flex layout to TickChart strip below */}
+                  <div style={{display:"flex",gap:CELL_GAP}}>
+                    {timeline.map((day,i)=>{
+                      const di=day.issues.filter(x=>x.type!=="rain"),ha=di.length>0,it=i===0;
+                      return(
+                        <div key={day.date} style={{flex:"1 0 0",minWidth:0,textAlign:"center",padding:"7px 3px 6px",borderRadius:7,background:it?"var(--panel-2)":"transparent",border:it?"1px solid var(--mint)":"1px solid var(--line)"}}>
+                          <div className="oh" style={{color:it?"var(--mint)":"var(--ink-3)",marginBottom:3}}>{day.dayAbbr.slice(0,it?5:3)}</div>
+                          <div style={{display:"flex",justifyContent:"center",margin:"3px 0"}}><WxIcon code={day.wc} size={17}/></div>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:it?21:17,fontWeight:800,color:"var(--ink)",lineHeight:1.1}}>{Math.round(day.high)}°</div>
+                          <div className="eb" style={{fontSize:9,color:"var(--ink-3)",marginTop:1}}>{Math.round(day.low)}°</div>
+                          {ha?(
+                            <div className="eb" style={{fontSize:8,color:"var(--alert)",marginTop:3,fontWeight:700}}>-{di.length}</div>
+                          ):day.rainCollect?(
+                            <div style={{marginTop:3,display:"flex",justifyContent:"center"}}>
+                              <svg width="7" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2C6 12 6 16 12 22c6-6 6-10 0-20z"/></svg>
+                            </div>
+                          ):<div style={{height:12}}/>}
                         </div>
-                      ):<div style={{height:12}}/>}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Twin horizontal tick chart */}
-              <TickChart timeline={timeline}/>
+                      );
+                    })}
+                  </div>
+                  {/* Tick chart — same gap:CELL_GAP + flex:"1 0 0", segment N under day cell N */}
+                  <TickChart timeline={timeline}/>
+                </div>
+              )}
             </div>
 
             {/* ── 04 SEASON TRACKER ─────────────────────────── */}
             {(()=>{const hp=getHP(),rp=getRP();return(
               <div className="card">
-                <div style={{display:"flex",gap:5,alignItems:"baseline",marginBottom:6}}>
-                  <span className="eb" style={{color:"var(--mint)"}}>04</span>
-                  <span className="eb">·</span>
-                  <span className="eb">SEASON</span>
-                </div>
-                <div className="st">Season Tracker</div>
-                {!climate?(
-                  <div className="eb" style={{color:"var(--ink-3)",textAlign:"center",padding:"12px 0",fontSize:9}}>Loading local climate history…</div>
-                ):(
-                  <>
-                    <div style={{display:"flex",gap:8}}>
-                      {hp&&<Donut pct={hp.pct} color="var(--alert)" centerText={`${hp.counted}/${hp.avg}`} sub={`days ≥${heatThreshold}°`} label="hot days this season"/>}
-                      {rp&&<Donut pct={rp.pct} color="var(--steel)" centerText={`${rp.counted}/${rp.avg}`} sub="rain days" label="rain days this season"/>}
-                    </div>
-                    <div style={{fontSize:11,color:"var(--ink-3)",marginTop:10,lineHeight:1.5,textAlign:"center"}}>{`Based on ${climate.yearsSampled}-year local average.${hp&&hp.remaining>0?` ~${hp.remaining} hot days still ahead.`:""}`}</div>
-                    <div className="mt" style={{color:"var(--ink-3)",marginTop:6,textAlign:"center",letterSpacing:".16em"}}>OUTDOOR · MAR 21 → DEC 21</div>
-                  </>
+                <SectionHead num="04" label="SEASON" title="Season Tracker" isCollapsed={collapsed.season} onToggle={()=>toggleSection("season")}/>
+                {!collapsed.season&&(
+                  <div style={{padding:"0 14px 14px"}}>
+                    {!climate?(
+                      <div className="eb" style={{color:"var(--ink-3)",textAlign:"center",padding:"12px 0",fontSize:9}}>Loading local climate history…</div>
+                    ):(
+                      <>
+                        <div style={{display:"flex",gap:8}}>
+                          {hp&&<Donut pct={hp.pct} color="var(--alert)" centerText={`${hp.counted}/${hp.avg}`} sub={`days ≥${heatThreshold}°`} label="hot days this season"/>}
+                          {rp&&<Donut pct={rp.pct} color="var(--steel)" centerText={`${rp.counted}/${rp.avg}`} sub="rain days" label="rain days this season"/>}
+                        </div>
+                        <div style={{fontSize:11,color:"var(--ink-3)",marginTop:10,lineHeight:1.5,textAlign:"center"}}>{`Based on ${climate.yearsSampled}-year local average.${hp&&hp.remaining>0?` ~${hp.remaining} hot days still ahead.`:""}`}</div>
+                        <div className="mt" style={{color:"var(--ink-3)",marginTop:6,textAlign:"center",letterSpacing:".16em"}}>OUTDOOR · MAR 21 → DEC 21</div>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             );})()}
 
             {/* ── 05 YOUR PLANTS ────────────────────────────── */}
             <div ref={refPlants} className="card">
-              <div style={{display:"flex",gap:5,alignItems:"baseline",marginBottom:6}}>
-                <span className="eb" style={{color:"var(--mint)"}}>05</span>
-                <span className="eb">·</span>
-                <span className="eb">INVENTORY</span>
-              </div>
-              <div className="st">Your Plants</div>
-              <button onClick={e=>{e.stopPropagation();setScr("groups");}}
-                style={{width:"100%",padding:"8px 12px",marginBottom:10,borderRadius:4,fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:".14em",textTransform:"uppercase",color:"var(--ink-2)",background:"none",border:"1px dashed var(--line-2)",cursor:"pointer"}}>
-                Manage Groups →
-              </button>
-              <div style={{display:"flex",padding:"2px 0 6px",borderBottom:"1px solid var(--line)"}}>
-                {["Plant","Group","Range","Alerts"].map((h,i)=>(
-                  <div key={i} className="eb" style={{fontSize:8,color:"var(--ink-3)",flex:i===0?3:i===1?2:i===2?3:1,textAlign:i===3?"right":"left",letterSpacing:".14em"}}>{h}</div>
-                ))}
-              </div>
-              {outP.map((p,i)=>{
-                const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;
-                const g=getPlantGroup(p.common_name),hasAdj=g&&(g.heatAdj||g.coldAdj||g.windAdj);
-                const effMax=p.max_temp_f+(g?.heatAdj||0),effMin=p.min_temp_f-(g?.coldAdj||0),effWind=p.max_wind_mph+(g?.windAdj||0);
-                return(
-                  <div key={i} onClick={()=>setDetailPlant(p)} style={{display:"flex",alignItems:"center",padding:"6px 0",borderBottom:"1px solid var(--line)20",cursor:"pointer"}}>
-                    <div style={{flex:3,fontSize:13,color:"var(--ink)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.common_name}</div>
-                    <div style={{flex:2,fontSize:10,color:"var(--ink-3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g?.name||"—"}</div>
-                    <div style={{flex:3,fontSize:10,color:hasAdj?"var(--amber)":"var(--ink-2)",textAlign:"center"}}>{effMin}–{effMax}° 💨{effWind}{hasAdj?" ✎":""}</div>
-                    <div style={{flex:1,fontSize:11,fontWeight:700,color:ac>0?"var(--amber)":"var(--ink-3)",textAlign:"right"}}>{ac||"—"}</div>
+              <SectionHead num="05" label="INVENTORY" title="Your Plants" isCollapsed={collapsed.plants} onToggle={()=>toggleSection("plants")}/>
+              {!collapsed.plants&&(
+                <div style={{padding:"0 14px 14px"}}>
+                  <button onClick={e=>{e.stopPropagation();setScr("groups");}}
+                    style={{width:"100%",padding:"8px 12px",marginBottom:10,borderRadius:4,fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:".14em",textTransform:"uppercase",color:"var(--ink-2)",background:"none",border:"1px dashed var(--line-2)",cursor:"pointer"}}>
+                    Manage Groups →
+                  </button>
+                  {/* Table header */}
+                  <div style={{display:"flex",padding:"2px 0 6px",borderBottom:"1px solid var(--line)"}}>
+                    {["Plant","Group","Range","Alerts"].map((h,i)=>(
+                      <div key={i} className="eb" style={{fontSize:8,color:"var(--ink-3)",flex:i===0?3:i===1?2:i===2?3:1,textAlign:i===3?"right":"left",letterSpacing:".14em"}}>{h}</div>
+                    ))}
                   </div>
-                );
-              })}
-              {inP.length>0&&(
-                <div style={{marginTop:10}}>
-                  <div className="eb" style={{color:"var(--amber)",marginBottom:6,fontSize:9,letterSpacing:".14em"}}>🏠 INDOORS</div>
-                  {inP.map((p,i)=>{const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;const g=getPlantGroup(p.common_name);return(
-                    <div key={i} onClick={()=>markBack(p.common_name)} style={{display:"flex",alignItems:"center",padding:"6px 0",borderBottom:"1px solid var(--line)20",cursor:"pointer"}}>
-                      <div style={{flex:3,fontSize:13,color:"var(--amber)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>↩ {p.common_name}</div>
-                      <div style={{flex:2,fontSize:10,color:"var(--ink-3)"}}>{g?.name||"—"}</div>
-                      <div style={{flex:3,fontSize:10,color:"var(--ink-2)",textAlign:"center"}}>{p.min_temp_f}–{p.max_temp_f}°</div>
-                      <div style={{flex:1,fontSize:11,fontWeight:700,color:ac>0?"var(--amber)":"var(--ink-3)",textAlign:"right"}}>{ac||"—"}</div>
+                  {outP.map((p,i)=>{
+                    const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;
+                    const g=getPlantGroup(p.common_name),hasAdj=g&&(g.heatAdj||g.coldAdj||g.windAdj);
+                    const effMax=p.max_temp_f+(g?.heatAdj||0),effMin=p.min_temp_f-(g?.coldAdj||0),effWind=p.max_wind_mph+(g?.windAdj||0);
+                    return(
+                      <div key={i} onClick={()=>setDetailPlant(p)} style={{display:"flex",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--line)20",cursor:"pointer"}}>
+                        <div style={{flex:3,overflow:"hidden",minWidth:0}}>
+                          {/* Plant name: Barlow 15px 700 ALL-CAPS */}
+                          <span className="inv-name">{p.common_name}</span>
+                        </div>
+                        <div style={{flex:2,overflow:"hidden",minWidth:0}}>
+                          <span className="inv-sec">{g?.name||"—"}</span>
+                        </div>
+                        <div style={{flex:3,textAlign:"center"}}>
+                          <span className="inv-sec" style={{color:hasAdj?"var(--amber)":"var(--ink-3)"}}>{effMin}–{effMax}° 💨{effWind}{hasAdj?" ✎":""}</span>
+                        </div>
+                        <div style={{flex:1,textAlign:"right"}}>
+                          <span className="inv-sec" style={{fontWeight:700,color:ac>0?"var(--amber)":"var(--ink-3)"}}>{ac||"—"}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {inP.length>0&&(
+                    <div style={{marginTop:10}}>
+                      <div className="eb" style={{color:"var(--amber)",marginBottom:6,fontSize:9}}>🏠 INDOORS</div>
+                      {inP.map((p,i)=>{const ac=actionLog.filter(l=>l.plants.includes(p.common_name)&&l.action!=="back-outside").length;const g=getPlantGroup(p.common_name);return(
+                        <div key={i} onClick={()=>markBack(p.common_name)} style={{display:"flex",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--line)20",cursor:"pointer"}}>
+                          <div style={{flex:3,overflow:"hidden",minWidth:0}}>
+                            <span className="inv-name" style={{color:"var(--amber)"}}>↩ {p.common_name}</span>
+                          </div>
+                          <div style={{flex:2,overflow:"hidden",minWidth:0}}>
+                            <span className="inv-sec">{g?.name||"—"}</span>
+                          </div>
+                          <div style={{flex:3,textAlign:"center"}}>
+                            <span className="inv-sec">{p.min_temp_f}–{p.max_temp_f}°</span>
+                          </div>
+                          <div style={{flex:1,textAlign:"right"}}>
+                            <span className="inv-sec" style={{fontWeight:700,color:ac>0?"var(--amber)":"var(--ink-3)"}}>{ac||"—"}</span>
+                          </div>
+                        </div>
+                      );})}
                     </div>
-                  );})}
+                  )}
                 </div>
               )}
             </div>
@@ -641,15 +705,15 @@ function App(){
         )}
       </>}
 
-      {/* ── GROUPS ───────────────────────────────────────────────── */}
+      {/* GROUPS */}
       {scr==="groups"&&<>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><button onClick={()=>setScr("home")} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--amber)",padding:4}}>←</button><div className="st" style={{marginBottom:0}}>Manage Groups</div></div>
-        {groups.length===0&&<div className="card" style={{textAlign:"center",color:"var(--ink-3)",fontSize:13,padding:24}}>No groups yet. Tap + to add plants.</div>}
+        {groups.length===0&&<div className="card" style={{padding:24,textAlign:"center",color:"var(--ink-3)",fontSize:13}}>No groups yet. Tap + to add plants.</div>}
         {groups.map(g=>(
-          <div key={g.id} className="card" style={{cursor:"pointer"}} onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}}>
+          <div key={g.id} className="card" style={{padding:"14px",cursor:"pointer"}} onClick={()=>{setEditingGroup(g.id);setSelP(g.plants);setGName(g.name);setHeatAdj(g.heatAdj||0);setColdAdj(g.coldAdj||0);setWindAdj(g.windAdj||0);setSq("");setScr("add");}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div><div style={{fontSize:14,fontWeight:600,color:"var(--ink)",marginBottom:3}}>{g.name}</div><div style={{fontSize:11,color:"var(--ink-3)"}}>{g.plants.length} plant{g.plants.length!==1?"s":""}{g.plants.filter(p=>p.indoors).length>0?` · ${g.plants.filter(p=>p.indoors).length} indoors`:""}{(g.heatAdj||g.coldAdj||g.windAdj)?<span style={{color:"var(--amber)"}}> · adjusted ✎</span>:null}</div></div>
-              <div style={{display:"flex",alignItems:"center",gap:10}}><button onClick={e=>{e.stopPropagation();if(confirm(`Delete "${g.name}"?`)){setGroups(p=>p.filter(x=>x.id!==g.id));}}} style={{background:"none",border:"1px solid var(--alert)44",borderRadius:6,padding:"4px 10px",fontSize:11,color:"var(--alert)",cursor:"pointer"}}>delete</button><div style={{fontSize:12,color:"var(--mint)"}}>edit →</div></div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}><button onClick={e=>{e.stopPropagation();if(confirm(`Delete "${g.name}"?`)){setGroups(p=>p.filter(x=>x.id!==g.id));};}} style={{background:"none",border:"1px solid var(--alert)44",borderRadius:6,padding:"4px 10px",fontSize:11,color:"var(--alert)",cursor:"pointer"}}>delete</button><div style={{fontSize:12,color:"var(--mint)"}}>edit →</div></div>
             </div>
             <div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>
               {g.plants.slice(0,6).map(p=>(<span key={p.common_name} style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:"var(--bg)",color:p.indoors?"var(--amber)":"var(--ink-2)",border:"1px solid var(--line)"}}>{p.common_name}</span>))}
@@ -660,11 +724,11 @@ function App(){
         <button onClick={()=>{setScr("add");setSelP([]);setGName("");setSq("");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);}} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:"var(--amber)",border:"1.5px dashed var(--amber)",fontSize:14,cursor:"pointer",marginTop:4}}>+ New Group</button>
       </>}
 
-      {/* ── ADD/EDIT ──────────────────────────────────────────────── */}
+      {/* ADD/EDIT */}
       {scr==="add"&&<>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><button onClick={()=>{setScr(editingGroup?"groups":"home");setErr(null);setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setGroupNameError("");}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--amber)",padding:4}}>←</button><div className="st" style={{marginBottom:0}}>{editingGroup?"Edit Group":"Add Plants"}</div></div>
         {selP.length>0&&<div style={{display:"flex",flexWrap:"wrap",marginBottom:12,gap:6}}>{selP.map((p,i)=>(<div key={i} onClick={()=>setSelP(prev=>prev.filter((_,j)=>j!==i))} style={{padding:"6px 10px",borderRadius:8,background:"var(--mint)",cursor:"pointer"}}><div style={{fontSize:11,fontWeight:600,color:"var(--bg)"}}>{p.common_name} ✕</div><div style={{fontSize:9,color:"rgba(0,0,0,0.5)",marginTop:2}}>{p.min_temp_f}–{p.max_temp_f}°F · 💨≤{p.max_wind_mph}mph</div></div>))}</div>}
-        <div className="card">
+        <div className="card" style={{padding:"14px"}}>
           <input type="text" value={sq} onChange={e=>setSq(e.target.value.slice(0,100))} placeholder="Search plants..." maxLength={100} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"1.5px solid var(--line)",fontSize:15,background:"var(--bg)",color:"var(--ink)",outline:"none",fontFamily:"inherit",boxSizing:"border-box",marginBottom:filtered.length>0||sq.length>0?12:0}}/>
           {sq.length>0&&filtered.length===0&&<div style={{fontSize:13,color:"var(--ink-3)",padding:"8px 0",textAlign:"center"}}>No matches. Send me a photo in chat.</div>}
           <div style={{maxHeight:340,overflowY:"auto"}}>
@@ -681,14 +745,13 @@ function App(){
                   {p.d?<span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"#1A2E1A",color:"#86EFAC"}}>💧 drought tolerant</span>:null}
                 </div>
                 <div style={{fontSize:11,color:"var(--ink-3)",marginTop:4}}>{p.t}</div>
-              </div>);
-            })}
+              </div>);})}
           </div>
         </div>
         {selP.length>0&&<>
-          <div className="card"><div className="eb" style={{marginBottom:8,color:"var(--amber)",fontSize:9,letterSpacing:".14em"}}>GROUP NAME</div><input type="text" value={gName} onChange={e=>{setGName(e.target.value.slice(0,60));setGroupNameError("");}} placeholder={`Patio Group ${groups.length+1}`} maxLength={60} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${groupNameError?"var(--alert)":"var(--line)"}`,fontSize:14,background:"var(--bg)",color:"var(--ink)",outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>{groupNameError&&<div style={{fontSize:11,color:"var(--alert)",marginTop:6}}>{groupNameError}</div>}</div>
-          <div className="card">
-            <div className="eb" style={{marginBottom:10,color:"var(--amber)",fontSize:9,letterSpacing:".14em"}}>TOLERANCE ADJUSTMENTS</div>
+          <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,color:"var(--amber)",fontSize:9}}>GROUP NAME</div><input type="text" value={gName} onChange={e=>{setGName(e.target.value.slice(0,60));setGroupNameError("");}} placeholder={`Patio Group ${groups.length+1}`} maxLength={60} style={{width:"100%",padding:"10px 12px",borderRadius:8,border:`1.5px solid ${groupNameError?"var(--alert)":"var(--line)"}`,fontSize:14,background:"var(--bg)",color:"var(--ink)",outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}/>{groupNameError&&<div style={{fontSize:11,color:"var(--alert)",marginTop:6}}>{groupNameError}</div>}</div>
+          <div className="card" style={{padding:"14px"}}>
+            <div className="eb" style={{marginBottom:10,color:"var(--amber)",fontSize:9}}>TOLERANCE ADJUSTMENTS</div>
             <div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.5}}>Your plants handle more than the textbook says? Adjust here.</div>
             {[{label:"🌡️ Heat",value:heatAdj,set:setHeatAdj,unit:"°F",color:"var(--alert)"},{label:"❄️ Cold",value:coldAdj,set:setColdAdj,unit:"°F",color:"var(--steel)"},{label:"💨 Wind",value:windAdj,set:setWindAdj,unit:" mph",color:"var(--amber)"}].map(({label,value,set,unit,color})=>(
               <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
@@ -706,15 +769,15 @@ function App(){
         <div style={{marginTop:16,background:"var(--panel-2)",border:"1px dashed var(--line)",borderRadius:12,padding:16,textAlign:"center",fontSize:12,color:"var(--ink-3)",lineHeight:1.5}}>📸 <strong style={{color:"var(--ink-2)"}}>Can't find your plant?</strong><br/>Send me a photo in the chat and I'll identify it.</div>
       </>}
 
-      {/* ── SETTINGS ─────────────────────────────────────────────── */}
+      {/* SETTINGS */}
       {scr==="set"&&<>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><button onClick={()=>{setScr("home");setErr(null);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--amber)",padding:4}}>←</button><div className="st" style={{marginBottom:0}}>Settings</div></div>
-        <div className="card"><div className="eb" style={{marginBottom:8,fontSize:9}}>LOCATION</div><div style={{fontSize:13,color:"var(--ink-2)"}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div></div>
-        <div className="card"><div className="eb" style={{marginBottom:10,fontSize:9}}>THEME</div><div style={{display:"flex",gap:8}}>{[{k:"dark",label:"Dark"},{k:"notebook",label:"Notebook"},{k:"cotton-candy",label:"Cotton Candy"}].map(t=>(<button key={t.k} onClick={()=>setTheme(t.k)} style={{flex:1,padding:"10px 6px",borderRadius:6,cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".08em",border:`1px solid ${theme===t.k?"var(--amber)":"var(--line)"}`,background:theme===t.k?"var(--panel-2)":"transparent",color:theme===t.k?"var(--amber)":"var(--ink-3)",fontWeight:theme===t.k?700:500}}>{t.label}</button>))}</div></div>
-        <div className="card"><div className="eb" style={{marginBottom:8,fontSize:9}}>TESTING</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Forces extreme weather so all alerts fire.</div><button onClick={()=>{setTestMode(t=>!t);setDismissed({});setAlertAckedDate("");}} style={{width:"100%",padding:"12px",borderRadius:10,border:`1.5px solid ${testMode?"var(--alert)":"var(--line)"}`,background:testMode?"#7F1D1D":"transparent",color:testMode?"#FCA5A5":"var(--ink-3)",fontSize:14,fontWeight:700,cursor:"pointer"}}>{testMode?"⚠️ Test mode ON — tap to disable":"Test mode off"}</button></div>
-        <div className="card"><div className="eb" style={{marginBottom:8,fontSize:9}}>HEAT THRESHOLD</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Counts as extreme-heat for the season tracker.</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:13,color:"var(--ink-2)"}}>🌡️ Extreme heat at</span><div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={()=>setHeatThreshold(t=>Math.max(80,t-5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>−</button><span style={{fontSize:16,fontWeight:800,color:"var(--alert)",minWidth:54,textAlign:"center"}}>{heatThreshold}°F</span><button onClick={()=>setHeatThreshold(t=>Math.min(120,t+5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>+</button></div></div></div>
-        <div className="card"><div className="eb" style={{marginBottom:8,fontSize:9}}>NOTIFICATIONS</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Daily weather alerts when the app is closed. Requires adding to home screen on iOS.</div>{pushEnabled?(<button onClick={unregisterPush} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:"var(--ink-3)",border:"1.5px solid var(--line)",fontSize:14,fontWeight:600,cursor:"pointer"}}>🔔 Notifications on — tap to disable</button>):(<button onClick={registerPush} disabled={pushPending} style={{width:"100%",padding:"12px",borderRadius:10,background:"linear-gradient(135deg,var(--mint),var(--steel))",color:"var(--bg)",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",opacity:pushPending?0.6:1}}>{pushPending?"Setting up…":"Enable notifications"}</button>)}</div>
-        <div className="card"><div className="eb" style={{marginBottom:8,fontSize:9}}>DATA</div><button onClick={()=>{if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);setWateringLog([]);}}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:"var(--alert)",border:"1.5px solid var(--alert)",fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button></div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>LOCATION</div><div style={{fontSize:13,color:"var(--ink-2)"}}>{savedZip?`Zip: ${savedZip}`:"Leander, TX"}</div></div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:10,fontSize:9}}>THEME</div><div style={{display:"flex",gap:8}}>{[{k:"dark",label:"Dark"},{k:"notebook",label:"Notebook"},{k:"cotton-candy",label:"Cotton Candy"}].map(t=>(<button key={t.k} onClick={()=>setTheme(t.k)} style={{flex:1,padding:"10px 6px",borderRadius:6,cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".08em",border:`1px solid ${theme===t.k?"var(--amber)":"var(--line)"}`,background:theme===t.k?"var(--panel-2)":"transparent",color:theme===t.k?"var(--amber)":"var(--ink-3)",fontWeight:theme===t.k?700:500}}>{t.label}</button>))}</div></div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>TESTING</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Forces extreme weather so all alerts fire.</div><button onClick={()=>{setTestMode(t=>!t);setDismissed({});setAlertAckedDate("");}} style={{width:"100%",padding:"12px",borderRadius:10,border:`1.5px solid ${testMode?"var(--alert)":"var(--line)"}`,background:testMode?"#7F1D1D":"transparent",color:testMode?"#FCA5A5":"var(--ink-3)",fontSize:14,fontWeight:700,cursor:"pointer"}}>{testMode?"⚠️ Test mode ON — tap to disable":"Test mode off"}</button></div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>HEAT THRESHOLD</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Counts as extreme-heat for the season tracker.</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:13,color:"var(--ink-2)"}}>🌡️ Extreme heat at</span><div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={()=>setHeatThreshold(t=>Math.max(80,t-5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>−</button><span style={{fontSize:16,fontWeight:800,color:"var(--alert)",minWidth:54,textAlign:"center"}}>{heatThreshold}°F</span><button onClick={()=>setHeatThreshold(t=>Math.min(120,t+5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>+</button></div></div></div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>NOTIFICATIONS</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Daily weather alerts when app is closed. Requires adding to home screen on iOS.</div>{pushEnabled?(<button onClick={unregisterPush} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:"var(--ink-3)",border:"1.5px solid var(--line)",fontSize:14,fontWeight:600,cursor:"pointer"}}>🔔 Notifications on — tap to disable</button>):(<button onClick={registerPush} disabled={pushPending} style={{width:"100%",padding:"12px",borderRadius:10,background:"linear-gradient(135deg,var(--mint),var(--steel))",color:"var(--bg)",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",opacity:pushPending?0.6:1}}>{pushPending?"Setting up…":"Enable notifications"}</button>)}</div>
+        <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>DATA</div><button onClick={()=>{if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);setWateringLog([]);}}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:"var(--alert)",border:"1.5px solid var(--alert)",fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button></div>
       </>}
       </div>
 
@@ -753,7 +816,7 @@ function App(){
           <div onClick={e=>e.stopPropagation()} style={{background:"var(--panel)",borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:"1px solid var(--line)",borderBottom:"none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div style={{fontSize:18,fontWeight:700,color:"var(--ink)"}}>💧 Log Watering</div><button onClick={()=>setShowWaterModal(false)} style={{background:"none",border:"none",fontSize:18,color:"var(--ink-3)",cursor:"pointer",padding:4}}>✕</button></div>
             {waterInfo?.earlyTrigger&&<div style={{padding:"8px 12px",borderRadius:8,background:"#2A1A08",border:"1px solid var(--amber)44",fontSize:12,color:"var(--amber)",marginBottom:14}}>🌡️ {getConsecHeat(timeline)} consecutive heat alert days — watering early.</div>}
-            <div className="eb" style={{marginBottom:6,color:"var(--amber)",fontSize:9,letterSpacing:".14em"}}>NOTES</div>
+            <div className="eb" style={{marginBottom:6,color:"var(--amber)",fontSize:9}}>NOTES</div>
             <textarea value={waterNotes} onChange={e=>setWaterNotes(e.target.value.slice(0,500))} rows={3} placeholder="e.g. skipped snake plant and pothos" style={{width:"100%",padding:"10px 12px",borderRadius:8,border:"1.5px solid var(--line)",fontSize:13,background:"var(--bg)",color:"var(--ink)",outline:"none",fontFamily:"inherit",boxSizing:"border-box",resize:"none",lineHeight:1.5}}/>
             <button onClick={logWatering} style={{width:"100%",marginTop:12,padding:"13px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--mint),var(--steel))",color:"var(--bg)",fontSize:15,fontWeight:700,cursor:"pointer"}}>Mark as watered today</button>
           </div>
