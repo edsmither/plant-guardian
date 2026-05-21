@@ -29,10 +29,10 @@ textarea,input,button{font-family:inherit;}
 /* ── Type classes ───────────────────────────────────────────── */
 /* Eyebrow */
 .eb{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);line-height:1.4;}
-/* Section title — 18px, weight 800, tight tracking, Barlow Condensed - erica changed to 18x w800 */
-.st{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
+/* Section title — 11px, weight 600, tight tracking, Barlow Condensed */
+.st{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
 /* Alert plant name */
-.pn{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
+.pn{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
 /* Alert description */
 .ad{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--ink-2);margin-top:2px;}
 /* Upcoming day abbr */
@@ -49,7 +49,7 @@ textarea,input,button{font-family:inherit;}
 .mt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;}
 /* Card */
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-/* Inventory plant name — Barlow 16px 700 ALL-CAPS, matches Upcoming sizing */
+/* Inventory plant name — Barlow 18px 700 ALL-CAPS, matches Upcoming sizing */
 .inv-name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 /* Inventory secondary */
 .inv-sec{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3);}
@@ -230,13 +230,13 @@ function TickChart({timeline}){
 function StencilDisc({size=34}){return<svg width={size} height={size} viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="86" stroke="var(--amber)" strokeWidth="6" fill="none"/><circle cx="100" cy="100" r="64" fill="var(--panel-2)" stroke="var(--amber)" strokeWidth="1.5"/><g transform="translate(100 100) rotate(-20) translate(-36 -50)"><path d="M36 0 C 64 18, 72 56, 50 100 C 22 78, 6 48, 36 0 Z" fill="var(--mint)" stroke="var(--mint)" strokeWidth="2" strokeLinejoin="round"/><path d="M36 0 L 36 100" stroke="var(--bg)" strokeWidth="3" strokeLinecap="round"/><g stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" opacity="0.85"><line x1="36" y1="22" x2="52" y2="26"/><line x1="36" y1="42" x2="56" y2="46"/><line x1="36" y1="62" x2="54" y2="66"/><line x1="36" y1="22" x2="22" y2="28"/><line x1="36" y1="42" x2="20" y2="48"/><line x1="36" y1="62" x2="24" y2="68"/></g></g></svg>;}
 
 function Donut({pct,color,centerText,sub,label}){
-  const r=60,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
+  const r=72,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
   return<div style={{textAlign:"center",flex:1}}>
-    <svg width="160" height="160" viewBox="0 0 160 160" style={{maxWidth:"100%"}}>
-      <circle cx="80" cy="80" r="60" fill="none" stroke="var(--line)" strokeWidth="13"/>
-      <circle cx="80" cy="80" r="60" fill="none" stroke={color} strokeWidth="13" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 80 80)"/>
-      <text x="80" y="77" textAnchor="middle" fontSize="34" fontWeight="800" fill="var(--ink)" fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text>
-      <text x="80" y="97" textAnchor="middle" fontSize="10" fill="var(--ink-3)" fontFamily="'JetBrains Mono',monospace" letterSpacing="0.06em">{sub}</text>
+    <svg width="184" height="184" viewBox="0 0 184 184" style={{maxWidth:"100%"}}>
+      <circle cx="92" cy="92" r="72" fill="none" stroke="var(--line)" strokeWidth="16"/>
+      <circle cx="92" cy="92" r="72" fill="none" stroke={color} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 92 92)"/>
+      <text x="92" y="89" textAnchor="middle" fontSize="34" fontWeight="800" fill="var(--ink)" fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text>
+      <text x="92" y="109" textAnchor="middle" fontSize="10" fill="var(--ink-3)" fontFamily="'JetBrains Mono',monospace" letterSpacing="0.06em">{sub}</text>
     </svg>
     {/* Percentage label — bigger + brighter than before, takes the room it needs */}
     <div style={{color:color,marginTop:4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:".04em",textTransform:"uppercase"}}>{label}</div>
@@ -381,16 +381,17 @@ function App(){
     if(dL===0)msgs.push({icon:"💧",text:cH>=4?`Heat alert for ${getConsecHeat(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});
     if(todayI.length>0){const types=[...new Set(todayI.map(i=>i.type))],plants=[...new Set(todayI.map(i=>i.plant))];msgs.push({icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
     if(msgs.length>0)setAlertModal(msgs);
-  },[ready,timeline]);
+  },[ready,timeline,alertAckedDate]);
 
   useEffect(()=>{
     if(!ready||!timeline.length)return;
+    const today=new Date().toISOString().split("T")[0];if(alertAckedDate===today)return;
     const allNames=groups.flatMap(g=>g.plants.map(p=>p.common_name)),prevNames=prevPlantsRef.current,newNames=allNames.filter(n=>!prevNames.includes(n));
     prevPlantsRef.current=allNames;if(!newNames.length)return;
     const ti=timeline[0].issues.filter(i=>i.type!=="rain"&&newNames.includes(i.plant));if(!ti.length)return;
     const types=[...new Set(ti.map(i=>i.type))],plants=[...new Set(ti.map(i=>i.plant))];
     setAlertModal([{icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`}]);
-  },[groups,timeline,ready]);
+  },[groups,timeline,ready,alertAckedDate]);
 
   const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);};
   const markBack=name=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
