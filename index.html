@@ -29,10 +29,10 @@ textarea,input,button{font-family:inherit;}
 /* ── Type classes ───────────────────────────────────────────── */
 /* Eyebrow */
 .eb{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);line-height:1.4;}
-/* Section title — 11px, weight 600, tight tracking, Barlow Condensed */
-.st{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
+/* Section title — 18px, weight 600, tight tracking, Barlow Condensed */
+.st{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
 /* Alert plant name */
-.pn{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
+.pn{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
 /* Alert description */
 .ad{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--ink-2);margin-top:2px;}
 /* Upcoming day abbr */
@@ -40,19 +40,19 @@ textarea,input,button{font-family:inherit;}
 /* Upcoming date sub */
 .ds{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;}
 /* Outlook day header */
-.oh{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+.oh{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
 /* Stat label */
-.sl{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);}
+.sl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);}
 /* Stat value */
 .sv{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
 /* Mono tiny */
 .mt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;}
 /* Card */
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-/* Inventory plant name — Barlow 18px 700 ALL-CAPS, matches Upcoming sizing */
-.inv-name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Inventory plant name — Barlow 14px 500 ALL-CAPS, matches Upcoming sizing */
+.inv-name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:14x;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 /* Inventory secondary */
-.inv-sec{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3);}
+.inv-sec{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-2);}
   </style>
 </head>
 <body>
@@ -163,7 +163,7 @@ const safeInt=(v,fb=0,mn=-50,mx=200)=>{const n=Number(v);return isFinite(n)?Math
 const vGroup=g=>{if(!g||typeof g!=="object")return null;if(typeof g.id!=="string"&&typeof g.id!=="number")return null;return{id:String(g.id).slice(0,40),name:sanitize(g.name||"My Plants",60),plants:Array.isArray(g.plants)?g.plants.slice(0,200).map(vPlant).filter(Boolean):[],heatAdj:safeInt(g.heatAdj,0,0,30),coldAdj:safeInt(g.coldAdj,0,0,30),windAdj:safeInt(g.windAdj,0,0,20),addedAt:typeof g.addedAt==="string"?g.addedAt.slice(0,30):new Date().toISOString()};};
 const vPlant=p=>{if(!p||typeof p!=="object")return null;if(typeof p.common_name!=="string"||!p.common_name.trim())return null;return{common_name:sanitize(p.common_name,80),scientific_name:sanitize(p.scientific_name||"",80),min_temp_f:safeInt(p.min_temp_f,50,-20,100),max_temp_f:safeInt(p.max_temp_f,95,40,130),max_wind_mph:safeInt(p.max_wind_mph,20,0,80),rain_sensitive:!!p.rain_sensitive,drought_tolerant:!!p.drought_tolerant,notes:sanitize(p.notes||"",300),indoors:!!p.indoors};};
 const VALID_THEMES=["dark","notebook","cotton-candy"];
-const vData=raw=>{try{const d=typeof raw==="string"?JSON.parse(raw):raw;if(!d||typeof d!=="object")return null;return{groups:Array.isArray(d.groups)?d.groups.slice(0,20).map(vGroup).filter(Boolean):[],zip:typeof d.zip==="string"?d.zip.replace(/\D/g,"").slice(0,5):"78641",loc:(d.loc&&isFinite(d.loc.lat)&&isFinite(d.loc.lon))?{lat:Number(d.loc.lat),lon:Number(d.loc.lon)}:null,dismissed:(d.dismissed&&typeof d.dismissed==="object")?d.dismissed:{},actionLog:Array.isArray(d.actionLog)?d.actionLog.slice(-500):[],wateringLog:Array.isArray(d.wateringLog)?d.wateringLog.slice(-200):[],alertAckedDate:typeof d.alertAckedDate==="string"?d.alertAckedDate.slice(0,10):"",collapsed:(d.collapsed&&typeof d.collapsed==="object")?d.collapsed:{},heatThreshold:safeInt(d.heatThreshold,95,80,120),climate:(d.climate&&typeof d.climate==="object")?d.climate:null,yearTally:(d.yearTally&&typeof d.yearTally==="object")?d.yearTally:{},theme:VALID_THEMES.includes(d.theme)?d.theme:"dark"};}catch{return null;}};
+const vData=raw=>{try{const d=typeof raw==="string"?JSON.parse(raw):raw;if(!d||typeof d!=="object")return null;return{groups:Array.isArray(d.groups)?d.groups.slice(0,20).map(vGroup).filter(Boolean):[],zip:typeof d.zip==="string"?d.zip.replace(/\D/g,"").slice(0,5):"78641",loc:(d.loc&&isFinite(d.loc.lat)&&isFinite(d.loc.lon))?{lat:Number(d.loc.lat),lon:Number(d.loc.lon)}:null,dismissed:(d.dismissed&&typeof d.dismissed==="object")?d.dismissed:{},actionLog:Array.isArray(d.actionLog)?d.actionLog.slice(-500):[],wateringLog:Array.isArray(d.wateringLog)?d.wateringLog.slice(-200):[],collapsed:(d.collapsed&&typeof d.collapsed==="object")?d.collapsed:{},heatThreshold:safeInt(d.heatThreshold,95,80,120),climate:(d.climate&&typeof d.climate==="object")?d.climate:null,yearTally:(d.yearTally&&typeof d.yearTally==="object")?d.yearTally:{},theme:VALID_THEMES.includes(d.theme)?d.theme:"dark"};}catch{return null;}};
 
 const VAPID_PUBLIC_KEY="BDPbVR8bQY5KMT0ignaMjWYO0XM6nVv7ArPNwuHicCsrAFwqgXv5rWLFweLV25rNCzOEcLxZim_tvpvejM4qjfQ";
 const WORKER_URL="https://plant-guardian-push.sericah007.workers.dev";
@@ -269,7 +269,6 @@ function App(){
   const [showWaterModal,setShowWaterModal]=useState(false);
   const [waterNotes,setWaterNotes]=useState("");
   const [alertModal,setAlertModal]=useState(null);
-  const [alertAckedDate,setAlertAckedDate]=useState("");
   const [pushEnabled,setPushEnabled]=useState(false);
   const [testMode,setTestMode]=useState(false);
   const [heatThreshold,setHeatThreshold]=useState(95);
@@ -282,6 +281,7 @@ function App(){
   const refOutlook=useRef(null);
   const refPlants=useRef(null);
   const prevPlantsRef=useRef([]);
+  const alertShownRef=useRef(false);
   const scrollTo=r=>r.current?.scrollIntoView({behavior:"smooth",block:"start"});
   const toggleSection=k=>setCollapsed(c=>({...c,[k]:!c[k]}));
 
@@ -301,7 +301,6 @@ function App(){
             setDismissed(d.dismissed);
             setActionLog(d.actionLog);
             setWateringLog(d.wateringLog);
-            setAlertAckedDate(d.alertAckedDate);
             if(d.heatThreshold)setHeatThreshold(d.heatThreshold);
             if(d.climate)setClimate(d.climate);
             if(d.yearTally)setYearTally(d.yearTally);
@@ -317,10 +316,10 @@ function App(){
   useEffect(()=>{
     if(!ready)return;
     const t=setTimeout(()=>{
-      (async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed}));}catch(e){}})();
+      (async()=>{try{await window.storage.set("pg-data",JSON.stringify({groups,zip:savedZip,loc,dismissed,actionLog,wateringLog,heatThreshold,climate,yearTally,theme,collapsed}));}catch(e){}})();
     },300);
     return()=>clearTimeout(t);
-  },[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,alertAckedDate,heatThreshold,climate,yearTally,theme,collapsed]);
+  },[groups,savedZip,loc,ready,dismissed,actionLog,wateringLog,heatThreshold,climate,yearTally,theme,collapsed]);
 
   useEffect(()=>{
     if(!loc)return;
@@ -372,7 +371,7 @@ function App(){
 
   useEffect(()=>{
     if(!ready||!groups.length||!timeline.length)return;
-    const today=new Date().toISOString().split("T")[0];if(alertAckedDate===today)return;
+    if(alertShownRef.current)return;
     const lastW=wateringLog[wateringLog.length-1],lastWD=lastW?new Date(lastW.date+"T12:00:00"):new Date(Date.now()-6*86400000);
     let cH=0;for(const d of timeline){if(d.issues.some(i=>i.type==="heat"))cH++;else break;}
     const interval=cH>=4?6:7,nextW=new Date(lastWD);nextW.setDate(lastWD.getDate()+interval);
@@ -381,17 +380,17 @@ function App(){
     if(dL===0)msgs.push({icon:"💧",text:cH>=4?`Heat alert for ${getConsecHeat(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});
     if(todayI.length>0){const types=[...new Set(todayI.map(i=>i.type))],plants=[...new Set(todayI.map(i=>i.plant))];msgs.push({icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
     if(msgs.length>0)setAlertModal(msgs);
-  },[ready,timeline,alertAckedDate]);
+  },[ready,timeline]);
 
   useEffect(()=>{
     if(!ready||!timeline.length)return;
-    const today=new Date().toISOString().split("T")[0];if(alertAckedDate===today)return;
+    if(alertShownRef.current)return;
     const allNames=groups.flatMap(g=>g.plants.map(p=>p.common_name)),prevNames=prevPlantsRef.current,newNames=allNames.filter(n=>!prevNames.includes(n));
     prevPlantsRef.current=allNames;if(!newNames.length)return;
     const ti=timeline[0].issues.filter(i=>i.type!=="rain"&&newNames.includes(i.plant));if(!ti.length)return;
     const types=[...new Set(ti.map(i=>i.type))],plants=[...new Set(ti.map(i=>i.plant))];
     setAlertModal([{icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`}]);
-  },[groups,timeline,ready,alertAckedDate]);
+  },[groups,timeline,ready]);
 
   const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);};
   const markBack=name=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
@@ -407,7 +406,7 @@ function App(){
     setScr(editingGroup?"groups":"home");setSelP([]);setGName("");setSq("");setEditingGroup(null);setHeatAdj(0);setColdAdj(0);setWindAdj(0);setTimeout(()=>setSaving(false),500);
   };
   const logWatering=()=>{setWateringLog(p=>[...p,{date:new Date().toISOString().split("T")[0],notes:sanitize(waterNotes,500),timestamp:new Date().toISOString()}]);setShowWaterModal(false);setWaterNotes("");};
-  const dismissAlertModal=()=>{setAlertAckedDate(new Date().toISOString().split("T")[0]);setAlertModal(null);};
+  const dismissAlertModal=()=>{alertShownRef.current=true;setAlertModal(null);};
   const urlB64=b=>{const pad="=".repeat((4-b.length%4)%4);const b64=(b+pad).replace(/-/g,"+").replace(/_/g,"/");return Uint8Array.from([...atob(b64)].map(c=>c.charCodeAt(0)));};
   const registerPush=async()=>{
     if(pushPending)return;setPushPending(true);
