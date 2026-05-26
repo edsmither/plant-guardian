@@ -231,15 +231,16 @@ function StencilDisc({size=34}){return<svg width={size} height={size} viewBox="0
 
 function Donut({pct,color,centerText,sub,label}){
   const r=72,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
+  const pctText=`${Math.round(pct*100)}%`;
   return<div style={{textAlign:"center",flex:1}}>
+    <div className="eb" style={{color:"var(--ink-3)",letterSpacing:".18em",marginBottom:6}}>{label}</div>
     <svg width="184" height="184" viewBox="0 0 184 184" style={{maxWidth:"100%"}}>
       <circle cx="92" cy="92" r="72" fill="none" stroke="var(--line)" strokeWidth="16"/>
       <circle cx="92" cy="92" r="72" fill="none" stroke={color} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 92 92)"/>
-      <text x="92" y="89" textAnchor="middle" fontSize="34" fontWeight="800" fill="var(--ink)" fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{centerText}</text>
-      <text x="92" y="109" textAnchor="middle" fontSize="10" fill="var(--ink-3)" fontFamily="'JetBrains Mono',monospace" letterSpacing="0.06em">{sub}</text>
+      <text x="92" y="101" textAnchor="middle" fontSize="42" fontWeight="800" fill={color} fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{pctText}</text>
     </svg>
-    {/* Percentage label — bigger + brighter than before, takes the room it needs */}
-    <div style={{color:color,marginTop:4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:".04em",textTransform:"uppercase"}}>{label}</div>
+    <div style={{marginTop:2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,color:"var(--ink)",letterSpacing:".04em"}}>{centerText}</div>
+    <div className="mt" style={{color:"var(--ink-3)",marginTop:2,letterSpacing:".14em"}}>{sub}</div>
   </div>;
 }
 
@@ -393,6 +394,7 @@ function App(){
   },[groups,timeline,ready]);
 
   const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);};
+  const unsnoozeAlert=(date,type)=>{setDismissed(p=>{const n={...p};delete n[`${date}-${type}`];return n;});};
   const markBack=name=>{setGroups(p=>p.map(g=>({...g,plants:g.plants.map(pl=>pl.common_name===name?{...pl,indoors:false}:pl)})));setActionLog(p=>[...p,{date:new Date().toISOString().split("T")[0],type:"return",plants:[name],action:"back-outside",timestamp:new Date().toISOString()}]);};
   const getAA=(date,type)=>dismissed[`${date}-${type}`]||null;
   const toggleP=p=>{const ex=selP.find(x=>x.common_name===p.n);setSelP(prev=>ex?prev.filter(x=>x.common_name!==p.n):[...prev,toP(p)]);if(!ex)setSq("");};
@@ -578,23 +580,25 @@ function App(){
                             </div>
                           )}
 
-                          {/* ── Single snooze for the whole day ── */}
-                          {!snoozed&&(
-                            <button onClick={()=>resolveAlert(td,"all",allPlants,"snoozed")}
-                              style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,background:"transparent",border:"1px dashed var(--line-2)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none"}}>
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" strokeWidth="2" strokeLinecap="round"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></svg>
-                              <span className="eb" style={{color:"var(--ink-3)",fontSize:9,letterSpacing:".18em"}}>SNOOZE · REMIND TOMORROW</span>
-                            </button>
-                          )}
+                          {/* ── Snooze toggle — tap to snooze, tap again to wake ── */}
+                          <button onClick={()=>snoozed?unsnoozeAlert(td,"all"):resolveAlert(td,"all",allPlants,"snoozed")}
+                            style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none",
+                              background:snoozed?"rgba(240,196,58,0.08)":"transparent",
+                              border:snoozed?"1px solid rgba(240,196,58,0.35)":"1px dashed var(--line-2)"}}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--warn)":"var(--ink-3)"} strokeWidth="2" strokeLinecap="round">
+                              {snoozed
+                                ?<><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></>
+                                :<><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></>
+                              }
+                            </svg>
+                            <span className="eb" style={{color:snoozed?"var(--warn)":"var(--ink-3)",fontSize:9,letterSpacing:".18em"}}>
+                              {snoozed?"SNOOZED · TAP TO WAKE":"SNOOZE · REMIND TOMORROW"}
+                            </span>
+                          </button>
                         </div>
                       )}
 
                       {!todayR&&!hasAlerts&&<div style={{fontSize:13,color:"var(--ink-3)"}}>No weather alerts for today.</div>}
-                      {snoozed&&(
-                        <div style={{marginTop:6,padding:"5px 10px",borderRadius:6,background:"rgba(240,196,58,0.07)",border:"1px solid rgba(240,196,58,0.15)"}}>
-                          <span className="eb" style={{color:"var(--warn)",fontSize:8}}>SNOOZED · RE-ALERTS TOMORROW</span>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -680,8 +684,8 @@ function App(){
                     ):(
                       <>
                         <div style={{display:"flex",gap:8}}>
-                          {hp&&<Donut pct={hp.pct} color="var(--alert)" centerText={`${hp.counted}/${hp.avg}`} sub={`days ≥${heatThreshold}°`} label={`${Math.round(hp.pct*100)}% hot days`}/>}
-                          {rp&&<Donut pct={rp.pct} color="var(--steel)" centerText={`${rp.counted}/${rp.avg}`} sub={`rain days ≥0.1"`} label={`${Math.round(rp.pct*100)}% rain days`}/>}
+                          {hp&&<Donut pct={hp.pct} color="var(--alert)" centerText={`${hp.counted}/${hp.avg}`} sub={`days ≥${heatThreshold}°`} label="Hot Days"/>}
+                          {rp&&<Donut pct={rp.pct} color="var(--steel)" centerText={`${rp.counted}/${rp.avg}`} sub={`rain days ≥0.1"`} label="Rain Days"/>}
                         </div>
                         <div style={{fontSize:11,color:"var(--ink-3)",marginTop:10,lineHeight:1.5,textAlign:"center"}}>{`Based on ${climate.yearsSampled}-year local average.${hp&&hp.remaining>0?` ~${hp.remaining} hot days still ahead.`:""}`}</div>
                       </>
