@@ -202,10 +202,10 @@ function SectionHead({num,label,extra,extraColor,right,rightColor,title,isCollap
 // segment N then sits exactly under day cell N.
 const CELL_GAP=4; // gap between day cells AND tick segments — must match
 
-function TickChart({timeline}){
+function TickChart({timeline,heatThreshold=95}){
   if(!timeline||!timeline.length)return null;
   const rows=[
-    {label:"ALERTS",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,hasData:d.high>0}))},
+    {label:"HOT",color:"var(--amber)",segs:timeline.map(d=>({on:d.high>=heatThreshold,hasData:d.high>0}))},
     {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({on:d.rainCollect,hasData:d.rain>0}))},
   ];
   return(
@@ -636,7 +636,7 @@ function App(){
                     })}
                   </div>
                   {/* Tick chart — same gap:CELL_GAP + flex:"1 0 0", segment N under day cell N */}
-                  <TickChart timeline={timeline}/>
+                  <TickChart timeline={timeline} heatThreshold={heatThreshold}/>
                 </div>
               )}
             </div>
