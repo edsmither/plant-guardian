@@ -148,7 +148,6 @@ function bTL(groups,wx){
         if(hi>p.max_temp_f+ha)iss.push({plant:p.common_name,type:"heat"});
         if(lo<p.min_temp_f-ca)iss.push({plant:p.common_name,type:"cold"});
         if(wi>p.max_wind_mph+wa)iss.push({plant:p.common_name,type:"wind"});
-        if(p.rain_sensitive&&ra>0.1)iss.push({plant:p.common_name,type:"rain"});
       }
     }
     const abbr=i===0?"TODAY":i===1?"TMRW":DN[dt.getDay()].toUpperCase().slice(0,3);
@@ -206,7 +205,7 @@ const CELL_GAP=4; // gap between day cells AND tick segments — must match
 function TickChart({timeline}){
   if(!timeline||!timeline.length)return null;
   const rows=[
-    {label:"HEAT",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,hasData:d.high>0}))},
+    {label:"ALERTS",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,hasData:d.high>0}))},
     {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({on:d.rainCollect,hasData:d.rain>0}))},
   ];
   return(
