@@ -264,7 +264,6 @@ function App(){
   const [windAdj,setWindAdj]=useState(0);
   const [dismissed,setDismissed]=useState({});
   const [detailPlant,setDetailPlant]=useState(null);
-  const [expandedAlert,setExpandedAlert]=useState(null);
   const [actionLog,setActionLog]=useState([]);
   const [wateringLog,setWateringLog]=useState([]);
   const [showWaterModal,setShowWaterModal]=useState(false);
@@ -513,7 +512,6 @@ function App(){
               const extra=open?`${allPlants.length} PLANT${allPlants.length!==1?"S":""}`:snoozed?"SNOOZED":!todayR?"ALL CLEAR":null;
               const extraColor=open?"var(--alert)":snoozed?"var(--warn)":"var(--mint)";
               const titleText=open?"Active Alerts":snoozed?"Alerts Snoozed":todayR?"Rainwater Day":"No Alerts Today";
-              const isExp=expandedAlert==="all";
               return(
                 <div ref={refToday} className="card">
                   <SectionHead num="01" label="TODAY" extra={extra} extraColor={extraColor} right={todayDateStr} title={titleText} isCollapsed={collapsed.today} onToggle={()=>toggleSection("today")}/>
@@ -528,59 +526,30 @@ function App(){
 
                       {hasAlerts&&(
                         <div style={{marginBottom:10,opacity:snoozed?0.6:1}}>
-                          {/* ── One alert card: neutral signal + count, taps to expand ── */}
-                          <div onClick={()=>setExpandedAlert(isExp?null:"all")}
-                            style={{display:"flex",alignItems:"center",gap:11,padding:"11px 12px",borderRadius:8,
-                              background:snoozed?"rgba(255,255,255,0.02)":"rgba(255,106,77,0.1)",
-                              border:`1px solid ${snoozed?"var(--line)":"rgba(255,106,77,0.35)"}`,cursor:"pointer"}}>
-                            {/* Neutral alert icon — triangle, no per-condition meaning */}
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--ink-3)":"var(--alert)"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><path d="M10.3 3.2 1.8 17.5A2 2 0 0 0 3.5 20.5h17A2 2 0 0 0 22.2 17.5L13.7 3.2a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
-                            <div style={{flex:1,minWidth:0}}>
-                              <div className="pn" style={{color:snoozed?"var(--ink-3)":"var(--alert)"}}>{allPlants.length} plant{allPlants.length!==1?"s":""} need attention</div>
-                              <div className="ad">{activeTypes.length} condition{activeTypes.length!==1?"s":""} today · tap for detail</div>
+                          {/* Alert card — always shows plant list, no tap required */}
+                          <div style={{padding:"11px 12px",borderRadius:8,
+                            background:snoozed?"rgba(255,255,255,0.02)":"rgba(255,106,77,0.08)",
+                            border:`1px solid ${snoozed?"var(--line)":"rgba(255,106,77,0.25)"}`}}>
+                            {/* Condition icon + description */}
+                            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--ink-3)":"var(--alert)"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><path d="M10.3 3.2 1.8 17.5A2 2 0 0 0 3.5 20.5h17A2 2 0 0 0 22.2 17.5L13.7 3.2a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+                              <span className="eb" style={{color:snoozed?"var(--ink-3)":"var(--alert)",fontSize:9,letterSpacing:".16em"}}>{activeTypes.map(t=>ACFG[t].desc).join(" · ")}</span>
                             </div>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--ink-3)":"var(--alert)"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,transform:isExp?"rotate(90deg)":"none",transition:"transform .15s"}}><polyline points="9 18 15 12 9 6"/></svg>
+                            {/* Plant list — always visible, low opacity alert tint */}
+                            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                              {allPlants.map(pname=>(
+                                <span key={pname} onClick={()=>{const g=getPlantGroup(pname);const pl=g?.plants.find(x=>x.common_name===pname);if(pl)setDetailPlant(pl);}}
+                                  style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",
+                                    color:snoozed?"var(--ink-3)":"rgba(255,106,77,0.85)",cursor:"pointer",
+                                    padding:"2px 8px",borderRadius:6,
+                                    background:snoozed?"rgba(255,255,255,0.03)":"rgba(255,106,77,0.08)"}}>
+                                  {pname}
+                                </span>
+                              ))}
+                            </div>
                           </div>
 
-                          {/* ── Expanded: conditions grouped, each with icon + plant specs ── */}
-                          {isExp&&(
-                            <div style={{marginTop:5,borderRadius:8,border:"1px solid var(--line)",background:"var(--bg)",overflow:"hidden"}}>
-                              {activeTypes.map((type,ti)=>{
-                                const cfg=ACFG[type],plants=ba[type];
-                                return(
-                                  <div key={type} style={{borderTop:ti>0?"1px solid var(--line)":"none"}}>
-                                    {/* Condition header — colored icon + desc */}
-                                    <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px 6px",background:cfg.bg}}>
-                                      <AIcon type={type} size={14}/>
-                                      <span className="eb" style={{color:cfg.color,fontSize:9,letterSpacing:".14em"}}>{cfg.desc}</span>
-                                    </div>
-                                    {/* Plant rows */}
-                                    {plants.map((pname,pi)=>{
-                                      const g=getPlantGroup(pname),pl=g?.plants.find(x=>x.common_name===pname);
-                                      let limit="",actual="";
-                                      if(pl){
-                                        const d0=timeline[0];
-                                        if(type==="heat"){limit=`max ${pl.max_temp_f+(g.heatAdj||0)}°`;actual=`${Math.round(d0.high)}° today`;}
-                                        else if(type==="cold"){limit=`min ${pl.min_temp_f-(g.coldAdj||0)}°`;actual=`${Math.round(d0.low)}° tonight`;}
-                                        else if(type==="wind"){limit=`max ${pl.max_wind_mph+(g.windAdj||0)} mph`;actual=`${Math.round(d0.wind)} mph today`;}
-                                      }
-                                      return(
-                                        <div key={pname} onClick={()=>pl&&setDetailPlant(pl)}
-                                          style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 12px 7px 22px",borderTop:"1px solid var(--line)",cursor:pl?"pointer":"default"}}>
-                                          <span className="pn" style={{color:"var(--ink)",fontSize:13}}>{pname}</span>
-                                          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,color:"var(--ink-3)",textAlign:"right",flexShrink:0}}>
-                                            <span style={{color:cfg.color}}>{actual}</span>{limit?` · ${limit}`:""}
-                                          </span>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* ── Snooze toggle — tap to snooze, tap again to wake ── */}
+                          {/* Snooze toggle — tap to snooze, tap again to wake */}
                           <button onClick={()=>snoozed?unsnoozeAlert(td,"all"):resolveAlert(td,"all",allPlants,"snoozed")}
                             style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none",
                               background:snoozed?"rgba(240,196,58,0.08)":"transparent",
