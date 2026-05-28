@@ -231,13 +231,13 @@ function StencilDisc({size=34}){return<svg width={size} height={size} viewBox="0
 
 function Donut({pct,color,centerText,sub,label}){
   const r=72,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
-  const pctText=`${Math.round(pct*100)}%`;
+  const pctNum=Math.round(pct*100);
   return<div style={{textAlign:"center",flex:1}}>
     <div className="eb" style={{color:"var(--ink-3)",letterSpacing:".18em",marginBottom:6}}>{label}</div>
     <svg width="184" height="184" viewBox="0 0 184 184" style={{maxWidth:"100%"}}>
       <circle cx="92" cy="92" r="72" fill="none" stroke="var(--line)" strokeWidth="16"/>
       <circle cx="92" cy="92" r="72" fill="none" stroke={color} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 92 92)"/>
-      <text x="92" y="101" textAnchor="middle" fontSize="42" fontWeight="800" fill={color} fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{pctText}</text>
+      <text x="92" y="101" textAnchor="middle" fontSize="42" fontWeight="800" fill={color} fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{pctNum}%</text>
     </svg>
     <div style={{marginTop:2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,color:"var(--ink)",letterSpacing:".04em"}}>{centerText}</div>
     <div className="mt" style={{color:"var(--ink-3)",marginTop:2,letterSpacing:".14em"}}>{sub}</div>
