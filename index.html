@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- ============================================
+     PLANT GUARDIAN  ·  v24
+     2026-05-28
+     fonts unified · donut shrunk · per-plant snooze
+     · modal + tolerance icons restyled
+     ============================================ -->
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -32,11 +38,11 @@ textarea,input,button{font-family:inherit;}
 /* Section title — 18px, weight 600, tight tracking, Barlow Condensed */
 .st{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.05;margin-bottom:10px;}
 /* Alert plant name */
-.pn{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1.15;}
+.pn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);line-height:1.15;}
 /* Alert description */
-.ad{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--ink-2);margin-top:2px;}
+.ad{font-family:'Inter',sans-serif;font-size:13px;font-weight:400;color:var(--ink-2);margin-top:2px;}
 /* Upcoming day abbr */
-.da{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);line-height:1;}
+.da{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);line-height:1;}
 /* Upcoming date sub */
 .ds{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;}
 /* Outlook day header */
@@ -49,10 +55,12 @@ textarea,input,button{font-family:inherit;}
 .mt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;}
 /* Card */
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
-/* Inventory plant name — Barlow 14px 500 ALL-CAPS, matches Upcoming sizing */
-.inv-name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:14x;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-/* Inventory secondary */
-.inv-sec{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-2);}
+/* Inventory plant name — matches .pn / .da: Barlow 15px 700 ALL-CAPS */
+.inv-name{display:block;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Inventory secondary — Inter 13px to match Plants-to-Watch row text */
+.inv-sec{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-2);}
+/* Secondary plant-list text (Plants to Watch, alert location) */
+.psec{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-2);}
   </style>
 </head>
 <body>
@@ -230,16 +238,16 @@ function TickChart({timeline}){
 function StencilDisc({size=34}){return<svg width={size} height={size} viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="86" stroke="var(--amber)" strokeWidth="6" fill="none"/><circle cx="100" cy="100" r="64" fill="var(--panel-2)" stroke="var(--amber)" strokeWidth="1.5"/><g transform="translate(100 100) rotate(-20) translate(-36 -50)"><path d="M36 0 C 64 18, 72 56, 50 100 C 22 78, 6 48, 36 0 Z" fill="var(--mint)" stroke="var(--mint)" strokeWidth="2" strokeLinejoin="round"/><path d="M36 0 L 36 100" stroke="var(--bg)" strokeWidth="3" strokeLinecap="round"/><g stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" opacity="0.85"><line x1="36" y1="22" x2="52" y2="26"/><line x1="36" y1="42" x2="56" y2="46"/><line x1="36" y1="62" x2="54" y2="66"/><line x1="36" y1="22" x2="22" y2="28"/><line x1="36" y1="42" x2="20" y2="48"/><line x1="36" y1="62" x2="24" y2="68"/></g></g></svg>;}
 
 function Donut({pct,color,centerText,sub,label}){
-  const r=72,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
+  const r=54,circ=2*Math.PI*r,dash=Math.max(0,Math.min(1,pct))*circ;
   const pctNum=Math.round(pct*100);
   return<div style={{textAlign:"center",flex:1}}>
-    <div className="eb" style={{color:"var(--ink-3)",letterSpacing:".18em",marginBottom:6}}>{label}</div>
-    <svg width="184" height="184" viewBox="0 0 184 184" style={{maxWidth:"100%"}}>
-      <circle cx="92" cy="92" r="72" fill="none" stroke="var(--line)" strokeWidth="16"/>
-      <circle cx="92" cy="92" r="72" fill="none" stroke={color} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 92 92)"/>
-      <text x="92" y="101" textAnchor="middle" fontSize="42" fontWeight="800" fill={color} fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{pctNum}%</text>
+    <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--ink)",marginBottom:6}}>{label}</div>
+    <svg width="136" height="136" viewBox="0 0 136 136" style={{maxWidth:"100%"}}>
+      <circle cx="68" cy="68" r="54" fill="none" stroke="var(--line)" strokeWidth="12"/>
+      <circle cx="68" cy="68" r="54" fill="none" stroke={color} strokeWidth="12" strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" transform="rotate(-90 68 68)"/>
+      <text x="68" y="78" textAnchor="middle" fontSize="32" fontWeight="800" fill={color} fontFamily="'Barlow Condensed',sans-serif" style={{fontVariantNumeric:"tabular-nums"}}>{pctNum}%</text>
     </svg>
-    <div style={{marginTop:2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,color:"var(--ink)",letterSpacing:".04em"}}>{centerText}</div>
+    <div style={{marginTop:2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700,color:"var(--ink)",letterSpacing:".04em"}}>{centerText}</div>
     <div className="mt" style={{color:"var(--ink-3)",marginTop:2,letterSpacing:".14em"}}>{sub}</div>
   </div>;
 }
@@ -377,8 +385,8 @@ function App(){
     const interval=cH>=4?6:7,nextW=new Date(lastWD);nextW.setDate(lastWD.getDate()+interval);
     const dL=Math.ceil((nextW-new Date())/86400000);
     const todayI=timeline[0].issues.filter(i=>i.type!=="rain"),msgs=[];
-    if(dL===0)msgs.push({icon:"💧",text:cH>=4?`Heat alert for ${getConsecHeat(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});
-    if(todayI.length>0){const types=[...new Set(todayI.map(i=>i.type))],plants=[...new Set(todayI.map(i=>i.plant))];msgs.push({icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
+    if(dL===0)msgs.push({text:cH>=4?`Heat alert for ${getConsecHeat(timeline)} consecutive days — water your plants today.`:"Your plants are due for watering today."});
+    if(todayI.length>0){const types=[...new Set(todayI.map(i=>i.type))],plants=[...new Set(todayI.map(i=>i.plant))];msgs.push({text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`});}
     if(msgs.length>0)setAlertModal(msgs);
   },[ready,timeline]);
 
@@ -389,7 +397,7 @@ function App(){
     prevPlantsRef.current=allNames;if(!newNames.length)return;
     const ti=timeline[0].issues.filter(i=>i.type!=="rain"&&newNames.includes(i.plant));if(!ti.length)return;
     const types=[...new Set(ti.map(i=>i.type))],plants=[...new Set(ti.map(i=>i.plant))];
-    setAlertModal([{icon:types.map(t=>t==="heat"?"🌡️":t==="cold"?"❄️":"💨").join(""),text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`}]);
+    setAlertModal([{text:`${plants.join(", ")} — ${types.map(t=>t==="heat"?"above typical range":t==="cold"?"below comfort overnight":"high wind").join(" & ")} today.`}]);
   },[groups,timeline,ready]);
 
   const resolveAlert=(date,type,plants,action)=>{setDismissed(p=>({...p,[`${date}-${type}`]:action}));setActionLog(p=>[...p,{date,type,plants:plants||[],action,timestamp:new Date().toISOString()}]);};
@@ -503,15 +511,15 @@ function App(){
             {(()=>{
               const ba=getTA(),td=timeline[0]?.date,pr=["cold","heat","wind"];
               const activeTypes=pr.filter(t=>ba[t]);
-              // Model C: ONE day-level snooze, keyed `${date}-all`
-              const snoozed=!!getAA(td,"all");
               // unique affected plants across all conditions
               const allPlants=[...new Set(activeTypes.flatMap(t=>ba[t]))];
               const hasAlerts=activeTypes.length>0;
-              const open=hasAlerts&&!snoozed;
-              const extra=open?`${allPlants.length} PLANT${allPlants.length!==1?"S":""}`:snoozed?"SNOOZED":!todayR?"ALL CLEAR":null;
-              const extraColor=open?"var(--alert)":snoozed?"var(--warn)":"var(--mint)";
-              const titleText=open?"Active Alerts":snoozed?"Alerts Snoozed":todayR?"Rainwater Day":"No Alerts Today";
+              // per-plant snooze: section is "snoozed" only if every affected plant is snoozed
+              const allPlantsSnoozed=hasAlerts&&allPlants.every(p=>getAA(td,`p-${p}`));
+              const open=hasAlerts&&!allPlantsSnoozed;
+              const extra=open?`${allPlants.length} PLANT${allPlants.length!==1?"S":""}`:allPlantsSnoozed?"SNOOZED":!todayR?"ALL CLEAR":null;
+              const extraColor=open?"var(--alert)":allPlantsSnoozed?"var(--warn)":"var(--mint)";
+              const titleText=open?"Active Alerts":allPlantsSnoozed?"Alerts Snoozed":todayR?"Rainwater Day":"No Alerts Today";
               return(
                 <div ref={refToday} className="card">
                   <SectionHead num="01" label="TODAY" extra={extra} extraColor={extraColor} right={todayDateStr} title={titleText} isCollapsed={collapsed.today} onToggle={()=>toggleSection("today")}/>
@@ -524,48 +532,78 @@ function App(){
                         </div>
                       )}
 
-                      {hasAlerts&&(
-                        <div style={{marginBottom:10,opacity:snoozed?0.6:1}}>
-                          {/* Alert card — always shows plant list, no tap required */}
-                          <div style={{padding:"11px 12px",borderRadius:8,
-                            background:snoozed?"rgba(255,255,255,0.02)":"rgba(255,106,77,0.08)",
-                            border:`1px solid ${snoozed?"var(--line)":"rgba(255,106,77,0.25)"}`}}>
-                            {/* Condition icon + description */}
-                            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--ink-3)":"var(--alert)"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><path d="M10.3 3.2 1.8 17.5A2 2 0 0 0 3.5 20.5h17A2 2 0 0 0 22.2 17.5L13.7 3.2a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
-                              <span className="eb" style={{color:snoozed?"var(--ink-3)":"var(--alert)",fontSize:9,letterSpacing:".16em"}}>{activeTypes.map(t=>ACFG[t].desc).join(" · ")}</span>
+                      {hasAlerts&&(()=>{
+                        const day=timeline[0],pr2=["cold","heat","wind"];
+                        const byPlant={};
+                        for(const iss of day.issues){
+                          if(iss.type==="rain")continue;
+                          if(!byPlant[iss.plant])byPlant[iss.plant]=new Set();
+                          byPlant[iss.plant].add(iss.type);
+                        }
+                        const rows=Object.entries(byPlant).map(([plant,types])=>{
+                          const g=getPlantGroup(plant);
+                          const ordered=pr2.filter(t=>types.has(t));
+                          return{plant,group:g?.name||"—",conditions:ordered,pl:g?.plants.find(x=>x.common_name===plant)};
+                        });
+                        const allSnoozed=rows.every(r=>getAA(td,`p-${r.plant}`));
+                        const noneSnoozed=rows.every(r=>!getAA(td,`p-${r.plant}`));
+                        return(
+                          <div style={{marginBottom:10}}>
+                            <div style={{display:"flex",gap:8,marginBottom:8}}>
+                              <button onClick={()=>rows.forEach(r=>resolveAlert(td,`p-${r.plant}`,[r.plant],"snoozed"))}
+                                style={{flex:1,padding:"7px 10px",borderRadius:8,cursor:"pointer",outline:"none",
+                                  background:allSnoozed?"rgba(240,196,58,0.1)":"transparent",
+                                  border:`1px solid ${allSnoozed?"rgba(240,196,58,0.4)":"var(--line-2)"}`,
+                                  fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",
+                                  color:allSnoozed?"var(--warn)":"var(--ink-3)"}}>
+                                Snooze All
+                              </button>
+                              <button onClick={()=>rows.forEach(r=>unsnoozeAlert(td,`p-${r.plant}`))}
+                                style={{flex:1,padding:"7px 10px",borderRadius:8,cursor:"pointer",outline:"none",
+                                  background:noneSnoozed?"rgba(91,227,168,0.08)":"transparent",
+                                  border:`1px solid ${noneSnoozed?"rgba(91,227,168,0.3)":"var(--line-2)"}`,
+                                  fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",
+                                  color:noneSnoozed?"var(--mint)":"var(--ink-3)"}}>
+                                Clear All
+                              </button>
                             </div>
-                            {/* Plant list — always visible, low opacity alert tint */}
-                            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                              {allPlants.map(pname=>(
-                                <span key={pname} onClick={()=>{const g=getPlantGroup(pname);const pl=g?.plants.find(x=>x.common_name===pname);if(pl)setDetailPlant(pl);}}
-                                  style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",
-                                    color:snoozed?"var(--ink-3)":"rgba(255,106,77,0.85)",cursor:"pointer",
-                                    padding:"2px 8px",borderRadius:6,
-                                    background:snoozed?"rgba(255,255,255,0.03)":"rgba(255,106,77,0.08)"}}>
-                                  {pname}
-                                </span>
-                              ))}
+                            <div style={{borderRadius:8,border:"1px solid rgba(255,106,77,0.2)",overflow:"hidden"}}>
+                              {rows.map((r,ri)=>{
+                                const isSnoozed=!!getAA(td,`p-${r.plant}`);
+                                const condColors={heat:"var(--alert)",cold:"var(--steel)",wind:"var(--amber)"};
+                                const condLabel=r.conditions.map(c=>c==="heat"?"Heat":c==="cold"?"Cold":"Wind").join(" · ");
+                                const domColor=condColors[r.conditions[0]]||"var(--alert)";
+                                return(
+                                  <div key={r.plant} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                                    borderTop:ri>0?"1px solid var(--line)":"none",
+                                    background:isSnoozed?"rgba(255,255,255,0.015)":"rgba(255,106,77,0.05)",
+                                    opacity:isSnoozed?0.55:1}}>
+                                    <div style={{width:8,height:8,borderRadius:4,background:domColor,flexShrink:0}}/>
+                                    <div style={{flex:1,minWidth:0,cursor:r.pl?"pointer":"default"}} onClick={()=>r.pl&&setDetailPlant(r.pl)}>
+                                      <div className="pn" style={{color:isSnoozed?"var(--ink-3)":"var(--ink)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.plant}</div>
+                                      <div className="psec" style={{color:"var(--ink-3)",fontSize:11}}>{r.group} · {condLabel}</div>
+                                    </div>
+                                    <button onClick={()=>isSnoozed?unsnoozeAlert(td,`p-${r.plant}`):resolveAlert(td,`p-${r.plant}`,[r.plant],"snoozed")}
+                                      style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,padding:"6px 9px",borderRadius:7,cursor:"pointer",outline:"none",
+                                        background:isSnoozed?"rgba(240,196,58,0.1)":"transparent",
+                                        border:`1px solid ${isSnoozed?"rgba(240,196,58,0.4)":"var(--line-2)"}`}}>
+                                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={isSnoozed?"var(--warn)":"var(--ink-3)"} strokeWidth="2" strokeLinecap="round">
+                                        {isSnoozed
+                                          ?<><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></>
+                                          :<><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></>
+                                        }
+                                      </svg>
+                                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8,fontWeight:600,letterSpacing:".12em",textTransform:"uppercase",color:isSnoozed?"var(--warn)":"var(--ink-3)"}}>
+                                        {isSnoozed?"On":"Snooze"}
+                                      </span>
+                                    </button>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
-
-                          {/* Snooze toggle — tap to snooze, tap again to wake */}
-                          <button onClick={()=>snoozed?unsnoozeAlert(td,"all"):resolveAlert(td,"all",allPlants,"snoozed")}
-                            style={{width:"100%",marginTop:5,padding:"8px 12px",borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,outline:"none",
-                              background:snoozed?"rgba(240,196,58,0.08)":"transparent",
-                              border:snoozed?"1px solid rgba(240,196,58,0.35)":"1px dashed var(--line-2)"}}>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={snoozed?"var(--warn)":"var(--ink-3)"} strokeWidth="2" strokeLinecap="round">
-                              {snoozed
-                                ?<><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></>
-                                :<><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/><path d="M2 2l3 3m-3 7h4"/></>
-                              }
-                            </svg>
-                            <span className="eb" style={{color:snoozed?"var(--warn)":"var(--ink-3)",fontSize:9,letterSpacing:".18em"}}>
-                              {snoozed?"SNOOZED · TAP TO WAKE":"SNOOZE · REMIND TOMORROW"}
-                            </span>
-                          </button>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       {!todayR&&!hasAlerts&&<div style={{fontSize:13,color:"var(--ink-3)"}}>No weather alerts for today.</div>}
                     </div>
@@ -822,6 +860,7 @@ function App(){
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>HEAT THRESHOLD</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Counts as extreme-heat for the season tracker.</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:13,color:"var(--ink-2)"}}>🌡️ Extreme heat at</span><div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={()=>setHeatThreshold(t=>Math.max(80,t-5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>−</button><span style={{fontSize:16,fontWeight:800,color:"var(--alert)",minWidth:54,textAlign:"center"}}>{heatThreshold}°F</span><button onClick={()=>setHeatThreshold(t=>Math.min(120,t+5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>+</button></div></div></div>
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>NOTIFICATIONS</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Daily weather alerts when app is closed. Requires adding to home screen on iOS.</div>{pushEnabled?(<button onClick={unregisterPush} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:"var(--ink-3)",border:"1.5px solid var(--line)",fontSize:14,fontWeight:600,cursor:"pointer"}}>🔔 Notifications on — tap to disable</button>):(<button onClick={registerPush} disabled={pushPending} style={{width:"100%",padding:"12px",borderRadius:10,background:"linear-gradient(135deg,var(--mint),var(--steel))",color:"var(--bg)",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",opacity:pushPending?0.6:1}}>{pushPending?"Setting up…":"Enable notifications"}</button>)}</div>
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>DATA</div><button onClick={()=>{if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);setWateringLog([]);}}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:"var(--alert)",border:"1.5px solid var(--alert)",fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button></div>
+        <div style={{textAlign:"center",padding:"8px 0 4px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".18em",color:"var(--ink-3)"}}>PLANT GUARDIAN · v24</div>
       </>}
       </div>
 
