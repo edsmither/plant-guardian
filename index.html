@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!-- ============================================
-     PLANT GUARDIAN  ·  v24
-     2026-05-28
-     fonts unified · donut shrunk · per-plant snooze
-     · modal + tolerance icons restyled
+     PLANT GUARDIAN  ·  v25
+     2026-05-31
+     HOT bar = threshold (3-state) · detail sheet
+     restyled · Manage Groups btn consistent
      ============================================ -->
 <html lang="en">
 <head>
@@ -211,11 +211,16 @@ function SectionHead({num,label,extra,extraColor,right,rightColor,title,isCollap
 // segment N then sits exactly under day cell N.
 const CELL_GAP=4; // gap between day cells AND tick segments — must match
 
-function TickChart({timeline}){
+function TickChart({timeline,heatThreshold=95}){
   if(!timeline||!timeline.length)return null;
+  const HOT_NEAR=8; // degrees below threshold that count as "approaching"
   const rows=[
-    {label:"HEAT",color:"var(--amber)",segs:timeline.map(d=>({on:d.issues.filter(x=>x.type!=="rain").length>0,hasData:d.high>0}))},
-    {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({on:d.rainCollect,hasData:d.rain>0}))},
+    {label:"HOT",color:"var(--amber)",segs:timeline.map(d=>({
+      level: d.high>0 ? (d.high>=heatThreshold?2 : d.high>=heatThreshold-HOT_NEAR?1 : 0) : -1
+    }))},
+    {label:"RAIN",color:"var(--mint)",segs:timeline.map(d=>({
+      level: d.rain>=0.1?2 : d.rain>0?1 : (d.rain===0?0:-1)
+    }))},
   ];
   return(
     <div style={{marginTop:10,paddingTop:8,borderTop:"1px solid var(--line)"}}>
@@ -226,7 +231,7 @@ function TickChart({timeline}){
           {/* Strip: identical flex layout to the day-cells row */}
           <div style={{display:"flex",gap:CELL_GAP}}>
             {row.segs.map((seg,i)=>(
-              <div key={i} style={{flex:"1 0 0",minWidth:0,height:8,borderRadius:2,background:row.color,opacity:!seg.hasData?0:seg.on?0.88:0.2}}/>
+              <div key={i} style={{flex:"1 0 0",minWidth:0,height:8,borderRadius:2,background:row.color,opacity:seg.level===2?0.88:seg.level===1?0.28:0}}/>
             ))}
           </div>
         </div>
@@ -675,7 +680,7 @@ function App(){
                     })}
                   </div>
                   {/* Tick chart — same gap:CELL_GAP + flex:"1 0 0", segment N under day cell N */}
-                  <TickChart timeline={timeline}/>
+                  <TickChart timeline={timeline} heatThreshold={heatThreshold}/>
                 </div>
               )}
             </div>
@@ -708,7 +713,7 @@ function App(){
               {!collapsed.plants&&(
                 <div style={{padding:"0 14px 14px"}}>
                   <button onClick={e=>{e.stopPropagation();setScr("groups");}}
-                    style={{width:"100%",padding:"8px 12px",marginBottom:10,borderRadius:4,fontFamily:"'JetBrains Mono',monospace",fontSize:9,letterSpacing:".14em",textTransform:"uppercase",color:"var(--ink-2)",background:"none",border:"1px dashed var(--line-2)",cursor:"pointer"}}>
+                    style={{width:"100%",padding:"8px 12px",marginBottom:10,borderRadius:8,fontFamily:"'JetBrains Mono',monospace",fontSize:9,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",color:"var(--ink-3)",background:"transparent",border:"1px solid var(--line-2)",cursor:"pointer"}}>
                     Manage Groups →
                   </button>
                   {/* Table header */}
@@ -860,7 +865,7 @@ function App(){
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>HEAT THRESHOLD</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Counts as extreme-heat for the season tracker.</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:13,color:"var(--ink-2)"}}>🌡️ Extreme heat at</span><div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={()=>setHeatThreshold(t=>Math.max(80,t-5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>−</button><span style={{fontSize:16,fontWeight:800,color:"var(--alert)",minWidth:54,textAlign:"center"}}>{heatThreshold}°F</span><button onClick={()=>setHeatThreshold(t=>Math.min(120,t+5))} style={{width:32,height:32,borderRadius:8,background:"var(--bg)",border:"1px solid var(--line)",color:"var(--ink)",fontSize:18,cursor:"pointer"}}>+</button></div></div></div>
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>NOTIFICATIONS</div><div style={{fontSize:12,color:"var(--ink-3)",marginBottom:12,lineHeight:1.6}}>Daily weather alerts when app is closed. Requires adding to home screen on iOS.</div>{pushEnabled?(<button onClick={unregisterPush} style={{width:"100%",padding:"12px",borderRadius:10,background:"transparent",color:"var(--ink-3)",border:"1.5px solid var(--line)",fontSize:14,fontWeight:600,cursor:"pointer"}}>🔔 Notifications on — tap to disable</button>):(<button onClick={registerPush} disabled={pushPending} style={{width:"100%",padding:"12px",borderRadius:10,background:"linear-gradient(135deg,var(--mint),var(--steel))",color:"var(--bg)",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",opacity:pushPending?0.6:1}}>{pushPending?"Setting up…":"Enable notifications"}</button>)}</div>
         <div className="card" style={{padding:"14px"}}><div className="eb" style={{marginBottom:8,fontSize:9}}>DATA</div><button onClick={()=>{if(confirm("Delete all plants?")){setGroups([]);setDismissed({});setActionLog([]);setWateringLog([]);}}} style={{width:"100%",padding:"12px 24px",borderRadius:10,background:"transparent",color:"var(--alert)",border:"1.5px solid var(--alert)",fontSize:14,fontWeight:600,cursor:"pointer"}}>Delete All Plants</button></div>
-        <div style={{textAlign:"center",padding:"8px 0 4px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".18em",color:"var(--ink-3)"}}>PLANT GUARDIAN · v24</div>
+        <div style={{textAlign:"center",padding:"8px 0 4px",fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".18em",color:"var(--ink-3)"}}>PLANT GUARDIAN · v25</div>
       </>}
       </div>
 
@@ -868,15 +873,45 @@ function App(){
       {detailPlant&&(
         <div onClick={()=>setDetailPlant(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:20,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:"var(--panel)",borderRadius:"16px 16px 0 0",padding:"20px 18px 32px",width:"100%",maxWidth:480,border:"1px solid var(--line)",borderBottom:"none"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}><div><div style={{fontSize:18,fontWeight:700,color:"var(--ink)"}}>{detailPlant.common_name}</div><div style={{fontSize:13,color:"var(--ink-3)",fontStyle:"italic"}}>{detailPlant.scientific_name}</div></div><button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:"var(--ink-3)",cursor:"pointer",padding:4}}>✕</button></div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+              <div>
+                <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:22,fontWeight:800,letterSpacing:".04em",textTransform:"uppercase",color:"var(--ink)"}}>{detailPlant.common_name}</div>
+                <div style={{fontFamily:"'Inter',sans-serif",fontSize:13,color:"var(--ink-3)",fontStyle:"italic"}}>{detailPlant.scientific_name}</div>
+              </div>
+              <button onClick={()=>setDetailPlant(null)} style={{background:"none",border:"none",fontSize:18,color:"var(--ink-3)",cursor:"pointer",padding:4}}>✕</button>
+            </div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               <div style={{display:"flex",gap:10}}>
-                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}><div style={{fontSize:10,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Temperature</div><div style={{fontSize:14,fontWeight:700,color:"var(--alert)"}}>🌡️ {detailPlant.min_temp_f}° – {detailPlant.max_temp_f}°F</div></div>
-                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}><div style={{fontSize:10,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wind</div><div style={{fontSize:14,fontWeight:700,color:"var(--amber)"}}>💨 ≤ {detailPlant.max_wind_mph} mph</div></div>
+                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}>
+                  <div className="eb" style={{fontSize:9,marginBottom:6}}>Temperature</div>
+                  <div style={{display:"flex",alignItems:"center",gap:7}}>
+                    <AIcon type="heat" size={15}/>
+                    <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:700,color:"var(--ink)"}}>{detailPlant.min_temp_f}°–{detailPlant.max_temp_f}°F</span>
+                  </div>
+                </div>
+                <div style={{flex:1,padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}>
+                  <div className="eb" style={{fontSize:9,marginBottom:6}}>Wind</div>
+                  <div style={{display:"flex",alignItems:"center",gap:7}}>
+                    <AIcon type="wind" size={15}/>
+                    <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:700,color:"var(--ink)"}}>≤ {detailPlant.max_wind_mph} mph</span>
+                  </div>
+                </div>
               </div>
-              <div style={{padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}><div style={{fontSize:10,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Rain</div><div style={{fontSize:14,fontWeight:700,color:detailPlant.rain_sensitive?"var(--steel)":"var(--mint)"}}>{detailPlant.rain_sensitive?"🌧️ Sensitive — cover or shelter":"✓ Handles rain fine"}</div></div>
-              {(detailPlant.drought_tolerant||DROUGHT_NAMES.has(detailPlant.common_name))&&<div style={{padding:"10px 12px",borderRadius:10,background:"#0F1F0F",border:"1px solid #1A3A1A"}}><div style={{fontSize:14,fontWeight:700,color:"#86EFAC"}}>💧 Drought tolerant</div></div>}
-              {detailPlant.notes&&<div style={{padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}><div style={{fontSize:10,color:"var(--ink-3)",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Notes</div><div style={{fontSize:13,color:"var(--ink-2)",lineHeight:1.5}}>{detailPlant.notes}</div></div>}
+              <div style={{padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}>
+                <div className="eb" style={{fontSize:9,marginBottom:6}}>Rain</div>
+                <div className="psec" style={{color:"var(--ink-2)"}}>{detailPlant.rain_sensitive?"Sensitive — but you're covered on the patio":"Handles rain fine"}</div>
+              </div>
+              {(detailPlant.drought_tolerant||DROUGHT_NAMES.has(detailPlant.common_name))&&(
+                <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(91,227,168,0.06)",border:"1px solid rgba(91,227,168,0.2)"}}>
+                  <div className="psec" style={{color:"var(--mint)",fontWeight:600}}>Drought tolerant</div>
+                </div>
+              )}
+              {detailPlant.notes&&(
+                <div style={{padding:"10px 12px",borderRadius:10,background:"var(--bg)",border:"1px solid var(--line)"}}>
+                  <div className="eb" style={{fontSize:9,marginBottom:6}}>Notes</div>
+                  <div className="psec" style={{color:"var(--ink-2)",lineHeight:1.5}}>{detailPlant.notes}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
